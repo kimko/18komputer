@@ -1,5 +1,7 @@
 # 18komputer
 
+**[Play Now: kimko.github.io/18komputer](https://kimko.github.io/18komputer/)**
+
 A mobile-first web assistant designed specifically for playing 18XX board games. It handles the heavy mathematical lifting—calculating complex revenues, tracking company shares, and determining player net worths—so you can focus on the game.
 
 ## Features
