@@ -81,7 +81,17 @@ export default function RevenueCalculator() {
   };
 
   const handleTogglePullman = (trainId) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, hasPullmanAttached: !t.hasPullmanAttached } : t));
+    setTrains(prev => prev.map(t => {
+      if (t.id === trainId) {
+        const willDetach = t.hasPullmanAttached;
+        return { 
+          ...t, 
+          hasPullmanAttached: !t.hasPullmanAttached,
+          pullmanStops: willDetach ? [] : t.pullmanStops
+        };
+      }
+      return t;
+    }));
   };
 
   const handleCopyTrain = (trainToCopy) => {
