@@ -2,10 +2,12 @@ import { Route, Switch } from 'wouter';
 import MainMenu from './components/MainMenu.jsx';
 import NewGame from './components/NewGame.jsx';
 import RaiseFunds from './components/RaiseFunds.jsx';
+import GameLayout from './components/GameLayout.jsx';
 
 function App() {
   return (
-    <Switch>
+    <GameLayout>
+      <Switch>
       <Route path="/" component={MainMenu} />
       <Route path="/new" component={NewGame} />
       <Route path="/resume">
@@ -21,6 +23,7 @@ function App() {
         <div style={{ color: 'white', padding: '2rem' }}>404 Not Found</div>
       </Route>
     </Switch>
+    </GameLayout>
   )
 }
 

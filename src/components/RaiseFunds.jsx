@@ -47,42 +47,41 @@ export default function RaiseFunds() {
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="teal.400" size="xl" /></Center>;
   if (!gameInstance || !gameDef) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
-  const toggleCompany = (shortName) => {
-    setActiveCompanies(prev => {
-      const next = { ...prev };
-      if (next[shortName] !== undefined) {
-        delete next[shortName];
-      } else {
-        // Default to first par value
-        next[shortName] = gameDef.parValues[0] || 0;
-      }
-      return next;
-    });
-  };
-
-  const updateParValue = (shortName, val) => {
-    setActiveCompanies(prev => ({
-      ...prev,
-      [shortName]: parseInt(val, 10)
-    }));
-  };
-
-  const handleSubmit = async () => {
+  const saveState = async (newState) => {
     const finalCompanies = gameDef.companies
-      .filter(c => activeCompanies[c.shortName] !== undefined)
+      .filter(c => newState[c.shortName] !== undefined)
       .map(c => ({
         ...c,
-        parValue: activeCompanies[c.shortName]
+        parValue: newState[c.shortName]
       }));
 
     try {
       await updateGameState(gameInstance.id, {
         activeCompanies: finalCompanies
       });
-      navigate(`/game/${gameInstance.id}/dashboard`);
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const toggleCompany = (shortName) => {
+    const next = { ...activeCompanies };
+    if (next[shortName] !== undefined) {
+      delete next[shortName];
+    } else {
+      next[shortName] = gameDef.parValues[0] || 0;
+    }
+    setActiveCompanies(next);
+    saveState(next);
+  };
+
+  const updateParValue = (shortName, val) => {
+    const next = {
+      ...activeCompanies,
+      [shortName]: parseInt(val, 10)
+    };
+    setActiveCompanies(next);
+    saveState(next);
   };
 
   return (
@@ -144,15 +143,6 @@ export default function RaiseFunds() {
             );
           })}
         </VStack>
-
-        <Button 
-          size="lg" 
-          colorPalette="teal" 
-          w="100%" 
-          onClick={handleSubmit}
-        >
-          Complete Setup
-        </Button>
       </Box>
     </Box>
   );

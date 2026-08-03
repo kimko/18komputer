@@ -75,27 +75,30 @@ describe('RaiseFunds Component', () => {
     // Wait for load
     await screen.findByText(/Raise Funds/i);
     
-    // Find the toggle/checkbox for PRR and activate it
-    // Assuming we have a button or checkbox to activate
+    // Activate PRR
     const activatePrrBtn = screen.getByRole('button', { name: /Activate PRR/i });
     fireEvent.click(activatePrrBtn);
     
-    // After activating, a select for Par Value should appear (or be enabled)
-    // We'll select 67 as the par value
-    const parSelects = screen.getAllByRole('combobox', { name: /Par Value/i });
-    fireEvent.change(parSelects[0], { target: { value: '67' } });
-    
-    // Submit the form
-    const saveBtn = screen.getByRole('button', { name: /Complete Setup/i });
-    fireEvent.click(saveBtn);
-    
+    // It should auto-save with default par value (which is 67)
     await waitFor(() => {
       expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
         activeCompanies: [
           { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
         ]
       });
-      expect(mockNavigate).toHaveBeenCalledWith('/game/inst_123/dashboard');
+    });
+    
+    // Change Par Value
+    const parSelects = screen.getAllByRole('combobox');
+    fireEvent.change(parSelects[0], { target: { value: '71' } });
+    
+    // It should auto-save the new par value
+    await waitFor(() => {
+      expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 71 }
+        ]
+      });
     });
   });
 });
