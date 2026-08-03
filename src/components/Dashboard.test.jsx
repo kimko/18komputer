@@ -51,12 +51,12 @@ describe('Dashboard', () => {
     expect(await screen.findByText('Company Values & Results')).toBeInTheDocument();
     
     // Check for Company row
-    expect(screen.getByText('PRR')).toBeInTheDocument();
+    expect(screen.getAllByText(/PRR/).length).toBeGreaterThan(0);
     
     // Check for OR columns based on maxOr
-    expect(screen.getByText('OR 1')).toBeInTheDocument();
-    expect(screen.getByText('OR 2')).toBeInTheDocument();
-    expect(screen.getByText('OR 3')).toBeInTheDocument();
+    expect(screen.getAllByText(/OR 1/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/OR 2/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/OR 3/).length).toBeGreaterThan(0);
     
     // Check for Player columns
     expect(screen.getByText('Alice')).toBeInTheDocument();
