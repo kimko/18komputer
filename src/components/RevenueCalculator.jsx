@@ -228,6 +228,9 @@ export default function RevenueCalculator() {
                   <Table.ColumnHeader>40%</Table.ColumnHeader>
                   <Table.ColumnHeader>50%</Table.ColumnHeader>
                   <Table.ColumnHeader>60%</Table.ColumnHeader>
+                  <Table.ColumnHeader>70%</Table.ColumnHeader>
+                  <Table.ColumnHeader>80%</Table.ColumnHeader>
+                  <Table.ColumnHeader>90%</Table.ColumnHeader>
                   <Table.ColumnHeader>100%</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
@@ -239,6 +242,9 @@ export default function RevenueCalculator() {
                   <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.4)}</Table.Cell>
                   <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.5)}</Table.Cell>
                   <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.6)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.7)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.8)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.9)}</Table.Cell>
                   <Table.Cell fontWeight="bold" color="orange.300">${isHalfPay ? Math.floor(grandTotal / 2) : grandTotal}</Table.Cell>
                 </Table.Row>
               </Table.Body>
