@@ -232,6 +232,19 @@ export default function RevenueCalculator() {
                 </Flex>
 
                 <SimpleGrid columns={5} gap="2" mt="4">
+                  {train.hasPullmanAttached && [10, 20, 30].map((val) => (
+                    <Button 
+                      key={`p-${val}`} 
+                      size="lg" 
+                      variant="outline" 
+                      color="cyan.300"
+                      colorPalette="cyan"
+                      onClick={() => handleAddPullmanStop(train.id, val)}
+                      disabled={train.isExcluded}
+                    >
+                      {val}
+                    </Button>
+                  ))}
                   {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((val) => (
                     <Button 
                       key={val} 
@@ -246,26 +259,6 @@ export default function RevenueCalculator() {
                     </Button>
                   ))}
                 </SimpleGrid>
-                {train.hasPullmanAttached && (
-                  <Box mt="4" p="4" bg="gray.900" borderRadius="md" border="1px dashed" borderColor="cyan.700">
-                    <Text fontSize="sm" color="cyan.400" mb="2">Pullman Revenue (Does not count against stops)</Text>
-                    <SimpleGrid columns={3} gap="2">
-                      {[10, 20, 30].map((val) => (
-                        <Button 
-                          key={`p-${val}`} 
-                          size="md" 
-                          variant="outline" 
-                          color="cyan.300"
-                          colorPalette="cyan"
-                          onClick={() => handleAddPullmanStop(train.id, val)}
-                          disabled={train.isExcluded}
-                        >
-                          +{val}
-                        </Button>
-                      ))}
-                    </SimpleGrid>
-                  </Box>
-                )}
               </Box>
             );
           })}
