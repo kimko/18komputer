@@ -24,7 +24,7 @@ export default function GameLayout({ children }) {
         top="0"
         zIndex="10"
       >
-        <Heading as="h1" size="md" color="teal.400">
+        <Heading as="h1" size="md" color="orange.400">
           <Link href="/">18XXc</Link>
         </Heading>
         

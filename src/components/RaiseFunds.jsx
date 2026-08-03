@@ -44,7 +44,7 @@ export default function RaiseFunds() {
   }, [match, params?.id]);
 
   if (!match) return null;
-  if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="teal.400" size="xl" /></Center>;
+  if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
   if (!gameInstance || !gameDef) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const saveState = async (newState) => {
@@ -87,7 +87,7 @@ export default function RaiseFunds() {
   return (
     <Box minH="100vh" bg="gray.900" color="white" p="8">
       <Box maxW="2xl" mx="auto">
-        <Heading as="h2" size="xl" color="teal.400" mb="2">
+        <Heading as="h2" size="xl" color="orange.400" mb="2">
           Raise Funds
         </Heading>
         <Text color="gray.400" mb="8">Activate companies and set their initial par values.</Text>
@@ -109,7 +109,7 @@ export default function RaiseFunds() {
                   
                   <Button 
                     size="sm" 
-                    colorPalette={isActive ? "red" : "teal"}
+                    colorPalette={isActive ? "red" : "orange"}
                     variant={isActive ? "outline" : "solid"}
                     onClick={() => toggleCompany(company.shortName)}
                   >
@@ -127,7 +127,8 @@ export default function RaiseFunds() {
                           size="md"
                           flex="1"
                           minW="60px"
-                          colorPalette={activeCompanies[company.shortName] === val ? "teal" : "gray"}
+                          color={activeCompanies[company.shortName] === val ? "white" : "whiteAlpha.800"}
+                          colorPalette={activeCompanies[company.shortName] === val ? "orange" : "gray"}
                           variant={activeCompanies[company.shortName] === val ? "solid" : "outline"}
                           onClick={() => updateParValue(company.shortName, val)}
                         >

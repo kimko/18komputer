@@ -18,7 +18,7 @@ export default function MainMenu() {
       >
         <VStack gap="8" align="stretch">
           <Box textAlign="center">
-            <Heading as="h1" size="2xl" mb="2" color="teal.400">
+            <Heading as="h1" size="2xl" mb="2" color="orange.400">
               TRAIN CALCULATOR
             </Heading>
             <Text color="gray.400">18XX Board Game Assistant</Text>
@@ -27,7 +27,7 @@ export default function MainMenu() {
           <VStack gap="4">
             <Button
               size="lg"
-              colorPalette="teal"
+              colorPalette="orange"
               w="100%"
               h="16"
               onClick={() => navigate('/new')}

@@ -50,7 +50,7 @@ export default function NewGame() {
         <VStack gap="6" align="stretch">
           <Box>
             <Flex justify="space-between" align="center" mb="2">
-              <Heading as="h2" size="xl" color="teal.400">
+              <Heading as="h2" size="xl" color="orange.400">
                 New Game
               </Heading>
               <IconButton variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" aria-label="Close" onClick={() => navigate('/')}>
@@ -68,8 +68,9 @@ export default function NewGame() {
                   <Button
                     key={game.id}
                     justifyContent="flex-start"
+                    color="white"
                     variant={selectedGame === game.id ? "solid" : "ghost"}
-                    colorPalette={selectedGame === game.id ? "teal" : "gray"}
+                    colorPalette={selectedGame === game.id ? "orange" : "gray"}
                     onClick={() => setSelectedGame(game.id)}
                   >
                     {game.name || game.id}
@@ -90,7 +91,7 @@ export default function NewGame() {
                   bg="gray.700"
                   border="none"
                 />
-                <Button type="submit" colorPalette="teal">
+                <Button type="submit" colorPalette="orange">
                   Add Player
                 </Button>
               </Flex>
@@ -112,7 +113,7 @@ export default function NewGame() {
 
           <Button
             size="lg"
-            colorPalette="teal"
+            colorPalette="orange"
             w="100%"
             h="14"
             mt="4"
