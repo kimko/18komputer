@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid, Table } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
-import gameIndex from '../data/games/index.json';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -11,7 +10,7 @@ export default function RevenueCalculator() {
   const [gameInstance, setGameInstance] = useState(null);
   
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
-  const [trains, setTrains] = useState([{ id: 1, stops: [], pullmanStops: [], hasPullmanAttached: false }]);
+  const [trains, setTrains] = useState([{ id: 1, stops: [], bonusStops: [] }]);
   const [isHalfPay, setIsHalfPay] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,10 +19,12 @@ export default function RevenueCalculator() {
     
     async function loadData() {
       try {
-        const instance = await getGame(params.id);
-        setGameInstance(instance);
-        if (instance.state?.activeCompanies?.length > 0) {
-          setSelectedCompanyId(instance.state.activeCompanies[0].shortName);
+        const data = await getGame(params.id);
+        const configModule = await import(`../data/games/${data.gameId}.json`);
+        data.staticConfig = configModule.default || configModule;
+        setGameInstance(data);
+        if (data.state?.activeCompanies?.length > 0) {
+          setSelectedCompanyId(data.state.activeCompanies[0].shortName);
         }
       } catch (err) {
         console.error(err);
@@ -41,35 +42,40 @@ export default function RevenueCalculator() {
 
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   
-  const gameConfig = gameIndex.find(g => g.id === gameInstance.gameId);
-  const supportsPullmans = gameConfig?.hasPullmans === true;
+  let allBonuses = [];
+  if (gameInstance.staticConfig?.hasPullmans) {
+    allBonuses.push({ label: 'Pullman', adds: [10, 20, 30] });
+  }
+  if (gameInstance.staticConfig?.revenueBonuses) {
+    allBonuses = [...allBonuses, ...gameInstance.staticConfig.revenueBonuses];
+  }
   
   const grandTotal = trains
     .filter(t => !t.isExcluded)
     .reduce((sum, t) => {
       const stopsSum = t.stops.reduce((s, v) => s + v, 0);
-      const pullmanSum = (t.pullmanStops || []).reduce((s, v) => s + v, 0);
-      return sum + stopsSum + pullmanSum;
+      const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
+      return sum + stopsSum + bonusSum;
     }, 0);
 
   const handleAddStop = (trainId, val) => {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [...t.stops, val] } : t));
   };
 
-  const handleAddPullmanStop = (trainId, val) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, pullmanStops: [...(t.pullmanStops || []), val] } : t));
+  const handleAddBonusStop = (trainId, val, label) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, bonusStops: [...(t.bonusStops || []), { val, label }] } : t));
   };
 
   const handleRemoveStop = (trainId, indexToRemove) => {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: t.stops.filter((_, idx) => idx !== indexToRemove) } : t));
   };
 
-  const handleRemovePullmanStop = (trainId, indexToRemove) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, pullmanStops: t.pullmanStops.filter((_, idx) => idx !== indexToRemove) } : t));
+  const handleRemoveBonusStop = (trainId, indexToRemove) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, bonusStops: t.bonusStops.filter((_, idx) => idx !== indexToRemove) } : t));
   };
 
   const handleClearTrain = (trainId) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [], pullmanStops: [] } : t));
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [], bonusStops: [] } : t));
   };
 
   const handleRemoveTrain = (trainId) => {
@@ -80,22 +86,8 @@ export default function RevenueCalculator() {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, isExcluded: !t.isExcluded } : t));
   };
 
-  const handleTogglePullman = (trainId) => {
-    setTrains(prev => prev.map(t => {
-      if (t.id === trainId) {
-        const willDetach = t.hasPullmanAttached;
-        return { 
-          ...t, 
-          hasPullmanAttached: !t.hasPullmanAttached,
-          pullmanStops: willDetach ? [] : t.pullmanStops
-        };
-      }
-      return t;
-    }));
-  };
-
   const handleCopyTrain = (trainToCopy) => {
-    setTrains(prev => [...prev, { id: Date.now(), stops: [...trainToCopy.stops], pullmanStops: [...trainToCopy.pullmanStops], hasPullmanAttached: trainToCopy.hasPullmanAttached }]);
+    setTrains(prev => [...prev, { id: Date.now(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }]);
   };
 
   const handleSubmit = async (decision) => {
@@ -117,7 +109,7 @@ export default function RevenueCalculator() {
       }));
       
       // Reset calc
-      setTrains([{ id: Date.now(), stops: [], pullmanStops: [], hasPullmanAttached: false }]);
+      setTrains([{ id: Date.now(), stops: [], bonusStops: [] }]);
       setIsHalfPay(false);
     } catch (err) {
       console.error(err);
@@ -161,8 +153,8 @@ export default function RevenueCalculator() {
         <VStack gap="6" align="stretch" mb="8">
           {trains.map((train, i) => {
             const stopsSum = train.stops.reduce((s, v) => s + v, 0);
-            const pullmanSum = (train.pullmanStops || []).reduce((s, v) => s + v, 0);
-            const trainTotal = stopsSum + pullmanSum;
+            const bonusSum = (train.bonusStops || []).reduce((s, b) => s + b.val, 0);
+            const trainTotal = stopsSum + bonusSum;
             
             return (
               <Box 
@@ -176,17 +168,12 @@ export default function RevenueCalculator() {
                 transition="opacity 0.2s"
               >
                 <Flex justify="flex-end" gap="2" mb="2" wrap="wrap">
-                  <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0)}>
+                  <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0)}>
                     Clear
                   </Button>
                   <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
                     Copy
                   </Button>
-                  {supportsPullmans && (
-                    <Button size="xs" variant={train.hasPullmanAttached ? "solid" : "outline"} color="white" colorPalette={train.hasPullmanAttached ? "cyan" : "gray"} onClick={() => handleTogglePullman(train.id)}>
-                      Pullman
-                    </Button>
-                  )}
                   <Button size="xs" variant={train.isExcluded ? "solid" : "outline"} color="white" colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
                     Exclude
                   </Button>
@@ -206,7 +193,7 @@ export default function RevenueCalculator() {
                     {train.isExcluded && <Text as="span" ml="2" color="red.400">(Excluded)</Text>}
                   </Heading>
                   <Flex wrap="wrap" gap="1" align="center" minH="32px">
-                    {train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
+                    {train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
                     {train.stops.map((stop, index) => (
                       <Flex key={`reg-${index}`} align="center">
                         <Button 
@@ -219,41 +206,43 @@ export default function RevenueCalculator() {
                         >
                           {stop}
                         </Button>
-                        {(index < train.stops.length - 1 || (train.pullmanStops && train.pullmanStops.length > 0)) && <Text color="gray.600" mx="1">+</Text>}
+                        {(index < train.stops.length - 1 || (train.bonusStops && train.bonusStops.length > 0)) && <Text color="gray.600" mx="1">+</Text>}
                       </Flex>
                     ))}
-                    {train.pullmanStops && train.pullmanStops.map((stop, index) => (
-                      <Flex key={`pul-${index}`} align="center">
+                    {train.bonusStops && train.bonusStops.map((stop, index) => (
+                      <Flex key={`bonus-${index}`} align="center">
                         <Button 
                           size="xs" 
                           variant="ghost" 
                           color="cyan.400"
-                          aria-label={`Remove pullman stop ${stop}`}
-                          onClick={() => handleRemovePullmanStop(train.id, index)}
+                          aria-label={`Remove bonus stop ${stop.val}`}
+                          onClick={() => handleRemoveBonusStop(train.id, index)}
                           _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
                         >
-                          {stop}(P)
+                          {stop.val}({stop.label})
                         </Button>
-                        {index < train.pullmanStops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
+                        {index < train.bonusStops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
                       </Flex>
                     ))}
                   </Flex>
                 </VStack>
 
                 <SimpleGrid columns={5} gap="2" mt="4">
-                  {train.hasPullmanAttached && [10, 20, 30].map((val) => (
-                    <Button 
-                      key={`p-${val}`} 
-                      size="lg" 
-                      variant="outline" 
-                      color="cyan.300"
-                      colorPalette="cyan"
-                      onClick={() => handleAddPullmanStop(train.id, val)}
-                      disabled={train.isExcluded}
-                    >
-                      {val}
-                    </Button>
-                  ))}
+                  {allBonuses.map(bonus => 
+                    bonus.adds.map((val) => (
+                      <Button 
+                        key={`b-${bonus.label}-${val}`} 
+                        size="lg" 
+                        variant="outline" 
+                        color="cyan.300"
+                        colorPalette="cyan"
+                        onClick={() => handleAddBonusStop(train.id, val, bonus.label[0])}
+                        disabled={train.isExcluded}
+                      >
+                        {val}({bonus.label[0]})
+                      </Button>
+                    ))
+                  )}
                   {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((val) => (
                     <Button 
                       key={val} 
