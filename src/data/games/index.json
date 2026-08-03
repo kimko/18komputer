@@ -12,42 +12,50 @@
   {
     "id": "1822",
     "name": "1822: The Railways of Great Britain",
-    "bggId": 193867
+    "bggId": 193867,
+    "hasPullmans": true
   },
   {
     "id": "1822CA",
     "name": "1822CA: The Railways of Canada",
-    "bggId": 253607
+    "bggId": 253607,
+    "hasPullmans": true
   },
   {
     "id": "1822MX",
     "name": "1822MX",
-    "bggId": 277538
+    "bggId": 277538,
+    "hasPullmans": true
   },
   {
     "id": "1822PNW",
     "name": "1822PNW: The Railways of the Pacific Northwest",
-    "bggId": 360242
+    "bggId": 360242,
+    "hasPullmans": true
   },
   {
     "id": "1822_MRS",
     "name": "1822: The Railways of Great Britain (Medium Regional Scenario)",
-    "bggId": 193867
+    "bggId": 193867,
+    "hasPullmans": true
   },
   {
     "id": "1822_MRS_sp",
     "name": "1822: The Railways of Great Britain (Medium Regional Scenario) (Southwest Peninsula)",
-    "bggId": 193867
+    "bggId": 193867,
+    "hasPullmans": true
   },
   {
     "id": "1822_NRS",
     "name": "1822: The Railways of Great Britain (Northern Regional Scenario)",
-    "bggId": 193867
+    "bggId": 193867,
+    "hasPullmans": true
   },
   {
     "id": "1822__",
     "name": "1822: The Railways of Great Britain (1822+)",
-    "bggId": 193867
+    "bggId": 193867,
+    "hasPullmans": true
   },
   {
     "id": "1824",

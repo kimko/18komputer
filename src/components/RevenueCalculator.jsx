@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid, Table } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
+import gameIndex from '../data/games/index.json';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -39,7 +40,9 @@ export default function RevenueCalculator() {
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const activeCompanies = gameInstance.state?.activeCompanies || [];
-  const supportsPullmans = gameInstance.hasPullmans === true;
+  
+  const gameConfig = gameIndex.find(g => g.id === gameInstance.gameId);
+  const supportsPullmans = gameConfig?.hasPullmans === true;
   
   const grandTotal = trains
     .filter(t => !t.isExcluded)
