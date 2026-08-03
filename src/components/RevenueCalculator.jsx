@@ -145,9 +145,9 @@ export default function RevenueCalculator() {
                 opacity={train.isExcluded ? 0.6 : 1}
                 transition="opacity 0.2s"
               >
-                <Flex justify="space-between" align="center" mb="4">
+                <Flex justify="space-between" align="start" mb="4">
                   <VStack align="start" gap="2">
-                    <Heading size="md" color={train.isExcluded ? "gray.400" : "white"}>
+                    <Heading size="lg" color={train.isExcluded ? "gray.400" : "white"}>
                       Train {i + 1} Total: ${trainTotal}
                       <Text as="span" fontSize="sm" color="gray.400" fontWeight="normal" ml="2">
                         ({train.stops.length} {train.stops.length === 1 ? 'stop' : 'stops'})
@@ -173,18 +173,18 @@ export default function RevenueCalculator() {
                       ))}
                     </Flex>
                   </VStack>
-                  <VStack gap="2">
+                  <VStack gap="2" align="flex-end">
                     <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0}>
                       Clear
                     </Button>
                     <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
                       Copy Train
                     </Button>
-                    <Button size="xs" variant={train.isExcluded ? "solid" : "ghost"} colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
+                    <Button size="xs" variant={train.isExcluded ? "solid" : "outline"} color="white" colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
                       {train.isExcluded ? "Include" : "Exclude"}
                     </Button>
                     {trains.length > 1 && (
-                      <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemoveTrain(train.id)}>
+                      <Button size="xs" variant="ghost" colorPalette="red" mt="4" onClick={() => handleRemoveTrain(train.id)}>
                         Remove Train
                       </Button>
                     )}
