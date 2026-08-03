@@ -219,19 +219,19 @@ export default function RevenueCalculator() {
           </Flex>
 
           <Box overflowX="auto" mb="6">
-            <Table.Root size="sm" variant="line" colorScheme="gray">
+            <Table.Root size="sm" color="white" bg="gray.800">
               <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>10%</Table.ColumnHeader>
-                  <Table.ColumnHeader>20%</Table.ColumnHeader>
-                  <Table.ColumnHeader>30%</Table.ColumnHeader>
-                  <Table.ColumnHeader>40%</Table.ColumnHeader>
-                  <Table.ColumnHeader>50%</Table.ColumnHeader>
-                  <Table.ColumnHeader>60%</Table.ColumnHeader>
-                  <Table.ColumnHeader>70%</Table.ColumnHeader>
-                  <Table.ColumnHeader>80%</Table.ColumnHeader>
-                  <Table.ColumnHeader>90%</Table.ColumnHeader>
-                  <Table.ColumnHeader>100%</Table.ColumnHeader>
+                <Table.Row bg="gray.700">
+                  <Table.ColumnHeader color="gray.300">10%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">20%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">30%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">40%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">50%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">60%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">70%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">80%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="gray.300">90%</Table.ColumnHeader>
+                  <Table.ColumnHeader color="orange.300">100%</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
