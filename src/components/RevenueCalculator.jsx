@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid, Table } from '@chakra-ui/react';
+import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { getGame, updateGameState } from '../api/mockApi.js';
+import { getGame } from '../api/mockApi.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -11,7 +11,6 @@ export default function RevenueCalculator() {
   
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [companyStates, setCompanyStates] = useState({});
-  const [submitting, setSubmitting] = useState(false);
 
   const trains = companyStates[selectedCompanyId]?.trains || [{ id: 1, stops: [], bonusStops: [] }];
   const isHalfPay = companyStates[selectedCompanyId]?.isHalfPay || false;
@@ -110,35 +109,6 @@ export default function RevenueCalculator() {
     const updatedTrains = [...trains, { id: Date.now(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }];
     updateCompanyState({ trains: updatedTrains });
   };
-
-  const handleSubmit = async (decision) => {
-    if (!selectedCompanyId) return;
-    
-    setSubmitting(true);
-    try {
-      const newOR = { companyId: selectedCompanyId, revenue: grandTotal, decision };
-      const existingORs = gameInstance.state?.companyORs || [];
-      const updatedORs = [...existingORs, newOR];
-      
-      await updateGameState(gameInstance.id, {
-        companyORs: updatedORs
-      });
-      
-      setGameInstance(prev => ({
-        ...prev,
-        state: { ...prev.state, companyORs: updatedORs }
-      }));
-      
-      // Reset calc
-      updateCompanyState({ trains: [{ id: Date.now(), stops: [], bonusStops: [] }], isHalfPay: false });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const stopValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
   return (
     <Box p="4">

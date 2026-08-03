@@ -8,8 +8,6 @@ vi.mock('wouter', () => ({
   useLocation: () => ['/', mockNavigate]
 }));
 
-import { useLocation } from 'wouter';
-
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -33,7 +31,6 @@ describe('MainMenu Component', () => {
 
   it('should navigate to the correct routes when buttons are clicked', () => {
     renderWithChakra(<MainMenu />);
-    const [, navigate] = useLocation();
     
     // Click New Game
     fireEvent.click(screen.getByRole('button', { name: /NEW GAME/i }));

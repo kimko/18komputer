@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner } from '@chakra-ui/react';
-import { useRoute, useLocation } from 'wouter';
+import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
 
 export default function RaiseFunds() {
   const [match, params] = useRoute('/game/:id/setup');
-  const [, navigate] = useLocation();
 
   const [loading, setLoading] = useState(true);
   const [gameInstance, setGameInstance] = useState(null);
