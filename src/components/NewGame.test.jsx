@@ -72,7 +72,7 @@ describe('NewGame Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Start Game/i }));
 
     await waitFor(() => {
-      expect(mockApi.createGame).toHaveBeenCalledWith('1830', ['Alice', 'Bob']);
+      expect(mockApi.createGame).toHaveBeenCalledWith('1830', ['Player 1', 'Player 2', 'Player 3', 'Alice', 'Bob']);
       // Should navigate to the setup phase (Raise Funds)
       expect(mockNavigate).toHaveBeenCalledWith('/game/inst_123/setup');
     });

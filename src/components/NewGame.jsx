@@ -9,7 +9,7 @@ export default function NewGame() {
   const [selectedGame, setSelectedGame] = useState(gameIndex[0]?.id || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [playerName, setPlayerName] = useState('');
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState(['Player 1', 'Player 2', 'Player 3']);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddPlayer = (e) => {
