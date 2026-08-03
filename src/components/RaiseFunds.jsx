@@ -96,39 +96,16 @@ export default function RaiseFunds() {
           {gameDef.companies?.map(company => {
             const isActive = activeCompanies[company.shortName] !== undefined;
             return (
-              <Flex 
+              <Box
                 key={company.shortName} 
                 p="4" 
                 bg="gray.800" 
                 borderRadius="md" 
-                align="center" 
-                justify="space-between"
                 borderLeft="4px solid"
                 borderColor={company.color}
               >
-                <Box>
+                <Flex align="center" justify="space-between">
                   <Text fontWeight="bold">{company.name} ({company.shortName})</Text>
-                </Box>
-                
-                <Flex align="center" gap="4">
-                  {isActive && (
-                    <select
-                      aria-label={`Par Value for ${company.shortName}`}
-                      value={activeCompanies[company.shortName]}
-                      onChange={(e) => updateParValue(company.shortName, e.target.value)}
-                      style={{
-                        padding: '0.5rem',
-                        borderRadius: '0.375rem',
-                        backgroundColor: '#2D3748',
-                        color: 'white',
-                        border: '1px solid #4A5568'
-                      }}
-                    >
-                      {gameDef.parValues?.map(val => (
-                        <option key={val} value={val}>{val}</option>
-                      ))}
-                    </select>
-                  )}
                   
                   <Button 
                     size="sm" 
@@ -139,7 +116,28 @@ export default function RaiseFunds() {
                     {isActive ? 'Deactivate' : `Activate ${company.shortName}`}
                   </Button>
                 </Flex>
-              </Flex>
+
+                {isActive && gameDef.parValues && gameDef.parValues.length > 0 && (
+                  <Box mt="4">
+                    <Text fontSize="sm" color="gray.400" mb="2">Select Initial Par Value</Text>
+                    <Flex wrap="wrap" gap="2">
+                      {gameDef.parValues.map(val => (
+                        <Button
+                          key={val}
+                          size="md"
+                          flex="1"
+                          minW="60px"
+                          colorPalette={activeCompanies[company.shortName] === val ? "teal" : "gray"}
+                          variant={activeCompanies[company.shortName] === val ? "solid" : "outline"}
+                          onClick={() => updateParValue(company.shortName, val)}
+                        >
+                          {val}
+                        </Button>
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
+              </Box>
             );
           })}
         </VStack>

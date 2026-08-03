@@ -62,24 +62,21 @@ export default function NewGame() {
 
           <Box>
             <Text mb="2" fontWeight="bold">Select Game</Text>
-            <select
-              value={selectedGame}
-              onChange={(e) => setSelectedGame(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '0.375rem',
-                backgroundColor: '#2D3748',
-                color: 'white',
-                border: '1px solid #4A5568'
-              }}
-            >
-              {gameIndex.map((game) => (
-                <option key={game.id} value={game.id}>
-                  {game.name || game.id}
-                </option>
-              ))}
-            </select>
+            <Box maxH="200px" overflowY="auto" border="1px solid" borderColor="whiteAlpha.200" borderRadius="md" p="2" bg="gray.800">
+              <VStack align="stretch" gap="1">
+                {gameIndex.map((game) => (
+                  <Button
+                    key={game.id}
+                    justifyContent="flex-start"
+                    variant={selectedGame === game.id ? "solid" : "ghost"}
+                    colorPalette={selectedGame === game.id ? "teal" : "gray"}
+                    onClick={() => setSelectedGame(game.id)}
+                  >
+                    {game.name || game.id}
+                  </Button>
+                ))}
+              </VStack>
+            </Box>
           </Box>
 
           <Box>

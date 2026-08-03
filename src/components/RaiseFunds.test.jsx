@@ -88,9 +88,9 @@ describe('RaiseFunds Component', () => {
       });
     });
     
-    // Change Par Value
-    const parSelects = screen.getAllByRole('combobox');
-    fireEvent.change(parSelects[0], { target: { value: '71' } });
+    // Change Par Value using the touch-friendly buttons
+    const par71Btn = screen.getByRole('button', { name: '71' });
+    fireEvent.click(par71Btn);
     
     // It should auto-save the new par value
     await waitFor(() => {

@@ -52,8 +52,8 @@ describe('NewGame Component', () => {
     renderWithChakra(<NewGame />);
 
     // Select the game
-    const gameSelect = screen.getByRole('combobox');
-    fireEvent.change(gameSelect, { target: { value: '1830' } });
+    const gameBtn = screen.getByRole('button', { name: /1830: Railways/i });
+    fireEvent.click(gameBtn);
 
     // Add first player
     const input = screen.getByPlaceholderText(/Player Name/i);
