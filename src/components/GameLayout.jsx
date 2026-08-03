@@ -11,9 +11,10 @@ export default function GameLayout({ children }) {
 
   return (
     <Box minH="100vh" bg="gray.900" color="white">
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar (Desktop Only) */}
       <Flex 
         as="nav" 
+        display={{ base: "none", md: "flex" }}
         bg="gray.800" 
         px="4" 
         py="2"
@@ -49,9 +50,42 @@ export default function GameLayout({ children }) {
       </Flex>
       
       {/* Main Content Area */}
-      <Box p="4">
+      <Box p="4" pb={{ base: "24", md: "4" }}>
         {children}
       </Box>
+
+      {/* Bottom Navigation Bar (Mobile Only) */}
+      <Flex
+        as="nav"
+        display={{ base: "flex", md: "none" }}
+        position="fixed"
+        bottom="0"
+        left="0"
+        w="100%"
+        bg="gray.800"
+        borderTop="1px solid"
+        borderColor="whiteAlpha.200"
+        zIndex="10"
+        px="2"
+        py="2"
+        justify="space-between"
+      >
+        <Link href={`/game/${gameId}/dashboard`}>
+          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+            Dashboard
+          </Button>
+        </Link>
+        <Link href={`/game/${gameId}/calculator`}>
+          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+            Calculator
+          </Button>
+        </Link>
+        <Link href={`/game/${gameId}/setup`}>
+          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+            Raise Funds
+          </Button>
+        </Link>
+      </Flex>
     </Box>
   );
 }
