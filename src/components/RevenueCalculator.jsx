@@ -165,71 +165,70 @@ export default function RevenueCalculator() {
                 opacity={train.isExcluded ? 0.6 : 1}
                 transition="opacity 0.2s"
               >
-                <Flex justify="space-between" align="start" mb="4">
-                  <VStack align="start" gap="2">
-                    <Heading size="lg" color={train.isExcluded ? "gray.400" : "white"}>
-                      Train {i + 1} Total: ${trainTotal}
-                      <Text as="span" fontSize="sm" color="gray.400" fontWeight="normal" ml="2">
-                        ({train.stops.length} {train.stops.length === 1 ? 'stop' : 'stops'})
-                      </Text>
-                      {train.isExcluded && <Text as="span" ml="2" color="red.400">(Excluded)</Text>}
-                    </Heading>
-                    <Flex wrap="wrap" gap="1" align="center" minH="32px">
-                      {train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
-                      {train.stops.map((stop, index) => (
-                        <Flex key={`reg-${index}`} align="center">
-                          <Button 
-                            size="xs" 
-                            variant="ghost" 
-                            color="orange.300"
-                            aria-label={`Remove stop ${stop}`}
-                            onClick={() => handleRemoveStop(train.id, index)}
-                            _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
-                          >
-                            {stop}
-                          </Button>
-                          {(index < train.stops.length - 1 || (train.pullmanStops && train.pullmanStops.length > 0)) && <Text color="gray.600" mx="1">+</Text>}
-                        </Flex>
-                      ))}
-                      {train.pullmanStops && train.pullmanStops.map((stop, index) => (
-                        <Flex key={`pul-${index}`} align="center">
-                          <Button 
-                            size="xs" 
-                            variant="ghost" 
-                            color="cyan.400"
-                            aria-label={`Remove pullman stop ${stop}`}
-                            onClick={() => handleRemovePullmanStop(train.id, index)}
-                            _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
-                          >
-                            {stop}(P)
-                          </Button>
-                          {index < train.pullmanStops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
-                        </Flex>
-                      ))}
-                    </Flex>
-                  </VStack>
-                  <VStack gap="2" align="flex-end">
-                    <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0)}>
-                      Clear
+                <Flex justify="flex-end" gap="2" mb="2" wrap="wrap">
+                  <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0)}>
+                    Clear
+                  </Button>
+                  <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
+                    Copy
+                  </Button>
+                  {supportsPullmans && (
+                    <Button size="xs" variant={train.hasPullmanAttached ? "solid" : "outline"} color="white" colorPalette={train.hasPullmanAttached ? "cyan" : "gray"} onClick={() => handleTogglePullman(train.id)}>
+                      Pullman
                     </Button>
-                    <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
-                      Copy Train
+                  )}
+                  <Button size="xs" variant={train.isExcluded ? "solid" : "outline"} color="white" colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
+                    Exclude
+                  </Button>
+                  {trains.length > 1 && (
+                    <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemoveTrain(train.id)}>
+                      Remove
                     </Button>
-                    {supportsPullmans && (
-                      <Button size="xs" variant={train.hasPullmanAttached ? "solid" : "outline"} color="white" colorPalette={train.hasPullmanAttached ? "cyan" : "gray"} onClick={() => handleTogglePullman(train.id)}>
-                        {train.hasPullmanAttached ? "- Detach Pullman" : "+ Attach Pullman"}
-                      </Button>
-                    )}
-                    <Button size="xs" variant={train.isExcluded ? "solid" : "outline"} color="white" colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
-                      {train.isExcluded ? "Include" : "Exclude"}
-                    </Button>
-                    {trains.length > 1 && (
-                      <Button size="xs" variant="ghost" colorPalette="red" mt="4" onClick={() => handleRemoveTrain(train.id)}>
-                        Remove Train
-                      </Button>
-                    )}
-                  </VStack>
+                  )}
                 </Flex>
+
+                <VStack align="start" gap="2" mb="4">
+                  <Heading size="lg" color={train.isExcluded ? "gray.400" : "white"}>
+                    Train {i + 1} Total: ${trainTotal}
+                    <Text as="span" fontSize="sm" color="gray.400" fontWeight="normal" ml="2">
+                      ({train.stops.length} {train.stops.length === 1 ? 'stop' : 'stops'})
+                    </Text>
+                    {train.isExcluded && <Text as="span" ml="2" color="red.400">(Excluded)</Text>}
+                  </Heading>
+                  <Flex wrap="wrap" gap="1" align="center" minH="32px">
+                    {train.stops.length === 0 && (!train.pullmanStops || train.pullmanStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
+                    {train.stops.map((stop, index) => (
+                      <Flex key={`reg-${index}`} align="center">
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          color="orange.300"
+                          aria-label={`Remove stop ${stop}`}
+                          onClick={() => handleRemoveStop(train.id, index)}
+                          _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+                        >
+                          {stop}
+                        </Button>
+                        {(index < train.stops.length - 1 || (train.pullmanStops && train.pullmanStops.length > 0)) && <Text color="gray.600" mx="1">+</Text>}
+                      </Flex>
+                    ))}
+                    {train.pullmanStops && train.pullmanStops.map((stop, index) => (
+                      <Flex key={`pul-${index}`} align="center">
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          color="cyan.400"
+                          aria-label={`Remove pullman stop ${stop}`}
+                          onClick={() => handleRemovePullmanStop(train.id, index)}
+                          _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+                        >
+                          {stop}(P)
+                        </Button>
+                        {index < train.pullmanStops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
+                      </Flex>
+                    ))}
+                  </Flex>
+                </VStack>
 
                 <SimpleGrid columns={5} gap="2" mt="4">
                   {train.hasPullmanAttached && [10, 20, 30].map((val) => (

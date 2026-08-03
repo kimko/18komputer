@@ -62,13 +62,13 @@ describe('RevenueCalculator Component', () => {
     expect(screen.getByText(/Grand Total: \$90/)).toBeInTheDocument();
 
     // Copy train 1
-    fireEvent.click(screen.getByRole('button', { name: /Copy Train/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Copy$/i }));
     
     // Now there should be two trains with 90 each, grand total 180
     expect(screen.getByText(/Grand Total: \$180/)).toBeInTheDocument();
 
     // Add an empty train by copying and clearing
-    const copyTrainBtns = screen.getAllByRole('button', { name: /Copy Train/i });
+    const copyTrainBtns = screen.getAllByRole('button', { name: /^Copy$/i });
     fireEvent.click(copyTrainBtns[1]); // Copy train 2
     
     // Now there should be 3 numpads
@@ -93,14 +93,14 @@ describe('RevenueCalculator Component', () => {
     expect(screen.getByText(/Grand Total: \$110/)).toBeInTheDocument();
 
     // Re-include train 1
-    const includeBtns = screen.getAllByRole('button', { name: /Include/i });
+    const includeBtns = screen.getAllByRole('button', { name: /^Exclude$/i });
     fireEvent.click(includeBtns[0]);
     
     // Grand total back to 200
     expect(screen.getByText(/Grand Total: \$200/)).toBeInTheDocument();
 
     // Remove train 2
-    const removeTrainBtns = screen.getAllByRole('button', { name: /Remove Train/i });
+    const removeTrainBtns = screen.getAllByRole('button', { name: /^Remove$/i });
     fireEvent.click(removeTrainBtns[1]); // Remove the copied train
 
     // Grand total: 90 + 20 = 110
