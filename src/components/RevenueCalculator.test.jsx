@@ -46,7 +46,7 @@ describe('RevenueCalculator Component', () => {
 
   it('should allow adding multiple trains and calculating grand total', async () => {
     renderWithChakra(<RevenueCalculator />);
-    await screen.findByText(/Revenue Calculator/i);
+    await screen.findByText(/Grand Total/i);
     
     // Select company
     fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
@@ -109,7 +109,7 @@ describe('RevenueCalculator Component', () => {
 
   it('should render a payout table and submit the operating decision', async () => {
     renderWithChakra(<RevenueCalculator />);
-    await screen.findByText(/Revenue Calculator/i);
+    await screen.findByText(/Grand Total/i);
     
     fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
     

@@ -143,13 +143,7 @@ export default function RevenueCalculator() {
   return (
     <Box p="4">
       <Box maxW="2xl" mx="auto">
-        <Heading as="h2" size="xl" color="orange.400" mb="2">
-          Revenue Calculator
-        </Heading>
-        <Text color="gray.400" mb="6">Calculate multiple trains and make operating decisions.</Text>
-        
         <Box mb="6">
-          <Text fontWeight="bold" mb="2">Operating Company</Text>
           {activeCompanies.length === 0 ? (
             <Text color="red.400">No active companies. Go to Raise Funds first.</Text>
           ) : (
