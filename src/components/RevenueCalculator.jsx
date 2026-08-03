@@ -10,9 +10,22 @@ export default function RevenueCalculator() {
   const [gameInstance, setGameInstance] = useState(null);
   
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
-  const [trains, setTrains] = useState([{ id: 1, stops: [], bonusStops: [] }]);
-  const [isHalfPay, setIsHalfPay] = useState(false);
+  const [companyStates, setCompanyStates] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const trains = companyStates[selectedCompanyId]?.trains || [{ id: 1, stops: [], bonusStops: [] }];
+  const isHalfPay = companyStates[selectedCompanyId]?.isHalfPay || false;
+
+  const updateCompanyState = (updates) => {
+    if (!selectedCompanyId) return;
+    setCompanyStates(prev => {
+      const currentState = prev[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false };
+      return {
+        ...prev,
+        [selectedCompanyId]: { ...currentState, ...updates }
+      };
+    });
+  };
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -59,35 +72,43 @@ export default function RevenueCalculator() {
     }, 0);
 
   const handleAddStop = (trainId, val) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [...t.stops, val] } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, stops: [...t.stops, val] } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleAddBonusStop = (trainId, val, label) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, bonusStops: [...(t.bonusStops || []), { val, label }] } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, bonusStops: [...(t.bonusStops || []), { val, label }] } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleRemoveStop = (trainId, indexToRemove) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: t.stops.filter((_, idx) => idx !== indexToRemove) } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, stops: t.stops.filter((_, idx) => idx !== indexToRemove) } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleRemoveBonusStop = (trainId, indexToRemove) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, bonusStops: t.bonusStops.filter((_, idx) => idx !== indexToRemove) } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, bonusStops: t.bonusStops.filter((_, idx) => idx !== indexToRemove) } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleClearTrain = (trainId) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [], bonusStops: [] } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, stops: [], bonusStops: [] } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleRemoveTrain = (trainId) => {
-    setTrains(prev => prev.filter(t => t.id !== trainId));
+    const updatedTrains = trains.filter(t => t.id !== trainId);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleToggleExclude = (trainId) => {
-    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, isExcluded: !t.isExcluded } : t));
+    const updatedTrains = trains.map(t => t.id === trainId ? { ...t, isExcluded: !t.isExcluded } : t);
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleCopyTrain = (trainToCopy) => {
-    setTrains(prev => [...prev, { id: Date.now(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }]);
+    const updatedTrains = [...trains, { id: Date.now(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }];
+    updateCompanyState({ trains: updatedTrains });
   };
 
   const handleSubmit = async (decision) => {
@@ -109,8 +130,7 @@ export default function RevenueCalculator() {
       }));
       
       // Reset calc
-      setTrains([{ id: Date.now(), stops: [], bonusStops: [] }]);
-      setIsHalfPay(false);
+      updateCompanyState({ trains: [{ id: Date.now(), stops: [], bonusStops: [] }], isHalfPay: false });
     } catch (err) {
       console.error(err);
     } finally {
@@ -272,7 +292,7 @@ export default function RevenueCalculator() {
                 size="sm" 
                 variant={!isHalfPay ? "solid" : "outline"} 
                 colorPalette="orange" 
-                onClick={() => setIsHalfPay(false)}
+                onClick={() => updateCompanyState({ isHalfPay: false })}
                 borderRightRadius={0}
               >
                 Full Pay
@@ -281,7 +301,7 @@ export default function RevenueCalculator() {
                 size="sm" 
                 variant={isHalfPay ? "solid" : "outline"} 
                 colorPalette="orange" 
-                onClick={() => setIsHalfPay(true)}
+                onClick={() => updateCompanyState({ isHalfPay: true })}
                 borderLeftRadius={0}
               >
                 Half Pay
