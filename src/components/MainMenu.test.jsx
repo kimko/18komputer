@@ -21,7 +21,7 @@ describe('MainMenu Component', () => {
     renderWithChakra(<MainMenu />);
     
     // Check for title
-    expect(screen.getByText(/TRAIN CALCULATOR/i)).toBeInTheDocument();
+    expect(screen.getByText(/18KOMPUTER/i)).toBeInTheDocument();
 
     // Check for primary buttons
     expect(screen.getByRole('button', { name: /NEW GAME/i })).toBeInTheDocument();
