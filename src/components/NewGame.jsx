@@ -49,12 +49,14 @@ export default function NewGame() {
       >
         <VStack gap="6" align="stretch">
           <Box>
-            <Button variant="ghost" colorPalette="gray" size="sm" onClick={() => navigate('/')} mb="4">
-              &larr; Back
-            </Button>
-            <Heading as="h2" size="xl" color="teal.400">
-              New Game
-            </Heading>
+            <Flex justify="space-between" align="center" mb="2">
+              <Heading as="h2" size="xl" color="teal.400">
+                New Game
+              </Heading>
+              <IconButton variant="ghost" colorPalette="gray" size="sm" aria-label="Close" onClick={() => navigate('/')}>
+                ✕
+              </IconButton>
+            </Flex>
             <Text color="gray.400">Select a title and add players.</Text>
           </Box>
 
