@@ -35,8 +35,7 @@ describe('RevenueCalculator Component', () => {
       players: ['Alice', 'Bob'],
       state: {
         activeCompanies: [
-          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 },
-          { shortName: 'NYC', name: 'New York Central', color: '#000000', parValue: 71 }
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
         ],
         companyORs: []
       }
@@ -45,62 +44,73 @@ describe('RevenueCalculator Component', () => {
     mockApi.updateGameState.mockResolvedValue({});
   });
 
-  it('should load active companies and allow calculating revenue', async () => {
+  it('should allow adding multiple trains and calculating grand total', async () => {
     renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Revenue Calculator/i);
     
-    // Wait for load
-    expect(await screen.findByText(/Revenue Calculator/i)).toBeInTheDocument();
+    // Select company
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+
+    // By default, one train panel should exist
+    const numpads = screen.getAllByRole('button', { name: '40' });
+    expect(numpads).toHaveLength(1);
+
+    // Add stops to train 1
+    fireEvent.click(numpads[0]); // +40
+    fireEvent.click(screen.getByRole('button', { name: '50' })); // +50
+    // Train 1 total: 90. Grand Total: 90.
+    expect(screen.getByText(/Grand Total: \$90/)).toBeInTheDocument();
+
+    // Copy train 1
+    fireEvent.click(screen.getByRole('button', { name: /Copy Train/i }));
     
-    // Should display active companies as touch-friendly buttons for selection
-    const prrBtn = screen.getByRole('button', { name: /PRR/i });
-    expect(prrBtn).toBeInTheDocument();
+    // Now there should be two trains with 90 each, grand total 180
+    expect(screen.getByText(/Grand Total: \$180/)).toBeInTheDocument();
+
+    // Add a new empty train
+    fireEvent.click(screen.getByRole('button', { name: /Add Train/i }));
     
-    // Select PRR
-    fireEvent.click(prrBtn);
+    // Now there should be 3 numpads
+    expect(screen.getAllByRole('button', { name: '40' })).toHaveLength(3);
     
-    // Add stops: 40 + 50 + 20
-    fireEvent.click(screen.getByRole('button', { name: '40' }));
-    fireEvent.click(screen.getByRole('button', { name: '50' }));
-    fireEvent.click(screen.getByRole('button', { name: '20' }));
+    // Add 20 to train 3
+    const numpads20 = screen.getAllByRole('button', { name: '20' });
+    fireEvent.click(numpads20[2]); // +20
     
-    // Total should be 110, Stops: 3
-    expect(screen.getByText(/Total: \$110/)).toBeInTheDocument();
-    expect(screen.getByText(/\(3 stops\)/)).toBeInTheDocument();
-    
-    // Remove the 50 stop (which is at index 1, but we can query by aria-label)
-    // We added aria-labels to the remove buttons to distinguish them from the numpad
-    const remove50Btn = screen.getByRole('button', { name: 'Remove stop 50' });
-    fireEvent.click(remove50Btn);
-    
-    // Total should now be 60, Stops: 2
-    expect(screen.getByText(/Total: \$60/)).toBeInTheDocument();
-    expect(screen.getByText(/\(2 stops\)/)).toBeInTheDocument();
-    
-    // Submit Revenue
-    const submitBtn = screen.getByRole('button', { name: /Submit Revenue/i });
-    fireEvent.click(submitBtn);
-    
-    await waitFor(() => {
-      expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
-        companyORs: [
-          { companyId: 'PRR', revenue: 60 }
-        ]
-      });
-      // Should clear the calculator after submission
-      expect(screen.getByText(/Total: \$0/)).toBeInTheDocument();
-      expect(screen.getByText(/\(0 stops\)/)).toBeInTheDocument();
-    });
+    // Grand total: 90 + 90 + 20 = 200
+    expect(screen.getByText(/Grand Total: \$200/)).toBeInTheDocument();
+
+    // Remove train 2
+    const removeTrainBtns = screen.getAllByRole('button', { name: /Remove Train/i });
+    fireEvent.click(removeTrainBtns[1]); // Remove the copied train
+
+    // Grand total: 90 + 20 = 110
+    expect(screen.getByText(/Grand Total: \$110/)).toBeInTheDocument();
   });
 
-  it('should allow clearing the current calculation', async () => {
+  it('should render a payout table and submit the operating decision', async () => {
     renderWithChakra(<RevenueCalculator />);
     await screen.findByText(/Revenue Calculator/i);
     
     fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
-    fireEvent.click(screen.getByRole('button', { name: '30' }));
-    expect(screen.getByText(/Total: \$30/)).toBeInTheDocument();
     
-    fireEvent.click(screen.getByRole('button', { name: /Clear/i }));
-    expect(screen.getByText(/Total: \$0/)).toBeInTheDocument();
+    // Make total 100 for easy math
+    fireEvent.click(screen.getByRole('button', { name: '100' }));
+    
+    // Check payout table (10% should be $10)
+    expect(screen.getByText('10%')).toBeInTheDocument();
+    expect(screen.getByText('$10')).toBeInTheDocument();
+    
+    // Submit "Pay Out 100%"
+    const payoutBtn = screen.getByRole('button', { name: /Pay Out 100%/i });
+    fireEvent.click(payoutBtn);
+    
+    await waitFor(() => {
+      expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
+        companyORs: [
+          { companyId: 'PRR', revenue: 100, decision: 'payout' }
+        ]
+      });
+    });
   });
 });

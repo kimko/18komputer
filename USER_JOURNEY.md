@@ -43,11 +43,11 @@ The initial game setup flow has been implemented.
 The core utility for running Operating Rounds has been implemented.
 - **UI:** A mobile-first, touch-friendly calculator layout optimized for rapid data entry.
 - **Features:**
-  - Dynamic selector for only the companies currently marked as "active".
-  - A grid of touch-friendly number pad buttons representing common stop values (10 through 100).
-  - A real-time running total display with an itemized string of tapped stops (e.g., `Stops: 40 + 50 + 20`).
-  - Clear and Undo capabilities.
-- **Data Flow:** Submitting the calculated revenue attaches an OR record (Operating Round) to the company within the mock API, paving the way for the final dashboard.
+  - Dynamic selector for the active operating company.
+  - **Multiple Trains:** Users can calculate multiple trains simultaneously. Trains can be added, removed, or duplicated via a "Copy Train" button.
+  - **Interactive History:** Each train has an itemized string of tapped stops (e.g., `60 + 70 + 40`). Stops can be instantly deleted by tapping them.
+  - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table dynamically generates the Revenue Per Share payout (from 10% to 100%).
+- **Data Flow:** Users finalize the round by selecting a payout decision ("Withhold 100%", "Half Pay", or "Pay Out 100%"). This decision, along with the grand total, is pushed to the game state.
 
 ---
 *Next up: Company Values & Results (Dashboard).*

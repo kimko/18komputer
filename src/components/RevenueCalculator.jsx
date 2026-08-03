@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
+import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid, Table } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
 
@@ -10,7 +10,8 @@ export default function RevenueCalculator() {
   const [gameInstance, setGameInstance] = useState(null);
   
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
-  const [stops, setStops] = useState([]);
+  // State for multiple trains
+  const [trains, setTrains] = useState([{ id: 1, stops: [] }]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,6 @@ export default function RevenueCalculator() {
       try {
         const instance = await getGame(params.id);
         setGameInstance(instance);
-        // Default select the first active company
         if (instance.state?.activeCompanies?.length > 0) {
           setSelectedCompanyId(instance.state.activeCompanies[0].shortName);
         }
@@ -39,26 +39,38 @@ export default function RevenueCalculator() {
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const activeCompanies = gameInstance.state?.activeCompanies || [];
-  const currentTotal = stops.reduce((sum, val) => sum + val, 0);
+  const grandTotal = trains.reduce((sum, t) => sum + t.stops.reduce((s, v) => s + v, 0), 0);
 
-  const handleAddStop = (val) => {
-    setStops(prev => [...prev, val]);
+  const handleAddStop = (trainId, val) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [...t.stops, val] } : t));
   };
 
-  const handleRemoveStop = (indexToRemove) => {
-    setStops(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  const handleRemoveStop = (trainId, indexToRemove) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: t.stops.filter((_, idx) => idx !== indexToRemove) } : t));
   };
 
-  const handleClear = () => {
-    setStops([]);
+  const handleClearTrain = (trainId) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [] } : t));
   };
 
-  const handleSubmit = async () => {
+  const handleRemoveTrain = (trainId) => {
+    setTrains(prev => prev.filter(t => t.id !== trainId));
+  };
+
+  const handleCopyTrain = (trainToCopy) => {
+    setTrains(prev => [...prev, { id: Date.now(), stops: [...trainToCopy.stops] }]);
+  };
+
+  const handleAddTrain = () => {
+    setTrains(prev => [...prev, { id: Date.now(), stops: [] }]);
+  };
+
+  const handleSubmit = async (decision) => {
     if (!selectedCompanyId) return;
     
     setSubmitting(true);
     try {
-      const newOR = { companyId: selectedCompanyId, revenue: currentTotal };
+      const newOR = { companyId: selectedCompanyId, revenue: grandTotal, decision };
       const existingORs = gameInstance.state?.companyORs || [];
       const updatedORs = [...existingORs, newOR];
       
@@ -66,17 +78,13 @@ export default function RevenueCalculator() {
         companyORs: updatedORs
       });
       
-      // Update local instance to reflect changes
       setGameInstance(prev => ({
         ...prev,
-        state: {
-          ...prev.state,
-          companyORs: updatedORs
-        }
+        state: { ...prev.state, companyORs: updatedORs }
       }));
       
       // Reset calc
-      setStops([]);
+      setTrains([{ id: Date.now(), stops: [] }]);
     } catch (err) {
       console.error(err);
     } finally {
@@ -92,7 +100,7 @@ export default function RevenueCalculator() {
         <Heading as="h2" size="xl" color="orange.400" mb="2">
           Revenue Calculator
         </Heading>
-        <Text color="gray.400" mb="6">Tap stops to calculate train revenue.</Text>
+        <Text color="gray.400" mb="6">Calculate multiple trains and make operating decisions.</Text>
         
         <Box mb="6">
           <Text fontWeight="bold" mb="2">Operating Company</Text>
@@ -116,64 +124,115 @@ export default function RevenueCalculator() {
           )}
         </Box>
 
-        <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200" mb="6">
-          <Flex justify="space-between" align="center" mb="6">
-            <VStack align="start" gap="2">
-              <Flex wrap="wrap" gap="1" align="center" minH="32px">
-                {stops.length === 0 && <Text color="gray.500" fontSize="sm">No stops added yet.</Text>}
-                {stops.map((stop, index) => (
-                  <Flex key={index} align="center">
-                    <Button 
-                      size="xs" 
-                      variant="ghost" 
-                      color="orange.300"
-                      aria-label={`Remove stop ${stop}`}
-                      onClick={() => handleRemoveStop(index)}
-                      _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
-                    >
-                      {stop}
+        <VStack gap="6" align="stretch" mb="6">
+          {trains.map((train, i) => {
+            const trainTotal = train.stops.reduce((s, v) => s + v, 0);
+            return (
+              <Box key={train.id} bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200">
+                <Flex justify="space-between" align="center" mb="4">
+                  <VStack align="start" gap="2">
+                    <Heading size="md" color="white">Train {i + 1} Total: ${trainTotal}</Heading>
+                    <Flex wrap="wrap" gap="1" align="center" minH="32px">
+                      {train.stops.length === 0 && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
+                      {train.stops.map((stop, index) => (
+                        <Flex key={index} align="center">
+                          <Button 
+                            size="xs" 
+                            variant="ghost" 
+                            color="orange.300"
+                            aria-label={`Remove stop ${stop}`}
+                            onClick={() => handleRemoveStop(train.id, index)}
+                            _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+                          >
+                            {stop}
+                          </Button>
+                          {index < train.stops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
+                        </Flex>
+                      ))}
+                    </Flex>
+                  </VStack>
+                  <VStack gap="2">
+                    <Button size="xs" variant="outline" colorPalette="red" onClick={() => handleClearTrain(train.id)} disabled={train.stops.length === 0}>
+                      Clear
                     </Button>
-                    {index < stops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
-                  </Flex>
-                ))}
-              </Flex>
-              <Heading size="2xl" color="white">
-                Total: ${currentTotal} <Text as="span" fontSize="lg" color="gray.400" fontWeight="normal">({stops.length} stops)</Text>
-              </Heading>
-            </VStack>
-            <Button variant="outline" colorPalette="red" onClick={handleClear} disabled={stops.length === 0}>
-              Clear
+                    <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
+                      Copy Train
+                    </Button>
+                    {trains.length > 1 && (
+                      <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemoveTrain(train.id)}>
+                        Remove Train
+                      </Button>
+                    )}
+                  </VStack>
+                </Flex>
+
+                <SimpleGrid columns={5} gap="2">
+                  {stopValues.map(val => (
+                    <Button
+                      key={val}
+                      size="lg"
+                      color="white"
+                      variant="outline"
+                      colorPalette="gray"
+                      _hover={{ bg: 'whiteAlpha.200' }}
+                      onClick={() => handleAddStop(train.id, val)}
+                    >
+                      {val}
+                    </Button>
+                  ))}
+                </SimpleGrid>
+              </Box>
+            );
+          })}
+        </VStack>
+
+        <Button size="lg" variant="outline" colorPalette="gray" w="100%" mb="8" onClick={handleAddTrain}>
+          + Add Train
+        </Button>
+
+        <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="orange.400" mb="6">
+          <Heading size="2xl" color="orange.400" textAlign="center" mb="6">Grand Total: ${grandTotal}</Heading>
+          
+          <Text fontWeight="bold" mb="4">Revenue Per Share (Payout)</Text>
+          <Box overflowX="auto" mb="6">
+            <Table.Root size="sm" variant="line" colorScheme="gray">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>10%</Table.ColumnHeader>
+                  <Table.ColumnHeader>20%</Table.ColumnHeader>
+                  <Table.ColumnHeader>30%</Table.ColumnHeader>
+                  <Table.ColumnHeader>40%</Table.ColumnHeader>
+                  <Table.ColumnHeader>50%</Table.ColumnHeader>
+                  <Table.ColumnHeader>60%</Table.ColumnHeader>
+                  <Table.ColumnHeader>100%</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                <Table.Row>
+                  <Table.Cell>${Math.floor(grandTotal * 0.1)}</Table.Cell>
+                  <Table.Cell>${Math.floor(grandTotal * 0.2)}</Table.Cell>
+                  <Table.Cell>${Math.floor(grandTotal * 0.3)}</Table.Cell>
+                  <Table.Cell>${Math.floor(grandTotal * 0.4)}</Table.Cell>
+                  <Table.Cell>${Math.floor(grandTotal * 0.5)}</Table.Cell>
+                  <Table.Cell>${Math.floor(grandTotal * 0.6)}</Table.Cell>
+                  <Table.Cell fontWeight="bold" color="orange.300">${grandTotal}</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+            </Table.Root>
+          </Box>
+
+          <Flex gap="4" justify="center">
+            <Button size="lg" colorPalette="red" variant="outline" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('withhold')}>
+              Withhold 100%
+            </Button>
+            <Button size="lg" colorPalette="yellow" variant="outline" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('half')}>
+              Half Pay
+            </Button>
+            <Button size="lg" colorPalette="green" variant="solid" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('payout')}>
+              Pay Out 100%
             </Button>
           </Flex>
-
-          <SimpleGrid columns={5} gap="2">
-            {stopValues.map(val => (
-              <Button
-                key={val}
-                size="lg"
-                color="white"
-                variant="outline"
-                colorPalette="gray"
-                _hover={{ bg: 'whiteAlpha.200' }}
-                onClick={() => handleAddStop(val)}
-              >
-                {val}
-              </Button>
-            ))}
-          </SimpleGrid>
         </Box>
-
-        <Button 
-          size="lg" 
-          colorPalette="orange" 
-          w="100%" 
-          h="14"
-          onClick={handleSubmit}
-          disabled={!selectedCompanyId || submitting}
-          loading={submitting}
-        >
-          Submit Revenue
-        </Button>
       </Box>
     </Box>
   );
