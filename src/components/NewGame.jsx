@@ -69,6 +69,7 @@ export default function NewGame() {
                     key={game.id}
                     justifyContent="flex-start"
                     color="white"
+                    _hover={{ bg: selectedGame === game.id ? undefined : 'whiteAlpha.200' }}
                     variant={selectedGame === game.id ? "solid" : "ghost"}
                     colorPalette={selectedGame === game.id ? "orange" : "gray"}
                     onClick={() => setSelectedGame(game.id)}
@@ -114,6 +115,7 @@ export default function NewGame() {
           <Button
             size="lg"
             colorPalette="orange"
+            _disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
             w="100%"
             h="14"
             mt="4"

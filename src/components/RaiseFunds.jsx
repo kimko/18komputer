@@ -128,6 +128,7 @@ export default function RaiseFunds() {
                           flex="1"
                           minW="60px"
                           color={activeCompanies[company.shortName] === val ? "white" : "whiteAlpha.800"}
+                          _hover={{ bg: activeCompanies[company.shortName] === val ? undefined : 'whiteAlpha.200' }}
                           colorPalette={activeCompanies[company.shortName] === val ? "orange" : "gray"}
                           variant={activeCompanies[company.shortName] === val ? "solid" : "outline"}
                           onClick={() => updateParValue(company.shortName, val)}
