@@ -164,7 +164,7 @@ export default function RevenueCalculator() {
           )}
         </Box>
 
-        <VStack gap="6" align="stretch" mb="8">
+        <VStack gap="3" align="stretch" mb="4">
           {trains.map((train, i) => {
             const stopsSum = train.stops.reduce((s, v) => s + v, 0);
             const bonusSum = (train.bonusStops || []).reduce((s, b) => s + b.val, 0);
@@ -174,7 +174,7 @@ export default function RevenueCalculator() {
               <Box 
                 key={train.id} 
                 bg="gray.800" 
-                p="6" 
+                p="3" 
                 borderRadius="md" 
                 border="1px solid" 
                 borderColor={train.isExcluded ? "gray.600" : "whiteAlpha.200"}
@@ -276,7 +276,7 @@ export default function RevenueCalculator() {
           })}
         </VStack>
 
-        <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="orange.400" mb="6">
+        <Box bg="gray.800" p="3" borderRadius="md" border="1px solid" borderColor="orange.400" mb="2">
           <Heading size="2xl" color="orange.400" textAlign="center" mb="6">Grand Total: ${grandTotal}</Heading>
           
           <Flex justify="space-between" align="center" mb="4">
