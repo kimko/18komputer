@@ -53,7 +53,7 @@ export default function NewGame() {
               <Heading as="h2" size="xl" color="teal.400">
                 New Game
               </Heading>
-              <IconButton variant="ghost" colorPalette="gray" size="sm" aria-label="Close" onClick={() => navigate('/')}>
+              <IconButton variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" aria-label="Close" onClick={() => navigate('/')}>
                 ✕
               </IconButton>
             </Flex>
