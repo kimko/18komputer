@@ -1,0 +1,97 @@
+{
+  "name": "1880: China",
+  "bggId": 69601,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Jingha Railway",
+      "shortName": "JHA",
+      "color": "#ba6128"
+    },
+    {
+      "name": "Jinghu Railway",
+      "shortName": "JHU",
+      "color": "#000000"
+    },
+    {
+      "name": "Jingguang Railway",
+      "shortName": "JGG",
+      "color": "#534074"
+    },
+    {
+      "name": "Jinglan Railway",
+      "shortName": "JLR",
+      "color": "#008a8b"
+    },
+    {
+      "name": "Binzhou Railway",
+      "shortName": "BZU",
+      "color": "#9d8359"
+    },
+    {
+      "name": "Longhai Railway",
+      "shortName": "LHR",
+      "color": "#004294"
+    },
+    {
+      "name": "Schichang Railway",
+      "shortName": "SCR",
+      "color": "#282f1a"
+    },
+    {
+      "name": "Chengkun Railway",
+      "shortName": "CKR",
+      "color": "#507eae"
+    },
+    {
+      "name": "Baocheng Railway",
+      "shortName": "BCR",
+      "color": "#94121d"
+    },
+    {
+      "name": "Ningxi Railway",
+      "shortName": "NXR",
+      "color": "#a83b5b"
+    },
+    {
+      "name": "Hukun Railway",
+      "shortName": "HKR",
+      "color": "#40743a"
+    },
+    {
+      "name": "Nanjiang Railway",
+      "shortName": "NJR",
+      "color": "#452518"
+    },
+    {
+      "name": "Qinshen Railway",
+      "shortName": "QSR",
+      "color": "#b3932c"
+    },
+    {
+      "name": "Wunan Railway",
+      "shortName": "WNR",
+      "color": "#a4391f"
+    }
+  ],
+  "id": "1880"
+}

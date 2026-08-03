@@ -1,0 +1,102 @@
+{
+  "name": "18RoyalGorge: The Rails of Fremont County",
+  "bggId": 381671,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    60,
+    65,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    130,
+    145,
+    160,
+    180
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Denver & Rio Grande Western",
+      "shortName": "RG",
+      "color": "#cc0000"
+    },
+    {
+      "name": "Santa Fe Railroad",
+      "shortName": "SF",
+      "color": "#6b2fa0"
+    },
+    {
+      "name": "Kansas Pacific Railway",
+      "shortName": "KP",
+      "color": "#808080"
+    },
+    {
+      "name": "Denver, South Park & Pacific Railroad",
+      "shortName": "SPP",
+      "color": "#ff8800"
+    },
+    {
+      "name": "Pueblo and Arkansas Valley Railroad",
+      "shortName": "PAV",
+      "color": "#0066cc"
+    },
+    {
+      "name": "Denver & New Orleans",
+      "shortName": "NO",
+      "color": "#1a1a1a"
+    },
+    {
+      "name": "Colorado Midland Railway",
+      "shortName": "CM",
+      "color": "#009933"
+    },
+    {
+      "name": "Silverton Railway",
+      "shortName": "S",
+      "color": "#e0e0e0"
+    },
+    {
+      "name": "Florence & Cripple Creek Railroad",
+      "shortName": "FCC",
+      "color": "#d4af00"
+    },
+    {
+      "name": "Colorado Springs & Cripple Creek District",
+      "shortName": "CSCC",
+      "color": "#2d8659"
+    },
+    {
+      "name": "Colorado & Southern",
+      "shortName": "CS",
+      "color": "#333333"
+    },
+    {
+      "name": "Colorado Fuel & Iron",
+      "shortName": "CF&I",
+      "color": "#666666"
+    },
+    {
+      "name": "Victor Gold Company",
+      "shortName": "VGC",
+      "color": "#c89b3c"
+    }
+  ],
+  "id": "18RoyalGorge"
+}

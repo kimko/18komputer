@@ -1,0 +1,101 @@
+{
+  "name": "18SJ: Railways in the Frozen North",
+  "bggId": 328237,
+  "maxOr": 3,
+  "revenueStops": [
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    90
+  ],
+  "parValues": [
+    67,
+    71,
+    76,
+    82,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Swedish-Norwegian Railroad Company",
+      "shortName": "SNJ",
+      "color": "#0f2e53"
+    },
+    {
+      "name": "Kil-Fryksdalen Järnväg",
+      "shortName": "KFJ",
+      "color": "#89877b"
+    },
+    {
+      "name": "Uppsala-Gävle Järnväg",
+      "shortName": "UGJ",
+      "color": "#ce8096"
+    },
+    {
+      "name": "Örebro-Köpings Järnvägsaktiebolag",
+      "shortName": "ÖKJ",
+      "color": "#553d5a"
+    },
+    {
+      "name": "Bergslagernas Järnvägar AB",
+      "shortName": "BJ",
+      "color": "#653916"
+    },
+    {
+      "name": "Stockholm-Västerås-Bergslagens Järnvägar",
+      "shortName": "SWB",
+      "color": "#16360f"
+    },
+    {
+      "name": "Mellersta Östergötlands Järnvägar",
+      "shortName": "MÖJ",
+      "color": "#448db3"
+    },
+    {
+      "name": "Malmö-Ystads Järnväg",
+      "shortName": "MYJ",
+      "color": "#dac928"
+    },
+    {
+      "name": "Östra Skånes Järnvägsaktiebolag",
+      "shortName": "ÖSJ",
+      "color": "#c1171a"
+    },
+    {
+      "name": "Sundsvall-Torphammars Järnväg",
+      "shortName": "STJ",
+      "color": "#000000"
+    },
+    {
+      "name": "Trafikaktiebolaget Grängesberg-Oxelösunds Järnvägar",
+      "shortName": "TGOJ",
+      "color": "#c4753f"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "Norr-Söder",
+      "adds": [
+        100
+      ]
+    },
+    {
+      "label": "Öst-Väst",
+      "adds": [
+        120
+      ]
+    },
+    {
+      "label": "Ore mine",
+      "adds": [
+        50
+      ]
+    }
+  ],
+  "id": "18SJ"
+}

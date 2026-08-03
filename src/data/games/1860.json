@@ -1,0 +1,60 @@
+{
+  "name": "1860: Railways of the Isle of Wight",
+  "bggId": 12750,
+  "maxOr": 4,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60
+  ],
+  "parValues": [],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Cowes & Newport",
+      "shortName": "C&N",
+      "color": "#477faa"
+    },
+    {
+      "name": "Isle Of Wight",
+      "shortName": "IOW",
+      "color": "#c4342d"
+    },
+    {
+      "name": "Isle of Wight, Newport Junction",
+      "shortName": "IWNJ",
+      "color": "#000000"
+    },
+    {
+      "name": "Freshwater, Yarmouth & Newport",
+      "shortName": "FYN",
+      "color": "#005221"
+    },
+    {
+      "name": "Brading Harbour Improvement & Railway",
+      "shortName": "BHI&R",
+      "color": "#710070"
+    },
+    {
+      "name": "Newport, Godshill & St. Lawrence",
+      "shortName": "NGStL",
+      "color": "#ffce00"
+    },
+    {
+      "name": "Shanklin & Chale",
+      "shortName": "S&C",
+      "color": "#452665"
+    },
+    {
+      "name": "Ventor, Yarmouth & South Coast",
+      "shortName": "VYSC",
+      "color": "#8cc140"
+    }
+  ],
+  "id": "1860"
+}

@@ -1,0 +1,53 @@
+{
+  "name": "18CZ: The Railway Comes To Czech Lands (Moravia-Silesia)",
+  "bggId": 163841,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Bayrische Staatsbahn",
+      "shortName": "By",
+      "color": "#31639c"
+    },
+    {
+      "name": "kk Staatsbahn",
+      "shortName": "kk",
+      "color": "#d9863a"
+    },
+    {
+      "name": "Preußische Eisenbahn",
+      "shortName": "Pr",
+      "color": "#000000"
+    },
+    {
+      "name": "Sächsische Eisenbahn",
+      "shortName": "Sx",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Ungarische Staatsbahn",
+      "shortName": "Ug",
+      "color": "#562f7e"
+    }
+  ],
+  "id": "18CZ_ms"
+}

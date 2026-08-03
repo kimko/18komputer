@@ -1,0 +1,193 @@
+{
+  "name": "1822PNW: The Railways of the Pacific Northwest",
+  "bggId": 360242,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    140,
+    160
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    1,
+    0
+  ],
+  "companies": [
+    {
+      "name": "Northern Pacific Railway",
+      "shortName": "NP",
+      "color": "#221e20"
+    },
+    {
+      "name": "Canadian Pacific Railway",
+      "shortName": "CPR",
+      "color": "#ef1d24"
+    },
+    {
+      "name": "Great Northern Railway",
+      "shortName": "GNR",
+      "color": "#6bcff7"
+    },
+    {
+      "name": "Oregon Railroad and Navigation Company",
+      "shortName": "ORNC",
+      "color": "#3078c1"
+    },
+    {
+      "name": "Spokane, Portland, and Seattle Railway",
+      "shortName": "SPS",
+      "color": "#8d061b"
+    },
+    {
+      "name": "Chicago, Milwaukee and Puget Sound",
+      "shortName": "CMPS",
+      "color": "#f69b1d"
+    },
+    {
+      "name": "Seattle and Walla Walla Railroad",
+      "shortName": "SWW",
+      "color": "#238541"
+    },
+    {
+      "name": "Pacific Great Eastern Railway",
+      "shortName": "1",
+      "color": "#ef1d24"
+    },
+    {
+      "name": "Spokane & British Columbia Railway",
+      "shortName": "2",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Bellingham Bay & British Columbia Railroad",
+      "shortName": "3",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Brewster & Davenport Railroad",
+      "shortName": "4",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Idaho & Washington Northern Railway",
+      "shortName": "5",
+      "color": "#6bcff7"
+    },
+    {
+      "name": "Port Townsend and Southern Railroad",
+      "shortName": "6",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Spokane Falls and Northern Railway",
+      "shortName": "7",
+      "color": "#f69b1d"
+    },
+    {
+      "name": "Puget Sound Shore Railroad",
+      "shortName": "8",
+      "color": "#238541"
+    },
+    {
+      "name": "Wenatchee Valley Railroad",
+      "shortName": "9",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Tacoma, Olympia and Grays Harbor Railroad Company",
+      "shortName": "10",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Aberdeen & Oakville Railroad",
+      "shortName": "11",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Connell Northern Railway Company",
+      "shortName": "12",
+      "color": "#ffffff"
+    },
+    {
+      "name": "North Yakima Valley Railroad",
+      "shortName": "13",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Camas Prairie Railroad",
+      "shortName": "14",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Ilwaco Railroad Company",
+      "shortName": "15",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Astoria and Columbia River Railroad Company",
+      "shortName": "16",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Oregon Central Railroad",
+      "shortName": "17",
+      "color": "#8d061b"
+    },
+    {
+      "name": "Portland and Willamette Valley Railway",
+      "shortName": "18",
+      "color": "#3078c1"
+    },
+    {
+      "name": "Cascade Portage Railway",
+      "shortName": "19",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Walla Walla Valley Railway",
+      "shortName": "20",
+      "color": "#221e20"
+    },
+    {
+      "name": "The Great Southern Railroad",
+      "shortName": "21",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Calgary Regional Railway",
+      "shortName": "A",
+      "color": "#808080"
+    },
+    {
+      "name": "Tacoma Regional Railway",
+      "shortName": "B",
+      "color": "#808080"
+    },
+    {
+      "name": "Vancouver Regional Railway",
+      "shortName": "C",
+      "color": "#808080"
+    }
+  ],
+  "id": "1822PNW"
+}

@@ -1,0 +1,131 @@
+{
+  "name": "18Ireland",
+  "bggId": 196217,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60
+  ],
+  "parValues": [
+    50,
+    60,
+    70,
+    85,
+    100
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Cork, Bandon & South Coast Railway",
+      "shortName": "CBSCR",
+      "color": "#804000"
+    },
+    {
+      "name": "Dublin & South Eastern Railway",
+      "shortName": "DSER",
+      "color": "#111111"
+    },
+    {
+      "name": "Great Northern Railway (Ireland)",
+      "shortName": "GNRI",
+      "color": "#81bae7"
+    },
+    {
+      "name": "Great Southern & Western Railway",
+      "shortName": "GSWR",
+      "color": "#ff0025"
+    },
+    {
+      "name": "Midland Great Western Railway",
+      "shortName": "MGWR",
+      "color": "#63b521"
+    },
+    {
+      "name": "Midland Railway Northern Counties Committee",
+      "shortName": "MRNCC",
+      "color": "#ca5262"
+    },
+    {
+      "name": "Waterford, Limerick & Western Railway",
+      "shortName": "MLWR",
+      "color": "#ffff00"
+    },
+    {
+      "name": "Cork, Blackrock & Passage Railway",
+      "shortName": "CBPR",
+      "color": "#000000"
+    },
+    {
+      "name": "Central Ireland Railway",
+      "shortName": "CIR",
+      "color": "#4a5d0a"
+    },
+    {
+      "name": "Dublin & Drogheda Railway",
+      "shortName": "DDR",
+      "color": "#a5ca2b"
+    },
+    {
+      "name": "Dundalk & Enniskillen Railway",
+      "shortName": "DER",
+      "color": "#ffcecb"
+    },
+    {
+      "name": "Dublin & Kingstown Railway",
+      "shortName": "DKR",
+      "color": "#7f0e7e"
+    },
+    {
+      "name": "Enniskillen, Bundoran & Sligo Railway",
+      "shortName": "EBSR",
+      "color": "#c0c061"
+    },
+    {
+      "name": "Grand Junction Railway",
+      "shortName": "GJR",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Great Northern & Western Railway",
+      "shortName": "GNWR",
+      "color": "#706498"
+    },
+    {
+      "name": "Kilkenny Junction Railway",
+      "shortName": "KJR",
+      "color": "#9d7469"
+    },
+    {
+      "name": "Londonderry & Enniskillen Railway",
+      "shortName": "LER",
+      "color": "#7e5945"
+    },
+    {
+      "name": "Sligo, Leitrim & Northern Counties Railway",
+      "shortName": "SLNCR",
+      "color": "#a1a4a3"
+    },
+    {
+      "name": "Ulster Railway",
+      "shortName": "UR",
+      "color": "#fc9303"
+    },
+    {
+      "name": "Waterford & Limerick Railway",
+      "shortName": "WLR",
+      "color": "#ff9c40"
+    },
+    {
+      "name": "Waterford & Kilkenny Railway",
+      "shortName": "WKR",
+      "color": "#8bb9dd"
+    }
+  ],
+  "id": "18ireland"
+}

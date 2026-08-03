@@ -1,0 +1,157 @@
+{
+  "name": "18España",
+  "bggId": 413525,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100
+  ],
+  "corporateStructures": [
+    0,
+    1
+  ],
+  "companies": [
+    {
+      "name": "Compañía de los Caminos de Hierro del Norte de España",
+      "shortName": "N",
+      "color": "#c29137"
+    },
+    {
+      "name": "Compañía de los ferrocarriles de Madrid a Zaragoza y Alicante",
+      "shortName": "MZA",
+      "color": "#ffd526"
+    },
+    {
+      "name": "Compañía de los Ferrocarriles Andaluces",
+      "shortName": "A",
+      "color": "#b75835"
+    },
+    {
+      "name": "Compañía de los Caminos de Hierro de Ciudad Real a Badajoz",
+      "shortName": "CRB",
+      "color": "#e96b28"
+    },
+    {
+      "name": "Compañía de los ferrocarriles de Madrid a Cáceres y Portugal",
+      "shortName": "MCP",
+      "color": "#009ad5"
+    },
+    {
+      "name": "Compañía de los Ferrocarriles de Zaragoza a Pamplona y Barcelona",
+      "shortName": "ZPB",
+      "color": "#da0a26"
+    },
+    {
+      "name": "Ferrocarril de Santander a Bilbao",
+      "shortName": "FdSB",
+      "color": "#009ad5"
+    },
+    {
+      "name": "Compañía de los Ferrocarriles Económicos de Asturias",
+      "shortName": "CFEA",
+      "color": "#e96b28"
+    },
+    {
+      "name": "Compañía del Ferrocarril de Langreo en Asturias",
+      "shortName": "CFLG",
+      "color": "#da0a26"
+    },
+    {
+      "name": "Ferrocarril de La Robla",
+      "shortName": "FdLR",
+      "color": "#009141"
+    },
+    {
+      "name": "Ferrocarril de Mérida a Sevilla",
+      "shortName": "MS",
+      "color": "#7dcce5"
+    },
+    {
+      "name": "Compañía del Ferrocarril de Córdoba a Málaga",
+      "shortName": "CM",
+      "color": "#009141"
+    },
+    {
+      "name": "Compañía del Ferrocarril de Sevilla a Jerez y de Puerto Real a Cádiz",
+      "shortName": "SC",
+      "color": "#fff014"
+    },
+    {
+      "name": "Ferrocarril de Albacete a Cartagena",
+      "shortName": "AC",
+      "color": "#b75835"
+    },
+    {
+      "name": "Ferrocarril de Madrid a Zaragoza",
+      "shortName": "MZ",
+      "color": "#7e7f7e"
+    },
+    {
+      "name": "Compañía del Ferrocarril de Zaragoza a Pamplona",
+      "shortName": "ZP",
+      "color": "#d90072"
+    },
+    {
+      "name": "Sociedad General de Ferrocarriles Vasco Asturiana",
+      "shortName": "SFVA",
+      "color": "#ad539b"
+    },
+    {
+      "name": "Ferrocarril del Cantábrico",
+      "shortName": "FdC",
+      "color": "#f78243"
+    },
+    {
+      "name": "Great Southern of Spain Railway Company Limited",
+      "shortName": "GSSR",
+      "color": "#6d1d7d"
+    },
+    {
+      "name": "Sociedad de los Ferrocarriles de Almansa a Valencia y Tarragona",
+      "shortName": "AVT",
+      "color": "#000000"
+    },
+    {
+      "name": "Compañía de los Ferrocarriles de Tarragona a Barcelona y Francia",
+      "shortName": "TBF",
+      "color": "#338242"
+    },
+    {
+      "name": "Compañía de los Caminos de Hierro del Sur de España",
+      "shortName": "CSE",
+      "color": "#f5b776"
+    },
+    {
+      "name": "Ferrocarril de Madrid a Hendaya",
+      "shortName": "MH",
+      "color": "#f9d4fa"
+    },
+    {
+      "name": "Compañía del Ferrocarril Central de Aragón",
+      "shortName": "CA",
+      "color": "#eaf7b0"
+    }
+  ],
+  "id": "18Espania"
+}

@@ -1,0 +1,155 @@
+{
+  "name": "18Korea",
+  "bggId": 346248,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90
+  ],
+  "parValues": [
+    60,
+    65,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    130,
+    145,
+    160,
+    180,
+    200
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Seoul Railway",
+      "shortName": "SR",
+      "color": "#e7646a"
+    },
+    {
+      "name": "Incheon Railway",
+      "shortName": "IR",
+      "color": "#eb8d5a"
+    },
+    {
+      "name": "Wonju Railway",
+      "shortName": "WJR",
+      "color": "#f5e44c"
+    },
+    {
+      "name": "Gangneung Railway",
+      "shortName": "GNR",
+      "color": "#9aea4d"
+    },
+    {
+      "name": "Daejeon Railway",
+      "shortName": "DJR",
+      "color": "#2cd75f"
+    },
+    {
+      "name": "Andong Railway",
+      "shortName": "AR",
+      "color": "#30ddfa"
+    },
+    {
+      "name": "Busan Railway",
+      "shortName": "BR",
+      "color": "#286be9"
+    },
+    {
+      "name": "Daegu Railway",
+      "shortName": "DR",
+      "color": "#413b94"
+    },
+    {
+      "name": "Gwangju Railway",
+      "shortName": "GJR",
+      "color": "#6f79ee"
+    },
+    {
+      "name": "Gusan Railway",
+      "shortName": "GR",
+      "color": "#253242"
+    },
+    {
+      "name": "Jinju Railway",
+      "shortName": "JR",
+      "color": "#4b68a3"
+    },
+    {
+      "name": "Changwon Railway",
+      "shortName": "CWR",
+      "color": "#e72193"
+    },
+    {
+      "name": "Rason Railway",
+      "shortName": "RR",
+      "color": "#e7646a"
+    },
+    {
+      "name": "Chōngjin Railway",
+      "shortName": "CJR",
+      "color": "#eb8d5a"
+    },
+    {
+      "name": "Hyesan Railway",
+      "shortName": "HJ",
+      "color": "#f5e44c"
+    },
+    {
+      "name": "Manpho Railway",
+      "shortName": "MR",
+      "color": "#9aea4d"
+    },
+    {
+      "name": "Tanchōn Railway",
+      "shortName": "TR",
+      "color": "#2cd75f"
+    },
+    {
+      "name": "Kaechon Railway",
+      "shortName": "KCR",
+      "color": "#30ddfa"
+    },
+    {
+      "name": "Hamhūng Railway",
+      "shortName": "HHR",
+      "color": "#286be9"
+    },
+    {
+      "name": "Wonsan Railway",
+      "shortName": "WSR",
+      "color": "#413b94"
+    },
+    {
+      "name": "Pyongyang Railway",
+      "shortName": "PYR",
+      "color": "#6f79ee"
+    },
+    {
+      "name": "Nampho Railway",
+      "shortName": "NR",
+      "color": "#253242"
+    },
+    {
+      "name": "Kaesong Railway",
+      "shortName": "KSR",
+      "color": "#4b68a3"
+    },
+    {
+      "name": "Sinuiju Railway",
+      "shortName": "SJR",
+      "color": "#e72193"
+    }
+  ],
+  "id": "18Korea"
+}

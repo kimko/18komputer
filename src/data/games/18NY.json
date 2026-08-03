@@ -1,0 +1,133 @@
+{
+  "name": "18NY: The Formation of the New York Central Railroad",
+  "bggId": 116046,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "companies": [
+    {
+      "name": "Delaware & Hudson Railroad",
+      "shortName": "D&H",
+      "color": "#2e3192"
+    },
+    {
+      "name": "Rome, Watertown & Ogdensburg Railroad",
+      "shortName": "RWO",
+      "color": "#07733d"
+    },
+    {
+      "name": "New York & Harlem Railroad",
+      "shortName": "NY&H",
+      "color": "#8c4776"
+    },
+    {
+      "name": "New York, New Haven & Hartford Railroad",
+      "shortName": "NH",
+      "color": "#e96b21"
+    },
+    {
+      "name": "Erie Railroad",
+      "shortName": "ERIE",
+      "color": "#fff200"
+    },
+    {
+      "name": "Boston & Albany Railroad",
+      "shortName": "B&A",
+      "color": "#e21f27"
+    },
+    {
+      "name": "Hudson River Railroad",
+      "shortName": "HR",
+      "color": "#8dd8f8"
+    },
+    {
+      "name": "New York Central Railroad",
+      "shortName": "NYC",
+      "color": "#231f20"
+    },
+    {
+      "name": "Mohawk & Hudson",
+      "shortName": "1",
+      "color": "#000000"
+    },
+    {
+      "name": "Utica & Schenectady",
+      "shortName": "2",
+      "color": "#000000"
+    },
+    {
+      "name": "Tonawanda",
+      "shortName": "3",
+      "color": "#000000"
+    },
+    {
+      "name": "Syracuse & Utica",
+      "shortName": "4",
+      "color": "#000000"
+    },
+    {
+      "name": "Auburn & Rochester",
+      "shortName": "5",
+      "color": "#000000"
+    },
+    {
+      "name": "Attica & Buffalo",
+      "shortName": "6",
+      "color": "#000000"
+    },
+    {
+      "name": "Schenectady & Troy",
+      "shortName": "7",
+      "color": "#000000"
+    },
+    {
+      "name": "Rochester, Lockport & Niagara Falls",
+      "shortName": "8",
+      "color": "#000000"
+    },
+    {
+      "name": "Buffalo & Lockport",
+      "shortName": "9",
+      "color": "#000000"
+    },
+    {
+      "name": "Rochester & Syracuse",
+      "shortName": "10",
+      "color": "#000000"
+    },
+    {
+      "name": "Buffalo & Rochester",
+      "shortName": "11",
+      "color": "#000000"
+    }
+  ],
+  "id": "18NY"
+}

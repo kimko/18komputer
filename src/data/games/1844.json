@@ -1,0 +1,104 @@
+{
+  "name": "1844: Schweiz",
+  "bggId": 183308,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90
+  ],
+  "parValues": [
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Appenzeller Bahn",
+      "shortName": "AB",
+      "color": "#606672"
+    },
+    {
+      "name": "Bern-Lötschberg-Simplon",
+      "shortName": "BLS",
+      "color": "#a6d608"
+    },
+    {
+      "name": "Ferrovie Nord Milano",
+      "shortName": "FNM",
+      "color": "#00853e"
+    },
+    {
+      "name": "Montreux-Oberland Bernois",
+      "shortName": "MOB",
+      "color": "#ffce00"
+    },
+    {
+      "name": "Rhätische Bahn",
+      "shortName": "RhB",
+      "color": "#e71837"
+    },
+    {
+      "name": "Sensetalbahn",
+      "shortName": "STB",
+      "color": "#0736a4"
+    },
+    {
+      "name": "Chur-Arosa",
+      "shortName": "ChA",
+      "color": "#02193c"
+    },
+    {
+      "name": "Jura-Neuchatel",
+      "shortName": "JN",
+      "color": "#106b21"
+    },
+    {
+      "name": "Visp-Zermatt",
+      "shortName": "VZ",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Schweizer Bundersbahnen",
+      "shortName": "SBB",
+      "color": "#c62033"
+    },
+    {
+      "name": "Gotthardbahn",
+      "shortName": "GB",
+      "color": "#d9e650"
+    },
+    {
+      "name": "Jura-Simplon",
+      "shortName": "JS",
+      "color": "#edece6"
+    },
+    {
+      "name": "Schweizerische Nordostbahn",
+      "shortName": "NOB",
+      "color": "#27357e"
+    },
+    {
+      "name": "Schweizerische Centralbahn",
+      "shortName": "SCB",
+      "color": "#563776"
+    },
+    {
+      "name": "Vereinigte Schweizer Bahnen",
+      "shortName": "VSB",
+      "color": "#196227"
+    }
+  ],
+  "id": "1844"
+}

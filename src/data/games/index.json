@@ -1,0 +1,352 @@
+[
+  {
+    "id": "1817",
+    "name": "1817",
+    "bggId": 63170
+  },
+  {
+    "id": "1817_modern_trains",
+    "name": "1817 (Modern trains)",
+    "bggId": 63170
+  },
+  {
+    "id": "1822",
+    "name": "1822: The Railways of Great Britain",
+    "bggId": 193867
+  },
+  {
+    "id": "1822CA",
+    "name": "1822CA: The Railways of Canada",
+    "bggId": 253607
+  },
+  {
+    "id": "1822MX",
+    "name": "1822MX",
+    "bggId": 277538
+  },
+  {
+    "id": "1822PNW",
+    "name": "1822PNW: The Railways of the Pacific Northwest",
+    "bggId": 360242
+  },
+  {
+    "id": "1822_MRS",
+    "name": "1822: The Railways of Great Britain (Medium Regional Scenario)",
+    "bggId": 193867
+  },
+  {
+    "id": "1822_MRS_sp",
+    "name": "1822: The Railways of Great Britain (Medium Regional Scenario) (Southwest Peninsula)",
+    "bggId": 193867
+  },
+  {
+    "id": "1822_NRS",
+    "name": "1822: The Railways of Great Britain (Northern Regional Scenario)",
+    "bggId": 193867
+  },
+  {
+    "id": "1822__",
+    "name": "1822: The Railways of Great Britain (1822+)",
+    "bggId": 193867
+  },
+  {
+    "id": "1824",
+    "name": "1824: Austrian-Hungarian Railway",
+    "bggId": 277030
+  },
+  {
+    "id": "1824_2p",
+    "name": "1824: Austrian-Hungarian Railway (Cisleithania - 2p)",
+    "bggId": 277030
+  },
+  {
+    "id": "1824_3p",
+    "name": "1824: Austrian-Hungarian Railway (Cisleithania - 3p)",
+    "bggId": 277030
+  },
+  {
+    "id": "1830",
+    "name": "1830: Railways & Robber Barons",
+    "bggId": 421
+  },
+  {
+    "id": "1832",
+    "name": "1832: The South",
+    "bggId": 23421
+  },
+  {
+    "id": "1835",
+    "name": "1835: Railways of Germany",
+    "bggId": 422
+  },
+  {
+    "id": "1840",
+    "name": "1840: Vienna Tramways",
+    "bggId": 300127
+  },
+  {
+    "id": "1840_2p",
+    "name": "1840: Vienna Tramways (2P)",
+    "bggId": 300127
+  },
+  {
+    "id": "1840_3p",
+    "name": "1840: Vienna Tramways (3P)",
+    "bggId": 300127
+  },
+  {
+    "id": "1844",
+    "name": "1844: Schweiz",
+    "bggId": 183308
+  },
+  {
+    "id": "1846",
+    "name": "1846: The Race for the Midwest",
+    "bggId": 17405
+  },
+  {
+    "id": "1846_me",
+    "name": "1846: The Race for the Midwest (Mini expansion)",
+    "bggId": 17405
+  },
+  {
+    "id": "1848",
+    "name": "1848: Australia",
+    "bggId": 32424
+  },
+  {
+    "id": "1848_3p",
+    "name": "1848: Australia (3 player)",
+    "bggId": 32424
+  },
+  {
+    "id": "1849",
+    "name": "1849: The Game of Sicilian Railways",
+    "bggId": 3097
+  },
+  {
+    "id": "1849_bonds",
+    "name": "1849: The Game of Sicilian Railways (Bonds)",
+    "bggId": 3097
+  },
+  {
+    "id": "1849_etrain",
+    "name": "1849: The Game of Sicilian Railways (E trains & Bonds)",
+    "bggId": 3097
+  },
+  {
+    "id": "1854",
+    "name": "1854: Austria",
+    "bggId": 183308
+  },
+  {
+    "id": "1860",
+    "name": "1860: Railways of the Isle of Wight",
+    "bggId": 12750
+  },
+  {
+    "id": "1861",
+    "name": "1861: The Railways of the Russian Empire",
+    "bggId": 23817
+  },
+  {
+    "id": "1861_2p",
+    "name": "1861: The Railways of the Russian Empire (2 player)",
+    "bggId": 23817
+  },
+  {
+    "id": "1862",
+    "name": "1862: Railway Mania in the Eastern Counties",
+    "bggId": 66837
+  },
+  {
+    "id": "1867",
+    "name": "1867: The Railways of Canada",
+    "bggId": 184524
+  },
+  {
+    "id": "1880",
+    "name": "1880: China",
+    "bggId": 69601
+  },
+  {
+    "id": "1882",
+    "name": "1882: Assiniboia",
+    "bggId": 282435
+  },
+  {
+    "id": "1888N",
+    "name": "1888-N: The Railways of Northern China",
+    "bggId": 359232
+  },
+  {
+    "id": "1889",
+    "name": "1889: History of Shikoku Railways",
+    "bggId": 23540
+  },
+  {
+    "id": "1899Daihan",
+    "name": "1899 DAIHAN",
+    "bggId": 428264
+  },
+  {
+    "id": "18CZ",
+    "name": "18CZ: The Railway Comes To Czech Lands",
+    "bggId": 163841
+  },
+  {
+    "id": "18CZ_bohemia",
+    "name": "18CZ: The Railway Comes To Czech Lands (Bohemia)",
+    "bggId": 163841
+  },
+  {
+    "id": "18CZ_ms",
+    "name": "18CZ: The Railway Comes To Czech Lands (Moravia-Silesia)",
+    "bggId": 163841
+  },
+  {
+    "id": "18Chesapeake",
+    "name": "18Chesapeake",
+    "bggId": 253608
+  },
+  {
+    "id": "18Chesapeake_rails",
+    "name": "18Chesapeake (Off the Rails)",
+    "bggId": 253608
+  },
+  {
+    "id": "18Cuba",
+    "name": "18Cuba",
+    "bggId": 355736
+  },
+  {
+    "id": "18DO",
+    "name": "18DO: Dortmund",
+    "bggId": 238957
+  },
+  {
+    "id": "18EU",
+    "name": "18EU",
+    "bggId": 5684
+  },
+  {
+    "id": "18Espania",
+    "name": "18España",
+    "bggId": 413525
+  },
+  {
+    "id": "18FL",
+    "name": "18FL",
+    "bggId": 21436
+  },
+  {
+    "id": "18GA",
+    "name": "18GA",
+    "bggId": 2583
+  },
+  {
+    "id": "18GB",
+    "name": "18GB: The Railways of Great Britain",
+    "bggId": 245532
+  },
+  {
+    "id": "18Hiawatha",
+    "name": "18 Hiawatha",
+    "bggId": 343142
+  },
+  {
+    "id": "18Hiawatha_np",
+    "name": "18 Hiawatha (No privates)",
+    "bggId": 343142
+  },
+  {
+    "id": "18IN",
+    "name": "18IN: Railways Across Indiana",
+    "bggId": 273586
+  },
+  {
+    "id": "18Korea",
+    "name": "18Korea",
+    "bggId": 346248
+  },
+  {
+    "id": "18MEX",
+    "name": "18MEX",
+    "bggId": 18485
+  },
+  {
+    "id": "18MS",
+    "name": "18MS: The Railroads Come to Mississippi",
+    "bggId": 313129
+  },
+  {
+    "id": "18Milwaukee",
+    "name": "18 Milwaukee",
+    "bggId": 343143
+  },
+  {
+    "id": "18NY",
+    "name": "18NY: The Formation of the New York Central Railroad",
+    "bggId": 116046
+  },
+  {
+    "id": "18NewEngland",
+    "name": "18NewEngland",
+    "bggId": 286205
+  },
+  {
+    "id": "18RoyalGorge",
+    "name": "18RoyalGorge: The Rails of Fremont County",
+    "bggId": 381671
+  },
+  {
+    "id": "18SJ",
+    "name": "18SJ: Railways in the Frozen North",
+    "bggId": 328237
+  },
+  {
+    "id": "18Texas",
+    "name": "18Texas",
+    "bggId": 407694
+  },
+  {
+    "id": "18USA",
+    "name": "18USA",
+    "bggId": 219717
+  },
+  {
+    "id": "18West",
+    "name": "18West: Rails to the Pacific",
+    "bggId": 30771
+  },
+  {
+    "id": "18ireland",
+    "name": "18Ireland",
+    "bggId": 196217
+  },
+  {
+    "id": "21Moon",
+    "name": "21Moon: Moon Truckin",
+    "bggId": 381869
+  },
+  {
+    "id": "21Moon_2p",
+    "name": "21Moon: Moon Truckin",
+    "bggId": 381869
+  },
+  {
+    "id": "Harzbahn1873",
+    "name": "Harzbahn 1873",
+    "bggId": 28944
+  },
+  {
+    "id": "RailwaysLostAtlas",
+    "name": "Railways of the Lost Atlas",
+    "bggId": 365357
+  },
+  {
+    "id": "TheHiawathas",
+    "name": "The Hiawathas",
+    "bggId": 343144
+  }
+]

@@ -1,0 +1,189 @@
+{
+  "name": "1822MX",
+  "bggId": 277538,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    80,
+    100
+  ],
+  "parValues": [
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    2
+  ],
+  "companies": [
+    {
+      "name": "Chihuahua-Pacific Railway",
+      "shortName": "CHP",
+      "color": "#ff9999"
+    },
+    {
+      "name": "Ferrocarril Mexicano",
+      "shortName": "FCM",
+      "color": "#e60000"
+    },
+    {
+      "name": "Ferrocarril del Pacifico",
+      "shortName": "FCP",
+      "color": "#ffe700"
+    },
+    {
+      "name": "Ferrocarriles Nacionales de México",
+      "shortName": "FNM",
+      "color": "#660066"
+    },
+    {
+      "name": "Interoceanic Railway of Mexico",
+      "shortName": "IRM",
+      "color": "#6e99c3"
+    },
+    {
+      "name": "Mexican Central Railway",
+      "shortName": "MC",
+      "color": "#000000"
+    },
+    {
+      "name": "Mexican International Railroad",
+      "shortName": "MIR",
+      "color": "#f09331"
+    },
+    {
+      "name": "Ferrocarril Sonora-Baja California",
+      "shortName": "M1",
+      "color": "#999999"
+    },
+    {
+      "name": "Rio Grande, Sierra Madre & Pacific Railway",
+      "shortName": "M2",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Nacozari",
+      "shortName": "M3",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Parral y Durango",
+      "shortName": "M4",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Coahulia y Zacatecas",
+      "shortName": "M5",
+      "color": "#999999"
+    },
+    {
+      "name": "Sianola and Durango Railroad",
+      "shortName": "M6",
+      "color": "#999999"
+    },
+    {
+      "name": "Monterrey Mineral and Terminal Railway",
+      "shortName": "M7",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Nacional de la Baja California",
+      "shortName": "M8",
+      "color": "#999999"
+    },
+    {
+      "name": "Southern Pacific Railroad of Mexico",
+      "shortName": "M9",
+      "color": "#999999"
+    },
+    {
+      "name": "Potosi Central Railroad",
+      "shortName": "M10",
+      "color": "#999999"
+    },
+    {
+      "name": "Guadalajara to Tepic and Mazatlán",
+      "shortName": "M11",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Guanajuato a San Luis de la Paz y Pozos",
+      "shortName": "M12",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril San Marcos a Huajapan de Leon",
+      "shortName": "M13",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Cazadero y Solis",
+      "shortName": "M14",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril San Gregorio",
+      "shortName": "M15",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Atlamaxac",
+      "shortName": "M16",
+      "color": "#999999"
+    },
+    {
+      "name": "Compania del ferrocarril de Mexico a Puebla",
+      "shortName": "M17",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Mexicano",
+      "shortName": "M18",
+      "color": "#999999"
+    },
+    {
+      "name": "Córdoba and Huatusco Railroad",
+      "shortName": "M19",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Interoceanico de Acapulco",
+      "shortName": "M20",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Oaxaca a Ejutla",
+      "shortName": "M21",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarriles Unidos de Yucatán",
+      "shortName": "M22",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarril Merida a Valladolid",
+      "shortName": "M23",
+      "color": "#999999"
+    },
+    {
+      "name": "Northern Railroad of Guatemala",
+      "shortName": "M24",
+      "color": "#999999"
+    },
+    {
+      "name": "Ferrocarriles Nacionales de México",
+      "shortName": "NdM",
+      "color": "#4f911a"
+    }
+  ],
+  "id": "1822MX"
+}

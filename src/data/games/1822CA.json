@@ -1,0 +1,235 @@
+{
+  "name": "1822CA: The Railways of Canada",
+  "bggId": 253607,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    140,
+    160
+  ],
+  "parValues": [
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    2,
+    0
+  ],
+  "companies": [
+    {
+      "name": "Canadian Northern Railway",
+      "shortName": "CNoR",
+      "color": "#9fce63"
+    },
+    {
+      "name": "Canadian Pacific Railway",
+      "shortName": "CPR",
+      "color": "#ed242a"
+    },
+    {
+      "name": "Great North West Railway",
+      "shortName": "GNWR",
+      "color": "#8dd8f8"
+    },
+    {
+      "name": "Grand Trunk Railway",
+      "shortName": "GT",
+      "color": "#000000"
+    },
+    {
+      "name": "Grand Trunk Pacific Railway",
+      "shortName": "GTP",
+      "color": "#f47d20"
+    },
+    {
+      "name": "Great Western Railway",
+      "shortName": "GWR",
+      "color": "#395aa8"
+    },
+    {
+      "name": "Intercolonial Railway",
+      "shortName": "ICR",
+      "color": "#eee91e"
+    },
+    {
+      "name": "National Transcontinental Railway",
+      "shortName": "NTR",
+      "color": "#9a6733"
+    },
+    {
+      "name": "Pacific Great Eastern Railway",
+      "shortName": "PGE",
+      "color": "#199d4a"
+    },
+    {
+      "name": "Québec, Montréal, Ottawa and Occidental Railway",
+      "shortName": "QMOO",
+      "color": "#7f3881"
+    },
+    {
+      "name": "Dominion Atlantic Railway",
+      "shortName": "M1",
+      "color": "#ffffff"
+    },
+    {
+      "name": "European & North American Railway",
+      "shortName": "M2",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Québec & New Brunswick Railway",
+      "shortName": "M3",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Québec Central Railway",
+      "shortName": "M4",
+      "color": "#ffffff"
+    },
+    {
+      "name": "North Shore Railway",
+      "shortName": "M5",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Champlain & St Lawrence Railroad",
+      "shortName": "M6",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Montréal & Lachine Railway",
+      "shortName": "M7",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Bytown & Prescott Railway",
+      "shortName": "M8",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Canada Atlantic Railway",
+      "shortName": "M9",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Midland Railway",
+      "shortName": "M10",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Canada Southern Railway",
+      "shortName": "M11",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Toronto, Hamilton & Buffalo Railway",
+      "shortName": "M12",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Ontario & Québec Railway",
+      "shortName": "M13",
+      "color": "#ffffff"
+    },
+    {
+      "name": "London & Port Stanley Railway",
+      "shortName": "M14",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Lake Nipissing & James",
+      "shortName": "M15",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Windsor, Chatham & London Railway",
+      "shortName": "M16",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Canada Central Railway",
+      "shortName": "M17",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Ontario & Abitibi Railway",
+      "shortName": "M18",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Algoma Central Railway",
+      "shortName": "M19",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Port Arthur, Duluth & Western Railway",
+      "shortName": "M20",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Winnipeg & Atlantic Railway",
+      "shortName": "M21",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Winnipeg & Hudson",
+      "shortName": "M22",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Prince Albert & North Saskatchewan Railway",
+      "shortName": "M23",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Saskatoon & Northern Railway",
+      "shortName": "M24",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Northern Empire Railway",
+      "shortName": "M25",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Calgary & Fort McMurray Railway",
+      "shortName": "M26",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Athabaska Northern Railway",
+      "shortName": "M27",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Kamloops & Yellow Head Pass Railway",
+      "shortName": "M28",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Kootenay, Cariboo & Pacific Railway",
+      "shortName": "M29",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Pacific Northern & Omineca Railway",
+      "shortName": "M30",
+      "color": "#ffffff"
+    }
+  ],
+  "id": "1822CA"
+}

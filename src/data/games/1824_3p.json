@@ -1,0 +1,59 @@
+{
+  "name": "1824: Austrian-Hungarian Railway (Cisleithania - 3p)",
+  "bggId": 277030,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80
+  ],
+  "parValues": [
+    60,
+    70,
+    80,
+    90,
+    100,
+    120
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Böhmische Kommerzbahn",
+      "shortName": "BK",
+      "color": "#6399ce"
+    },
+    {
+      "name": "Carl Ludwigs-Bahn",
+      "shortName": "CK",
+      "color": "#000000"
+    },
+    {
+      "name": "Mährisch-Schlesische Eisenbahn",
+      "shortName": "MS",
+      "color": "#e5e619"
+    },
+    {
+      "name": "k&k Staatsbahn",
+      "shortName": "KK",
+      "color": "#cca978"
+    },
+    {
+      "name": "Südbahn",
+      "shortName": "SD",
+      "color": "#fc9303"
+    },
+    {
+      "name": "Ungarische Staatsbahn",
+      "shortName": "UG",
+      "color": "#650065"
+    }
+  ],
+  "id": "1824_3p"
+}

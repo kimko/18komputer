@@ -1,0 +1,69 @@
+{
+  "name": "18DO: Dortmund",
+  "bggId": 238957,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Bergisch-Märkische Eisenbahn",
+      "shortName": "BME",
+      "color": "#0066cc"
+    },
+    {
+      "name": "Cöln-Mindener Eisenbahngesellschaft",
+      "shortName": "CME",
+      "color": "#cc0000"
+    },
+    {
+      "name": "Dortmund-Gronau-Enscheder Eisenbahn",
+      "shortName": "DGEE",
+      "color": "#009933"
+    },
+    {
+      "name": "Dortmunder Hafenbahn",
+      "shortName": "DHB",
+      "color": "#996633"
+    },
+    {
+      "name": "Hansabahn Dortmund",
+      "shortName": "HHW",
+      "color": "#666666"
+    },
+    {
+      "name": "Königlich-Westfälische Eisenbahn-Gesellschaft",
+      "shortName": "KWE",
+      "color": "#ff9900"
+    },
+    {
+      "name": "Rheinische Eisenbahn-Gesellschaft",
+      "shortName": "RhE",
+      "color": "#9933cc"
+    }
+  ],
+  "id": "18DO"
+}

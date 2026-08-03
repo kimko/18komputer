@@ -1,0 +1,146 @@
+{
+  "name": "18USA",
+  "bggId": 219717,
+  "maxOr": 2,
+  "revenueStops": [
+    20,
+    30,
+    40,
+    50,
+    60,
+    80,
+    100
+  ],
+  "parValues": [
+    50,
+    60,
+    65,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    135,
+    150,
+    165,
+    180,
+    200
+  ],
+  "corporateStructures": [
+    0,
+    1,
+    2
+  ],
+  "companies": [
+    {
+      "name": "Atchison, Topeka and Santa Fe Railway",
+      "shortName": "ATSF",
+      "color": "#003366"
+    },
+    {
+      "name": "Baltimore and Ohio Railroad",
+      "shortName": "B&O",
+      "color": "#0066cc"
+    },
+    {
+      "name": "Chesapeake and Ohio Railway",
+      "shortName": "C&O",
+      "color": "#003366"
+    },
+    {
+      "name": "Denver and Rio Grande Western Railroad",
+      "shortName": "D&RGW",
+      "color": "#c4a672"
+    },
+    {
+      "name": "Great Northern Railway",
+      "shortName": "GN",
+      "color": "#87ceeb"
+    },
+    {
+      "name": "Illinois Central Railroad",
+      "shortName": "IC",
+      "color": "#40e0d0"
+    },
+    {
+      "name": "Kansas City Southern Railway",
+      "shortName": "KCS",
+      "color": "#cc0000"
+    },
+    {
+      "name": "Milwaukee Road",
+      "shortName": "MILW",
+      "color": "#808080"
+    },
+    {
+      "name": "Missouri-Kansas-Texas Railroad",
+      "shortName": "MKT",
+      "color": "#228b22"
+    },
+    {
+      "name": "Missouri Pacific Railroad",
+      "shortName": "MP",
+      "color": "#8b008b"
+    },
+    {
+      "name": "Norfolk and Western Railway",
+      "shortName": "N&W",
+      "color": "#8b4513"
+    },
+    {
+      "name": "Northern Pacific Railway",
+      "shortName": "NP",
+      "color": "#1a1a1a"
+    },
+    {
+      "name": "New York Central Railroad",
+      "shortName": "NYC",
+      "color": "#000000"
+    },
+    {
+      "name": "Pennsylvania Railroad",
+      "shortName": "PRR",
+      "color": "#90ee90"
+    },
+    {
+      "name": "St. Louis-San Francisco Railway",
+      "shortName": "SLSF",
+      "color": "#cc0000"
+    },
+    {
+      "name": "Southern Pacific Railroad",
+      "shortName": "SP",
+      "color": "#ffa500"
+    },
+    {
+      "name": "Southern Railway",
+      "shortName": "SOU",
+      "color": "#228b22"
+    },
+    {
+      "name": "Texas and Pacific Railway",
+      "shortName": "T&P",
+      "color": "#ff00ff"
+    },
+    {
+      "name": "Union Pacific Railroad",
+      "shortName": "UP",
+      "color": "#ffd700"
+    },
+    {
+      "name": "Western Pacific Railroad",
+      "shortName": "WP",
+      "color": "#8b4513"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "Brdg",
+      "adds": [
+        10
+      ]
+    }
+  ],
+  "id": "18USA"
+}

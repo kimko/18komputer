@@ -1,0 +1,100 @@
+{
+  "name": "1835: Railways of Germany",
+  "bggId": 422,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    80,
+    84,
+    88,
+    92,
+    154
+  ],
+  "corporateStructures": [
+    3
+  ],
+  "companies": [
+    {
+      "name": "Bergisch-Märkische Bahn",
+      "shortName": "BM",
+      "color": "#37383a"
+    },
+    {
+      "name": "Berlin-Potsdamer Bahn",
+      "shortName": "BP",
+      "color": "#37383a"
+    },
+    {
+      "name": "Magdeburger Bahn",
+      "shortName": "MB",
+      "color": "#37383a"
+    },
+    {
+      "name": "Köln-Mindener Bahn",
+      "shortName": "KM",
+      "color": "#37383a"
+    },
+    {
+      "name": "Berlin-Stettiner Bahn",
+      "shortName": "BS",
+      "color": "#37383a"
+    },
+    {
+      "name": "Altona-Kiel Bahn",
+      "shortName": "AK",
+      "color": "#37383a"
+    },
+    {
+      "name": "Bayrische Eisenbahn",
+      "shortName": "BY",
+      "color": "#00a993"
+    },
+    {
+      "name": "Sächsische Eisenbahn",
+      "shortName": "SX",
+      "color": "#d81e3e"
+    },
+    {
+      "name": "Badische Eisenbahn",
+      "shortName": "BA",
+      "color": "#7b352a"
+    },
+    {
+      "name": "Hessische Eisenbahn",
+      "shortName": "HE",
+      "color": "#78c292"
+    },
+    {
+      "name": "Württembergische Eisenbahn",
+      "shortName": "WT",
+      "color": "#ebff45"
+    },
+    {
+      "name": "Eisenbahn Mecklenburg Schwerin",
+      "shortName": "MS",
+      "color": "#8b008b"
+    },
+    {
+      "name": "Oldenburgische Eisenbahn",
+      "shortName": "OL",
+      "color": "#6e6966"
+    },
+    {
+      "name": "Preussische Eisenbahn",
+      "shortName": "PR",
+      "color": "#37383a"
+    }
+  ],
+  "id": "1835"
+}

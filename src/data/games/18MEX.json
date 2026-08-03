@@ -1,0 +1,74 @@
+{
+  "name": "18MEX",
+  "bggId": 18485,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60
+  ],
+  "parValues": [
+    60,
+    70,
+    75,
+    80,
+    90
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Chihuahua Pacific Railway",
+      "shortName": "Chi",
+      "color": "#ff0102"
+    },
+    {
+      "name": "Mexican Central Railway",
+      "shortName": "MC",
+      "color": "#000000"
+    },
+    {
+      "name": "National Railways of Mexico",
+      "shortName": "NdM",
+      "color": "#048004"
+    },
+    {
+      "name": "United Railways of Yucatan",
+      "shortName": "UdY",
+      "color": "#800080"
+    },
+    {
+      "name": "Southern Pacific Railroad of Mexico",
+      "shortName": "SPM",
+      "color": "#0bc7ff"
+    },
+    {
+      "name": "Mexican Railway",
+      "shortName": "MEX",
+      "color": "#808080"
+    },
+    {
+      "name": "Texas-Mexican Railway",
+      "shortName": "TM",
+      "color": "#ffa500"
+    },
+    {
+      "name": "Pacific Railroad",
+      "shortName": "PAC",
+      "color": "#feff00"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "Towns",
+      "adds": [
+        10,
+        20,
+        30
+      ]
+    }
+  ],
+  "id": "18MEX"
+}

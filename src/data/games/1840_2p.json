@@ -1,0 +1,68 @@
+{
+  "name": "1840: Vienna Tramways (2P)",
+  "bggId": 300127,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90
+  ],
+  "parValues": [],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Bau- und Betriebscesellschaft für städtische Straßenbahnen in Wien",
+      "shortName": "BBG",
+      "color": "#fce903"
+    },
+    {
+      "name": "Dampftramway Krauss & Comp.",
+      "shortName": "DT K&C",
+      "color": "#5a005a"
+    },
+    {
+      "name": "Gemeinde Wien - Städtische Straßenbahnen",
+      "shortName": "GWStStB",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Schaeck-Jaquet & Comp.",
+      "shortName": "SJE",
+      "color": "#27357e"
+    },
+    {
+      "name": "Wien-Kagraner Bahn",
+      "shortName": "WKB",
+      "color": "#1b8948"
+    },
+    {
+      "name": "Wiener Tramway Gesellshaft",
+      "shortName": "WT",
+      "color": "#000000"
+    },
+    {
+      "name": "Donaukanal Linie",
+      "shortName": "D",
+      "color": "#ffce00"
+    },
+    {
+      "name": "Gürtel Linie",
+      "shortName": "G",
+      "color": "#e38f1c"
+    },
+    {
+      "name": "Wiental Linie",
+      "shortName": "W",
+      "color": "#654737"
+    }
+  ],
+  "id": "1840_2p"
+}

@@ -1,0 +1,108 @@
+{
+  "name": "18CZ: The Railway Comes To Czech Lands",
+  "bggId": 163841,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80
+  ],
+  "parValues": [
+    50,
+    55,
+    60,
+    65,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Bayrische Staatsbahn",
+      "shortName": "By",
+      "color": "#31639c"
+    },
+    {
+      "name": "kk Staatsbahn",
+      "shortName": "kk",
+      "color": "#d9863a"
+    },
+    {
+      "name": "Preußische Eisenbahn",
+      "shortName": "Pr",
+      "color": "#000000"
+    },
+    {
+      "name": "Sächsische Eisenbahn",
+      "shortName": "Sx",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Ungarische Staatsbahn",
+      "shortName": "Ug",
+      "color": "#562f7e"
+    },
+    {
+      "name": "Aussig-Teplitzer Eisenbahn",
+      "shortName": "ATE",
+      "color": "#ffce00"
+    },
+    {
+      "name": "Böhmische Nordbahn",
+      "shortName": "BN",
+      "color": "#918e8c"
+    },
+    {
+      "name": "Buschtehrader Eisenbahn",
+      "shortName": "BTE",
+      "color": "#b1d07d"
+    },
+    {
+      "name": "Kaiser Ferdinands-Nordbahn",
+      "shortName": "KFN",
+      "color": "#4877f4"
+    },
+    {
+      "name": "Österreichische Nordwestbahn",
+      "shortName": "NWB",
+      "color": "#ece753"
+    },
+    {
+      "name": "Böhmische Commercialbahn",
+      "shortName": "BCB",
+      "color": "#fc9303"
+    },
+    {
+      "name": "Eisenbahn Karlsbad-Johanngeorgenstadt",
+      "shortName": "EKJ",
+      "color": "#ffffff"
+    },
+    {
+      "name": "Mährische Westbahn",
+      "shortName": "MW",
+      "color": "#617c8d"
+    },
+    {
+      "name": "Ostrau-Friedlander Eisenbahn",
+      "shortName": "OFE",
+      "color": "#d7bfcb"
+    },
+    {
+      "name": "Vereinigte Böhmerwaldbahnen",
+      "shortName": "VBW",
+      "color": "#106b21"
+    }
+  ],
+  "id": "18CZ"
+}

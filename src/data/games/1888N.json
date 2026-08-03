@@ -1,0 +1,69 @@
+{
+  "name": "1888-N: The Railways of Northern China",
+  "bggId": 359232,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Jingha Railway",
+      "shortName": "JHR",
+      "color": "#c93a1e"
+    },
+    {
+      "name": "Shenshan Line",
+      "shortName": "SSL",
+      "color": "#a7a6a6"
+    },
+    {
+      "name": "Changda Line",
+      "shortName": "CDL",
+      "color": "#44bc4f"
+    },
+    {
+      "name": "Hanji Railway",
+      "shortName": "HJR",
+      "color": "#cba375"
+    },
+    {
+      "name": "Taijiao Line",
+      "shortName": "TJL",
+      "color": "#231f20"
+    },
+    {
+      "name": "Lanyan Railway",
+      "shortName": "LYR",
+      "color": "#fcc707"
+    },
+    {
+      "name": "Jingzhan Railway",
+      "shortName": "JZR",
+      "color": "#9d65b9"
+    },
+    {
+      "name": "Zidong Railway",
+      "shortName": "ZDR",
+      "color": "#00acd0"
+    }
+  ],
+  "id": "1888N"
+}

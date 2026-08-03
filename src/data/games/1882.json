@@ -1,0 +1,62 @@
+{
+  "name": "1882: Assiniboia",
+  "bggId": 282435,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80
+  ],
+  "parValues": [
+    67,
+    71,
+    76,
+    82,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Canadian National Railway",
+      "shortName": "CN",
+      "color": "#ffa300"
+    },
+    {
+      "name": "Canadian Northern Railway",
+      "shortName": "CNR",
+      "color": "#227332"
+    },
+    {
+      "name": "Canadian Pacific Railway",
+      "shortName": "CPR",
+      "color": "#d81e3d"
+    },
+    {
+      "name": "Grand Trunk Pacific Railway",
+      "shortName": "GT",
+      "color": "#000000"
+    },
+    {
+      "name": "Hudson Bay Railway",
+      "shortName": "HBR",
+      "color": "#ffd700"
+    },
+    {
+      "name": "Qu",
+      "shortName": "QLL",
+      "color": "#800080"
+    },
+    {
+      "name": "Saskatchewan Central Railroad",
+      "shortName": "SC",
+      "color": "#0489d0"
+    }
+  ],
+  "id": "1882"
+}

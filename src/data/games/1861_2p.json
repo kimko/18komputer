@@ -1,0 +1,154 @@
+{
+  "name": "1861: The Railways of the Russian Empire (2 player)",
+  "bggId": 23817,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    100
+  ],
+  "parValues": [
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    135,
+    150,
+    165,
+    180,
+    200
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Grand Russian Railway",
+      "shortName": "GRR",
+      "color": "#e7001b"
+    },
+    {
+      "name": "Moscow & Kazan Railway",
+      "shortName": "MK",
+      "color": "#88411b"
+    },
+    {
+      "name": "Moscow, Kursk & Nizhnii Novgorod Railway",
+      "shortName": "MKN",
+      "color": "#197abf"
+    },
+    {
+      "name": "Moscow Kiev & Voronezh Railway",
+      "shortName": "MKV",
+      "color": "#a5b37e"
+    },
+    {
+      "name": "Moscow, Vindava & Rybinsk Railway",
+      "shortName": "MVR",
+      "color": "#60b535"
+    },
+    {
+      "name": "North Western Railway",
+      "shortName": "NW",
+      "color": "#000000"
+    },
+    {
+      "name": "South Eastern Railway",
+      "shortName": "SE",
+      "color": "#881780"
+    },
+    {
+      "name": "South Western Railway",
+      "shortName": "SW",
+      "color": "#f4ec40"
+    },
+    {
+      "name": "Ekaterinin Railway",
+      "shortName": "E",
+      "color": "#130e29"
+    },
+    {
+      "name": "Kharkov-Rostov Ry.",
+      "shortName": "KR",
+      "color": "#650065"
+    },
+    {
+      "name": "Kiev-Brest Railway",
+      "shortName": "KB",
+      "color": "#63ba93"
+    },
+    {
+      "name": "Kiev-Kursk Railway",
+      "shortName": "KK",
+      "color": "#31639c"
+    },
+    {
+      "name": "Odessa-Kiev Railway",
+      "shortName": "OK",
+      "color": "#8bb9dd"
+    },
+    {
+      "name": "Moskow-Brest Ry.",
+      "shortName": "MB",
+      "color": "#27357e"
+    },
+    {
+      "name": "Moskow-Kursk Ry.",
+      "shortName": "MKR",
+      "color": "#ff7a00"
+    },
+    {
+      "name": "Moskow-Nizhnii Novgorod",
+      "shortName": "MNN",
+      "color": "#e66100"
+    },
+    {
+      "name": "Moskow-Voronezh Ry.",
+      "shortName": "MV",
+      "color": "#a13d2d"
+    },
+    {
+      "name": "Nikolaev Railway",
+      "shortName": "M",
+      "color": "#ca5262"
+    },
+    {
+      "name": "Riga-Orel Railway",
+      "shortName": "RO",
+      "color": "#2b898c"
+    },
+    {
+      "name": "Samara-Vyazma Ry.",
+      "shortName": "SV",
+      "color": "#4f6571"
+    },
+    {
+      "name": "St. Petersburg-Warsaw",
+      "shortName": "SPW",
+      "color": "#2462a9"
+    },
+    {
+      "name": "Tsaritsyn-Riga Ry.",
+      "shortName": "TR",
+      "color": "#9da3c8"
+    },
+    {
+      "name": "Vladikavkaz Railway",
+      "shortName": "V",
+      "color": "#d8dae6"
+    },
+    {
+      "name": "Yuzovka Railway",
+      "shortName": "Y",
+      "color": "#f95819"
+    }
+  ],
+  "id": "1861_2p"
+}

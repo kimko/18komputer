@@ -1,0 +1,71 @@
+{
+  "name": "1848: Australia",
+  "bggId": 32424,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    80
+  ],
+  "parValues": [
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Central Australian Railway",
+      "shortName": "CAR",
+      "color": "#000000"
+    },
+    {
+      "name": "Commonwealth Railways",
+      "shortName": "COM",
+      "color": "#b8bc86"
+    },
+    {
+      "name": "Federal Territory Railway",
+      "shortName": "FED",
+      "color": "#477faa"
+    },
+    {
+      "name": "New South Wales Railways",
+      "shortName": "NSW",
+      "color": "#ff7b00"
+    },
+    {
+      "name": "Queensland Government Railway",
+      "shortName": "QR",
+      "color": "#106b21"
+    },
+    {
+      "name": "South Australian Railway",
+      "shortName": "SAR",
+      "color": "#8d008c"
+    },
+    {
+      "name": "Victorian Railways",
+      "shortName": "VR",
+      "color": "#ffe700"
+    },
+    {
+      "name": "West Australian Railway",
+      "shortName": "WA",
+      "color": "#c4342d"
+    },
+    {
+      "name": "Bank of England",
+      "shortName": "BoE",
+      "color": "#cfc6b8"
+    }
+  ],
+  "id": "1848"
+}

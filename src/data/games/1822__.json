@@ -1,0 +1,234 @@
+{
+  "name": "1822: The Railways of Great Britain (1822+)",
+  "bggId": 193867,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    140,
+    160
+  ],
+  "parValues": [
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    2
+  ],
+  "companies": [
+    {
+      "name": "Caledonian Railway",
+      "shortName": "CR",
+      "color": "#2462a9"
+    },
+    {
+      "name": "Great Western Railway",
+      "shortName": "GWR",
+      "color": "#05761a"
+    },
+    {
+      "name": "Lancashire and Yorkshire Railway",
+      "shortName": "L&YR",
+      "color": "#510951"
+    },
+    {
+      "name": "London, Brighton and South Coast Railway",
+      "shortName": "LBSCR",
+      "color": "#fce903"
+    },
+    {
+      "name": "London and North Western Railway",
+      "shortName": "LNWR",
+      "color": "#000000"
+    },
+    {
+      "name": "Midland Railway",
+      "shortName": "MR",
+      "color": "#b9132c"
+    },
+    {
+      "name": "North British Railway",
+      "shortName": "NBR",
+      "color": "#5c330a"
+    },
+    {
+      "name": "North Eastern Railway",
+      "shortName": "NER",
+      "color": "#63b521"
+    },
+    {
+      "name": "South Eastern and Chatham Railway",
+      "shortName": "SECR",
+      "color": "#fc9303"
+    },
+    {
+      "name": "South Wales Railway",
+      "shortName": "SWR",
+      "color": "#909090"
+    },
+    {
+      "name": "Great North of Scotland Railway",
+      "shortName": "M1",
+      "color": "#999999"
+    },
+    {
+      "name": "Lanarkshire and Dunbartonshire Railway",
+      "shortName": "M2",
+      "color": "#999999"
+    },
+    {
+      "name": "Edinburgh and Dalkeith Railway",
+      "shortName": "M3",
+      "color": "#999999"
+    },
+    {
+      "name": "Newcastle and North Shields Railway",
+      "shortName": "M4",
+      "color": "#999999"
+    },
+    {
+      "name": "Stockton and Darlington Railway",
+      "shortName": "M5",
+      "color": "#999999"
+    },
+    {
+      "name": "Furness Railway",
+      "shortName": "M6",
+      "color": "#999999"
+    },
+    {
+      "name": "Warrington and Newton Railway",
+      "shortName": "M7",
+      "color": "#999999"
+    },
+    {
+      "name": "Manchester, Sheffield and Lincolnshire Railway",
+      "shortName": "M8",
+      "color": "#999999"
+    },
+    {
+      "name": "East Lincolnshire Railway",
+      "shortName": "M9",
+      "color": "#999999"
+    },
+    {
+      "name": "Grand Junction Railway",
+      "shortName": "M10",
+      "color": "#999999"
+    },
+    {
+      "name": "Great Northern Railway",
+      "shortName": "M11",
+      "color": "#999999"
+    },
+    {
+      "name": "Eastern Union Railway",
+      "shortName": "M12",
+      "color": "#999999"
+    },
+    {
+      "name": "Headcorn and Maidstone Junction Light Railway",
+      "shortName": "M13",
+      "color": "#999999"
+    },
+    {
+      "name": "Metropolitan Railway",
+      "shortName": "M14",
+      "color": "#999999"
+    },
+    {
+      "name": "London, Tilbury and Southend Railway",
+      "shortName": "M15",
+      "color": "#999999"
+    },
+    {
+      "name": "London and Birmingham Railway",
+      "shortName": "M16",
+      "color": "#999999"
+    },
+    {
+      "name": "London and Southampton Railway",
+      "shortName": "M17",
+      "color": "#999999"
+    },
+    {
+      "name": "Somerset and Dorset Joint Railway",
+      "shortName": "M18",
+      "color": "#999999"
+    },
+    {
+      "name": "Penarth Harbour and Dock Railway",
+      "shortName": "M19",
+      "color": "#999999"
+    },
+    {
+      "name": "Monmouthshire Railway and Canal Company",
+      "shortName": "M20",
+      "color": "#999999"
+    },
+    {
+      "name": "Taff Vale Railway",
+      "shortName": "M21",
+      "color": "#999999"
+    },
+    {
+      "name": "Exter and Crediton Railway",
+      "shortName": "M22",
+      "color": "#999999"
+    },
+    {
+      "name": "West Cornwall Railway",
+      "shortName": "M23",
+      "color": "#999999"
+    },
+    {
+      "name": "Swansea and Mumbles Railway",
+      "shortName": "M24",
+      "color": "#999999"
+    },
+    {
+      "name": "Yarmouth & Norwich Railway",
+      "shortName": "M25",
+      "color": "#999999"
+    },
+    {
+      "name": "Hull and Selby Railway",
+      "shortName": "M26",
+      "color": "#999999"
+    },
+    {
+      "name": "City of Glasgow Union Railway",
+      "shortName": "M27",
+      "color": "#999999"
+    },
+    {
+      "name": "Maryport and Carisle Railway",
+      "shortName": "M28",
+      "color": "#999999"
+    },
+    {
+      "name": "Shropshire and Montgomeryshire Railway",
+      "shortName": "M29",
+      "color": "#999999"
+    },
+    {
+      "name": "Plymouth and Dartmoor Railway",
+      "shortName": "M30",
+      "color": "#999999"
+    }
+  ],
+  "id": "1822__"
+}

@@ -1,0 +1,81 @@
+{
+  "name": "1832: The South",
+  "bggId": 23421,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    68,
+    72,
+    76,
+    82,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Atlantic Coast Line Railroad",
+      "shortName": "ACL",
+      "color": "#ffc0cb"
+    },
+    {
+      "name": "Atlanta & West Point Railroad",
+      "shortName": "A&WP",
+      "color": "#800080"
+    },
+    {
+      "name": "Seaboard Air Line Railway",
+      "shortName": "SAL",
+      "color": "#ff8c00"
+    },
+    {
+      "name": "Norfolk & Western Railway",
+      "shortName": "N&W",
+      "color": "#000000"
+    },
+    {
+      "name": "Central of Georgia Railway",
+      "shortName": "CoG",
+      "color": "#008080"
+    },
+    {
+      "name": "Louisville & Nashville Railroad",
+      "shortName": "L&N",
+      "color": "#0000ff"
+    },
+    {
+      "name": "Georgia Railroad",
+      "shortName": "GRR",
+      "color": "#add8e6"
+    },
+    {
+      "name": "Gulf, Mobile & Ohio Railroad",
+      "shortName": "GM&O",
+      "color": "#ff0000"
+    },
+    {
+      "name": "Southern Railway",
+      "shortName": "SOU",
+      "color": "#008000"
+    },
+    {
+      "name": "Florida East Coast Railway",
+      "shortName": "FEC",
+      "color": "#ffff00"
+    }
+  ],
+  "id": "1832"
+}

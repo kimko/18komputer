@@ -1,0 +1,167 @@
+{
+  "name": "1862: Railway Mania in the Eastern Counties",
+  "bggId": 66837,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    130,
+    140,
+    150,
+    200
+  ],
+  "parValues": [
+    54,
+    56,
+    58,
+    60,
+    62,
+    65,
+    68,
+    71,
+    74,
+    78,
+    82,
+    86,
+    90,
+    95,
+    100,
+    105,
+    110,
+    116,
+    122,
+    128,
+    134,
+    142,
+    150,
+    158,
+    166,
+    174,
+    182,
+    191,
+    200
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Ely & Huntingdon",
+      "shortName": "E&H",
+      "color": "#ffff00"
+    },
+    {
+      "name": "Eastern Counties Railway",
+      "shortName": "ECR",
+      "color": "#452665"
+    },
+    {
+      "name": "East Norfolk Railway",
+      "shortName": "ENR",
+      "color": "#fce903"
+    },
+    {
+      "name": "East Suffolk Railway",
+      "shortName": "ESR",
+      "color": "#084a23"
+    },
+    {
+      "name": "Eastern Union Railway",
+      "shortName": "EUR",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Felixstowe Dock & Railway",
+      "shortName": "FDR",
+      "color": "#ffaa00"
+    },
+    {
+      "name": "Ipswich & Bury Railway",
+      "shortName": "I&B",
+      "color": "#000000"
+    },
+    {
+      "name": "Lynn & Dereham Railway",
+      "shortName": "L&D",
+      "color": "#ff7b00"
+    },
+    {
+      "name": "Lynn & Ely Railway",
+      "shortName": "L&E",
+      "color": "#e71837"
+    },
+    {
+      "name": "Lynn & Hunstanton Railway",
+      "shortName": "L&H",
+      "color": "#7d95c1"
+    },
+    {
+      "name": "Norwich & Brandon Railway",
+      "shortName": "N&B",
+      "color": "#c7c7bf"
+    },
+    {
+      "name": "Northern & Eastern Railway",
+      "shortName": "N&E",
+      "color": "#a1a4a3"
+    },
+    {
+      "name": "Norfolk & Suffolk, Joint Railway",
+      "shortName": "N&S",
+      "color": "#698bd0"
+    },
+    {
+      "name": "Newmarket and Great Chesterford Railway",
+      "shortName": "NGC",
+      "color": "#ffff40"
+    },
+    {
+      "name": "Colchester, Stour Valley, Sudbury & Halstead",
+      "shortName": "SVR",
+      "color": "#966f39"
+    },
+    {
+      "name": "Yarmouth & Norwich Railway",
+      "shortName": "Y&N",
+      "color": "#fc9303"
+    },
+    {
+      "name": "Wells & Fakenham Railway",
+      "shortName": "W&F",
+      "color": "#a5d610"
+    },
+    {
+      "name": "West Norfolk Railway",
+      "shortName": "WNR",
+      "color": "#ba8b49"
+    },
+    {
+      "name": "Waveney Valley Railway",
+      "shortName": "WVR",
+      "color": "#69487c"
+    },
+    {
+      "name": "Wisbech, St Ives & Cambridge Junction Rwy",
+      "shortName": "WStI",
+      "color": "#6b4283"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "The George Hudson",
+      "adds": [
+        10
+      ]
+    }
+  ],
+  "id": "1862"
+}

@@ -1,0 +1,137 @@
+{
+  "name": "18NewEngland",
+  "bggId": 286205,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    100
+  ],
+  "parValues": [],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Boston & Albany Railroad",
+      "shortName": "B&A",
+      "color": "#cc0000"
+    },
+    {
+      "name": "Boston & Maine Railroad",
+      "shortName": "B&M",
+      "color": "#106b21"
+    },
+    {
+      "name": "Canadian National Railway",
+      "shortName": "CNR",
+      "color": "#ffe700"
+    },
+    {
+      "name": "Central Vermont Railway",
+      "shortName": "CVR",
+      "color": "#6a0dad"
+    },
+    {
+      "name": "Delaware & Hudson Railway",
+      "shortName": "D&H",
+      "color": "#020894"
+    },
+    {
+      "name": "New York Central Railroad",
+      "shortName": "NYC",
+      "color": "#000000"
+    },
+    {
+      "name": "New York, New Haven & Hartford Railroad",
+      "shortName": "NNH",
+      "color": "#fc9303"
+    },
+    {
+      "name": "Providence & Worcester Railroad",
+      "shortName": "P&W",
+      "color": "#663300"
+    },
+    {
+      "name": "Albany and West Stockbridge Railroad",
+      "shortName": "AWS",
+      "color": "#ce0018"
+    },
+    {
+      "name": "Boston and Lowell Railroad",
+      "shortName": "BL",
+      "color": "#ff7b00"
+    },
+    {
+      "name": "Boston and Providence Railroad",
+      "shortName": "BP",
+      "color": "#808000"
+    },
+    {
+      "name": "Connecticut River Railroad",
+      "shortName": "CR",
+      "color": "#654737"
+    },
+    {
+      "name": "Connecticut Valley Railroad",
+      "shortName": "CV",
+      "color": "#d9e54c"
+    },
+    {
+      "name": "Eastern Railroad",
+      "shortName": "ER",
+      "color": "#8d008c"
+    },
+    {
+      "name": "Fitchburg Railroad",
+      "shortName": "FRR",
+      "color": "#63b521"
+    },
+    {
+      "name": "Granite Railway",
+      "shortName": "GR",
+      "color": "#005221"
+    },
+    {
+      "name": "Hartford and New Haven Railroad",
+      "shortName": "HNH",
+      "color": "#ff07d8"
+    },
+    {
+      "name": "Hudson Railroad",
+      "shortName": "HRR",
+      "color": "#31429e"
+    },
+    {
+      "name": "New London Northern Railroad",
+      "shortName": "NLN",
+      "color": "#8bb9dd"
+    },
+    {
+      "name": "New York and New Haven Railroad",
+      "shortName": "NYNH",
+      "color": "#dd7324"
+    },
+    {
+      "name": "New York, Westchester and Boston",
+      "shortName": "NYW",
+      "color": "#c4342d"
+    },
+    {
+      "name": "Poughkeepsie and Eastern Railway",
+      "shortName": "PE",
+      "color": "#804000"
+    },
+    {
+      "name": "Worcester, Nashua and Rochester",
+      "shortName": "WNR",
+      "color": "#000000"
+    }
+  ],
+  "id": "18NewEngland"
+}

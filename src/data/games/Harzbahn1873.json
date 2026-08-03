@@ -1,0 +1,104 @@
+{
+  "name": "Harzbahn 1873",
+  "bggId": 28944,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    120,
+    150,
+    190,
+    240,
+    300
+  ],
+  "corporateStructures": [
+    0,
+    1
+  ],
+  "companies": [
+    {
+      "name": "Halberstadt-Blankenburger Eisenbahn",
+      "shortName": "HBE",
+      "color": "#ff0000"
+    },
+    {
+      "name": "Gernrode-Harzgeroder Eisenbahn",
+      "shortName": "GHE",
+      "color": "#326199"
+    },
+    {
+      "name": "Nordhausen-Wernigeroder Eisenbahn",
+      "shortName": "NWE",
+      "color": "#a2a024"
+    },
+    {
+      "name": "Südharzeisenbahn",
+      "shortName": "SHE",
+      "color": "#ffff00"
+    },
+    {
+      "name": "Kleinbahn Ellrich-Zorge",
+      "shortName": "KEZ",
+      "color": "#2e270d"
+    },
+    {
+      "name": "Wernigerode-Blankenburger Eisenbahn",
+      "shortName": "WBE",
+      "color": "#959490"
+    },
+    {
+      "name": "Quedlinburger Lokalbahn",
+      "shortName": "QLB",
+      "color": "#ff740e"
+    },
+    {
+      "name": "Harzer Werke",
+      "shortName": "HW",
+      "color": "#772500"
+    },
+    {
+      "name": "Concordia",
+      "shortName": "CO",
+      "color": "#16ce91"
+    },
+    {
+      "name": "Montania",
+      "shortName": "MO",
+      "color": "#448a28"
+    },
+    {
+      "name": "Schachtbau Nordhausen",
+      "shortName": "SN",
+      "color": "#f7848d"
+    },
+    {
+      "name": "Union",
+      "shortName": "U",
+      "color": "#950822"
+    },
+    {
+      "name": "Magdeburg-Halberstädter Eisenbahn",
+      "shortName": "MHE",
+      "color": "#c0c0c0"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "HW Bonus",
+      "adds": [
+        50
+      ]
+    }
+  ],
+  "id": "Harzbahn1873"
+}

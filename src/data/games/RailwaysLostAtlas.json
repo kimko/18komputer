@@ -1,0 +1,131 @@
+{
+  "name": "Railways of the Lost Atlas",
+  "bggId": 365357,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120,
+    125,
+    130,
+    135
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Spacious Company",
+      "shortName": "Spacious",
+      "color": "#d4c4a8"
+    },
+    {
+      "name": "Adaptive Company",
+      "shortName": "Adaptive",
+      "color": "#7d8471"
+    },
+    {
+      "name": "Bridging Company",
+      "shortName": "Bridging",
+      "color": "#5fb4b4"
+    },
+    {
+      "name": "Overnight Company",
+      "shortName": "Overnight",
+      "color": "#9b8bb4"
+    },
+    {
+      "name": "Tunneling Company",
+      "shortName": "Tunneling",
+      "color": "#6b4423"
+    },
+    {
+      "name": "Northern Port Company",
+      "shortName": "Northern Port",
+      "color": "#5bc0be"
+    },
+    {
+      "name": "Expansive Company",
+      "shortName": "Expansive",
+      "color": "#e8998d"
+    },
+    {
+      "name": "Express Company",
+      "shortName": "Express",
+      "color": "#d96c2c"
+    },
+    {
+      "name": "Suburban Company",
+      "shortName": "Suburban",
+      "color": "#f4a5b8"
+    },
+    {
+      "name": "Resourceful Company",
+      "shortName": "Resourceful",
+      "color": "#8b4557"
+    },
+    {
+      "name": "Agricultural Company",
+      "shortName": "Agricultural",
+      "color": "#6b8e23"
+    },
+    {
+      "name": "Eastern Mining Company",
+      "shortName": "Eastern Mining",
+      "color": "#8b6914"
+    },
+    {
+      "name": "Consortium",
+      "shortName": "Consortium",
+      "color": "#c45a2a"
+    },
+    {
+      "name": "Union",
+      "shortName": "Union",
+      "color": "#2b4162"
+    },
+    {
+      "name": "System",
+      "shortName": "System",
+      "color": "#5fa8a3"
+    },
+    {
+      "name": "International",
+      "shortName": "International",
+      "color": "#1e3a5f"
+    },
+    {
+      "name": "Federation",
+      "shortName": "Federation",
+      "color": "#4a7c59"
+    },
+    {
+      "name": "Experiment",
+      "shortName": "Experiment",
+      "color": "#c24d4d"
+    }
+  ],
+  "id": "RailwaysLostAtlas"
+}

@@ -3,9 +3,9 @@
 ## Phase 1: Setup & Data Preparation
 - [x] Initialize Vite + React project mirroring the `portfolio` setup.
 - [x] Install core dependencies (Chakra UI, Framer Motion, Wouter) and testing framework (Vitest, React Testing Library).
-- [ ] **TDD:** Write tests for the `.txt` to JSON parsing logic.
-- [ ] Build the Node.js parsing script to satisfy tests and convert `../games/*.txt` into JSON files (per `game_data_schema.md`).
-- [ ] Generate the `index.json` manifest of all available games.
+- [x] **TDD:** Write tests for the `.txt` to JSON parsing logic.
+- [x] Build the Node.js parsing script to satisfy tests and convert `../games/*.txt` into JSON files (per `game_data_schema.md`).
+- [x] Generate the `index.json` manifest of all available games.
 
 ## Phase 1: Core UI Implementation
 - [ ] **Main Menu:** TDD the landing hub (New Game, Resume Game, User Management).

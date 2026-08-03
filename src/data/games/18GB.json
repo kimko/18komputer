@@ -1,0 +1,91 @@
+{
+  "name": "18GB: The Railways of Great Britain",
+  "bggId": 245532,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    70,
+    75,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [
+    0,
+    1
+  ],
+  "companies": [
+    {
+      "name": "Caledonian Railway",
+      "shortName": "CR",
+      "color": "#0a70b3"
+    },
+    {
+      "name": "Great Eastern Railway",
+      "shortName": "GER",
+      "color": "#37b2e2"
+    },
+    {
+      "name": "Glasgow and South Western Railway",
+      "shortName": "GSWR",
+      "color": "#ec767c"
+    },
+    {
+      "name": "Great Western Railway",
+      "shortName": "GWR",
+      "color": "#008f4f"
+    },
+    {
+      "name": "London and North Western Railway",
+      "shortName": "LNWR",
+      "color": "#0a0a0a"
+    },
+    {
+      "name": "London and South Western Railway",
+      "shortName": "LSWR",
+      "color": "#fcea18"
+    },
+    {
+      "name": "Lancashire and Yorkshire Railway",
+      "shortName": "LYR",
+      "color": "#baa4cb"
+    },
+    {
+      "name": "Midland Railway",
+      "shortName": "MR",
+      "color": "#dd0030"
+    },
+    {
+      "name": "Manchester, Sheffield and Lincolnshire Railway",
+      "shortName": "MSLR",
+      "color": "#881a1e"
+    },
+    {
+      "name": "North British Railway",
+      "shortName": "NBR",
+      "color": "#eb6f0e"
+    },
+    {
+      "name": "North Eastern Railway",
+      "shortName": "NER",
+      "color": "#7bb137"
+    },
+    {
+      "name": "South Wales Railway",
+      "shortName": "SWR",
+      "color": "#9a9a9d"
+    }
+  ],
+  "id": "18GB"
+}

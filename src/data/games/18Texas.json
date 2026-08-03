@@ -1,0 +1,55 @@
+{
+  "name": "18Texas",
+  "bggId": 407694,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    80
+  ],
+  "parValues": [
+    70,
+    75,
+    82,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Missouri-Kansas-Texas Railroad",
+      "shortName": "MKT",
+      "color": "#239454"
+    },
+    {
+      "name": "Missouri Pacific Railroad",
+      "shortName": "MPR",
+      "color": "#d81e3d"
+    },
+    {
+      "name": "St. Louis Southwestern Railway",
+      "shortName": "SLS",
+      "color": "#375383"
+    },
+    {
+      "name": "San Antonio and Aransas Pass Railway",
+      "shortName": "SA&AP",
+      "color": "#000000"
+    },
+    {
+      "name": "Souther Pacific Railroad",
+      "shortName": "SPR",
+      "color": "#f48321"
+    },
+    {
+      "name": "Texas and Pacific Railway",
+      "shortName": "TPR",
+      "color": "#9e5d90"
+    }
+  ],
+  "id": "18Texas"
+}

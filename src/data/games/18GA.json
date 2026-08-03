@@ -1,0 +1,57 @@
+{
+  "name": "18GA",
+  "bggId": 2583,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    55,
+    70,
+    90,
+    110
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Atlantic Coast Line",
+      "shortName": "ACL",
+      "color": "#000000"
+    },
+    {
+      "name": "Central of Georgia Railroad",
+      "shortName": "CoG",
+      "color": "#ff0000"
+    },
+    {
+      "name": "Georgia and Florida Railroad",
+      "shortName": "G&F",
+      "color": "#00bfff"
+    },
+    {
+      "name": "Georgia Railroad",
+      "shortName": "GA",
+      "color": "#008000"
+    },
+    {
+      "name": "Western and Atlantic Railroad",
+      "shortName": "W&A",
+      "color": "#800080"
+    },
+    {
+      "name": "Seaboard Air Line",
+      "shortName": "SAL",
+      "color": "#ffd700"
+    }
+  ],
+  "id": "18GA"
+}

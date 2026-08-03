@@ -1,0 +1,53 @@
+{
+  "name": "The Hiawathas",
+  "bggId": 343144,
+  "maxOr": 3,
+  "revenueStops": [
+    20,
+    30,
+    40,
+    60
+  ],
+  "parValues": [
+    67,
+    71,
+    76,
+    82,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Pennsylvania Railroad",
+      "shortName": "PRR",
+      "color": "#237333"
+    },
+    {
+      "name": "New York Central System",
+      "shortName": "NYC",
+      "color": "#000000"
+    },
+    {
+      "name": "Canadian Pacific Railroad",
+      "shortName": "CPR",
+      "color": "#c4012b"
+    },
+    {
+      "name": "Baltimore & Ohio Railroad",
+      "shortName": "B&O",
+      "color": "#0188d1"
+    },
+    {
+      "name": "Chesapeake & Ohio Railroad",
+      "shortName": "C&O",
+      "color": "#a2dced"
+    },
+    {
+      "name": "Erie Railroad",
+      "shortName": "Erie",
+      "color": "#ffffff"
+    }
+  ],
+  "id": "TheHiawathas"
+}

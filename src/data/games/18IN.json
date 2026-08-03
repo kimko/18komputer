@@ -1,0 +1,155 @@
+{
+  "name": "18IN: Railways Across Indiana",
+  "bggId": 273586,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    70,
+    75,
+    80,
+    90,
+    100,
+    110,
+    120,
+    140,
+    200,
+    250
+  ],
+  "corporateStructures": [
+    0
+  ],
+  "companies": [
+    {
+      "name": "Chicago & Eastern Illinois Railroad",
+      "shortName": "C&EI",
+      "color": "#000000"
+    },
+    {
+      "name": "New York Central Railroad",
+      "shortName": "NYC",
+      "color": "#808080"
+    },
+    {
+      "name": "New York, Chicago & St. Louis Railroad",
+      "shortName": "NKP",
+      "color": "#808080"
+    },
+    {
+      "name": "Lake Shore & Michigan Southern Railroad",
+      "shortName": "LS",
+      "color": "#0000ff"
+    },
+    {
+      "name": "Wabash Railway",
+      "shortName": "WAB",
+      "color": "#ffd700"
+    },
+    {
+      "name": "Pennsylvania Railroad",
+      "shortName": "PRR",
+      "color": "#008000"
+    },
+    {
+      "name": "Chicago, Indianapolis & Louisville Railway",
+      "shortName": "Monon",
+      "color": "#ff0000"
+    },
+    {
+      "name": "Cleveland, Cincinnati, Chicago & St. Louis Railway",
+      "shortName": "Big4",
+      "color": "#ffa500"
+    },
+    {
+      "name": "Buffalo, Cleveland & Chicago Railway",
+      "shortName": "C",
+      "color": "#000000"
+    },
+    {
+      "name": "Lake Erie, Wabash & St. Louis Railroad",
+      "shortName": "W",
+      "color": "#000000"
+    },
+    {
+      "name": "New Albany & Salem Railroad",
+      "shortName": "A",
+      "color": "#000000"
+    },
+    {
+      "name": "Chicago & Indianapolis Air Line Railway",
+      "shortName": "I",
+      "color": "#000000"
+    },
+    {
+      "name": "Cincinnati, Hamilton & Indianapolis Railroad",
+      "shortName": "H",
+      "color": "#000000"
+    },
+    {
+      "name": "Chicago, Danville & Vincennes Railroad",
+      "shortName": "V",
+      "color": "#000000"
+    },
+    {
+      "name": "Evansville, Terre Haute & Chicago Railroad",
+      "shortName": "E",
+      "color": "#000000"
+    },
+    {
+      "name": "Northern Indiana & Chicago Railroad",
+      "shortName": "N",
+      "color": "#000000"
+    },
+    {
+      "name": "Indianapolis and Bellefontaine Railroad",
+      "shortName": "D",
+      "color": "#000000"
+    },
+    {
+      "name": "Indianapolis, Pittsburg & Columbus Railroad",
+      "shortName": "P",
+      "color": "#000000"
+    },
+    {
+      "name": "Indiana, Danville & Western Railroad",
+      "shortName": "G",
+      "color": "#000000"
+    },
+    {
+      "name": "Toledo, St. Louis & Western Railroad",
+      "shortName": "T",
+      "color": "#000000"
+    },
+    {
+      "name": "LaFayette, Muncie and Bloomington Railroad",
+      "shortName": "M",
+      "color": "#000000"
+    },
+    {
+      "name": "Indiana, Bloomington & Western Railroad",
+      "shortName": "B",
+      "color": "#000000"
+    },
+    {
+      "name": "Indianapolis & St. Louis Railway",
+      "shortName": "R",
+      "color": "#000000"
+    },
+    {
+      "name": "Cincinnati, Lafayette & Chicago Railroad",
+      "shortName": "F",
+      "color": "#000000"
+    }
+  ],
+  "id": "18IN"
+}

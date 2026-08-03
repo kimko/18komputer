@@ -1,0 +1,65 @@
+{
+  "name": "18Chesapeake",
+  "bggId": 253608,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    100
+  ],
+  "parValues": [
+    70,
+    80,
+    95
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Baltimore & Ohio Railroad",
+      "shortName": "B&O",
+      "color": "#0188d1"
+    },
+    {
+      "name": "Camden & Amboy Railroad",
+      "shortName": "C&A",
+      "color": "#f48321"
+    },
+    {
+      "name": "Chesapeake & Ohio Railroad",
+      "shortName": "C&O",
+      "color": "#a2dced"
+    },
+    {
+      "name": "Lehigh Valley Railroad",
+      "shortName": "LV",
+      "color": "#fff500"
+    },
+    {
+      "name": "Norfolk & Western Railway",
+      "shortName": "N&W",
+      "color": "#7b352a"
+    },
+    {
+      "name": "Pittsburgh and Lake Erie Railroad",
+      "shortName": "PLE",
+      "color": "#000000"
+    },
+    {
+      "name": "Pennsylvania Railroad",
+      "shortName": "PRR",
+      "color": "#237333"
+    },
+    {
+      "name": "Strasburg Rail Road",
+      "shortName": "SRR",
+      "color": "#d81e3d"
+    }
+  ],
+  "id": "18Chesapeake"
+}

@@ -1,0 +1,62 @@
+{
+  "name": "18FL",
+  "bggId": 21436,
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
+  ],
+  "parValues": [
+    70,
+    75,
+    80,
+    90,
+    100,
+    110
+  ],
+  "corporateStructures": [
+    0,
+    1
+  ],
+  "companies": [
+    {
+      "name": "Louisville and Nashville Railroad",
+      "shortName": "LN",
+      "color": "#00008b"
+    },
+    {
+      "name": "The Plant System",
+      "shortName": "Plant",
+      "color": "#00bfff"
+    },
+    {
+      "name": "Southern Railway",
+      "shortName": "SR",
+      "color": "#76a042"
+    },
+    {
+      "name": "Seaboard Air Line",
+      "shortName": "SAL",
+      "color": "#f48221"
+    },
+    {
+      "name": "Atlantic Coast Line",
+      "shortName": "ACL",
+      "color": "#800080"
+    },
+    {
+      "name": "Florida East Coast Railway",
+      "shortName": "FECR",
+      "color": "#d81e3e"
+    }
+  ],
+  "id": "18FL"
+}

@@ -1,0 +1,77 @@
+{
+  "name": "1899 DAIHAN",
+  "bggId": 428264,
+  "maxOr": 3,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60
+  ],
+  "parValues": [
+    65,
+    70,
+    75,
+    80,
+    90,
+    100
+  ],
+  "corporateStructures": [],
+  "companies": [
+    {
+      "name": "Daihan Railway",
+      "shortName": "DR",
+      "color": "#0c6aa5"
+    },
+    {
+      "name": "Gyeongbu Railway",
+      "shortName": "GR",
+      "color": "#58b46e"
+    },
+    {
+      "name": "Pyeongyang Railroad",
+      "shortName": "PR",
+      "color": "#dc3d47"
+    },
+    {
+      "name": "Buha Railroad",
+      "shortName": "BR",
+      "color": "#229c94"
+    },
+    {
+      "name": "Honam Railway",
+      "shortName": "HR",
+      "color": "#d58531"
+    },
+    {
+      "name": "Yeongnam Railway",
+      "shortName": "YR",
+      "color": "#814e8d"
+    },
+    {
+      "name": "Fives Lille",
+      "shortName": "FL",
+      "color": "#e98788"
+    },
+    {
+      "name": "Russia Railway",
+      "shortName": "RR",
+      "color": "#fbd13c"
+    }
+  ],
+  "revenueBonuses": [
+    {
+      "label": "Goods",
+      "adds": [
+        20,
+        30,
+        40,
+        60,
+        80
+      ]
+    }
+  ],
+  "id": "1899Daihan"
+}
