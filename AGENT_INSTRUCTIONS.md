@@ -1,4 +1,4 @@
-# 18XXc Web Calculator - AI Agent Guide
+# 18komputer - AI Agent Guide
 
 ## Project Overview
 This project is a web-based calculator for 18xx board games. It is being built in two phases:

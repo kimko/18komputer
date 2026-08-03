@@ -1,7 +1,7 @@
-# 18xxc Web Calculator - Design & Architecture (Updated)
+# 18komputer - Design & Architecture (Updated)
 
 ## Overview
-This document outlines the architecture and design approach for building the web version of the 18xxc calculator app based on our design interview.
+This document outlines the architecture and design approach for building the web version of the 18komputer calculator app based on our design interview.
 
 ## Phase 1: Frontend Only (Stateless)
 - **Framework & Setup:** The project will exactly mirror the `~/Projects/portfolio` setup, using **Vite, React, Chakra UI, Framer Motion, and Wouter**. 
@@ -43,7 +43,7 @@ A highly interactive, touch-friendly calculator for computing the revenue of a c
   - A `[ Clear ]` button to instantly reset that specific row's count to 0.
   - A global "Reset" button at the bottom to clear the entire train's route.
 
-- **Data Flow:** The total revenue calculated across all trains here will be manually entered into the Company ORs Table in section C.
+- **Data Flow:** The total revenue calculated across all trains here acts purely as a visual aid. The user will manually enter the final calculated revenue into the Company ORs Table in section C.
 
 ### C) Company values and Results
 1. **Company ORs Table:**

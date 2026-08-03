@@ -1,7 +1,7 @@
-# 18xxc Game Data Schema & Mapping
+# 18komputer Game Data Schema & Mapping
 
 ## Overview
-This document defines the target JSON structure for the web calculator and how the custom `.txt` files from `18xxc-games/games` will be mapped to this structure by our build script.
+This document defines the target JSON structure for the web calculator and how the custom `.txt` files from `18XXc-also/games` will be mapped to this structure by our build script.
 
 ## Target JSON Structure (`GameData` Interface)
 
@@ -19,6 +19,7 @@ interface GameData {
   companies: Company[];
   trains: Train[];
   revenueBonuses: RevenueBonus[];
+  hasPullmans?: boolean;  // Injected for 1822 family games
   // Other properties like assets, corporateStructures can be added as needed.
 }
 

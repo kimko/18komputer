@@ -1,4 +1,4 @@
-# 18XXc Web Calculator - Task List
+# 18komputer - Task List
 
 ## Phase 1: Setup & Data Preparation
 - [x] Initialize Vite + React project mirroring the `portfolio` setup.

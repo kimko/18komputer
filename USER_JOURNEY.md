@@ -1,4 +1,4 @@
-# 18XXc Web Calculator - User Journey
+# 18komputer - User Journey
 
 This document tracks the current capabilities and functional flows of the application from an end-user and system perspective. It must be updated every time a new feature is completed.
 
@@ -18,7 +18,7 @@ While there is no user-facing UI built just yet, the application's underlying da
 The central landing page has been implemented, serving as the user's primary entry point.
 - **UI:** A sleek, glassmorphism-styled dashboard utilizing a dark gray and teal color palette.
 - **Actions & Routing:**
-  - **NEW GAME:** Routes to `/new`. Implements a form to select one of the 70 supported 18xx titles from a dropdown, add player names dynamically to a roster, and dispatch the data to the API state manager to initialize a new instance.
+  - **NEW GAME:** Routes to `/new`. Implements a form to select one of the 70 supported 18xx titles from a dropdown (with a real-time wildcard text search filter), add player names dynamically to a roster, and dispatch the data to the API state manager to initialize a new instance.
   - **RESUME GAME:** Routes to `/resume` (future existing game loader).
   - **USER MANAGEMENT:** Routes to `/users` (future player profile settings).
 
@@ -44,10 +44,11 @@ The core utility for running Operating Rounds has been implemented.
 - **UI:** A mobile-first, touch-friendly calculator layout optimized for rapid data entry.
 - **Features:**
   - Dynamic selector for the active operating company.
-  - **Multiple Trains:** Users can calculate multiple trains simultaneously. Trains can be added, removed, or duplicated via a "Copy Train" button.
+  - **Multiple Trains:** Users can calculate multiple trains simultaneously. Trains can be added, removed, or duplicated via a "Copy Train" button. State is tracked independently for each company.
   - **Interactive History:** Each train has an itemized string of tapped stops (e.g., `60 + 70 + 40`). Stops can be instantly deleted by tapping them.
+  - **Dynamic Bonuses**: Fully supports 18xx-specific revenue bonuses (like Towns, Ports, or 1822 Pullmans), rendered distinctly without counting against stop limits.
   - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table dynamically generates the Revenue Per Share payout (from 10% to 100%).
-- **Data Flow:** Users finalize the round by selecting a payout decision ("Withhold 100%", "Half Pay", or "Pay Out 100%"). This decision, along with the grand total, is pushed to the game state.
+- **Data Flow:** The calculator currently acts as a pure visual aid. Users will reference the Grand Total and Payout tables to manually enter operating decisions into the final dashboard.
 
 ---
 *Next up: Company Values & Results (Dashboard).*
