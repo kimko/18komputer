@@ -22,5 +22,14 @@ The central landing page has been implemented, serving as the user's primary ent
   - **RESUME GAME:** Routes to `/resume` (future existing game loader).
   - **USER MANAGEMENT:** Routes to `/users` (future player profile settings).
 
+### 3. Persistent State Manager
+An asynchronous API layer has been implemented to handle game state.
+- **Data Store:** Currently powered by browser `localStorage` but architected with Promises to mimic network latency for a seamless swap to the Elixir backend later.
+- **Operations Supported:**
+  - `createGame(gameId, players)`: Spawns a new game instance with a unique ID and initialized data schema.
+  - `getGame(instanceId)`: Fetches the current state of a running game instance.
+  - `updateGameState(instanceId, updates)`: Deep merges incoming state modifications (e.g., active companies, player assets).
+  - `getGamesList()`: Retrieves a catalog of all saved instances, sorted by creation date (ready for the 'Resume Game' menu).
+
 ---
-*Next up: State API Mock (`localStorage` implementation) and the Raise Funds setup flow.*
+*Next up: Raise Funds (Setup) Flow.*
