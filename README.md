@@ -1,16 +1,37 @@
-# React + Vite
+# 18komputer
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A mobile-first web assistant designed specifically for playing 18XX board games. It handles the heavy mathematical lifting—calculating complex revenues, tracking company shares, and determining player net worths—so you can focus on the game.
 
-Currently, two official plugins are available:
+## Features
+- **Extensive Game Library**: Built-in support for over 60 different 18XX titles.
+- **Dynamic Revenue Calculator**: Add multiple trains, calculate grand totals, and generate payout tables instantly.
+- **Title-Specific Mechanics**: Includes specialized features like Pullman tracking for the 1822 series.
+- **Mobile-First Design**: A clean, dark-mode interface powered by Chakra UI, optimized specifically for playing at the table on your phone.
+- **Local Persistence**: Games are automatically saved to your browser's local storage.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
+- **Framework**: React (via Vite)
+- **Styling**: Chakra UI (Dark Mode default)
+- **Routing**: Wouter
+- **Testing**: Vitest + React Testing Library
+- **Deployment**: GitHub Pages (via GitHub Actions)
 
-## React Compiler
+## Local Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-## Expanding the Oxlint configuration
+2. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+3. **Run the test suite:**
+   ```bash
+   npm run test
+   ```
+
+## Deployment
+This project is configured to deploy automatically to GitHub Pages via GitHub Actions. Any push to the `main` branch will trigger a production build and deploy to the `gh-pages` environment.
