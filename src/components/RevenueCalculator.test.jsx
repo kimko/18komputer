@@ -63,8 +63,18 @@ describe('RevenueCalculator Component', () => {
     fireEvent.click(screen.getByRole('button', { name: '50' }));
     fireEvent.click(screen.getByRole('button', { name: '20' }));
     
-    // Total should be 110
-    expect(screen.getByText('Total: $110')).toBeInTheDocument();
+    // Total should be 110, Stops: 3
+    expect(screen.getByText(/Total: \$110/)).toBeInTheDocument();
+    expect(screen.getByText(/\(3 stops\)/)).toBeInTheDocument();
+    
+    // Remove the 50 stop (which is at index 1, but we can query by aria-label)
+    // We added aria-labels to the remove buttons to distinguish them from the numpad
+    const remove50Btn = screen.getByRole('button', { name: 'Remove stop 50' });
+    fireEvent.click(remove50Btn);
+    
+    // Total should now be 60, Stops: 2
+    expect(screen.getByText(/Total: \$60/)).toBeInTheDocument();
+    expect(screen.getByText(/\(2 stops\)/)).toBeInTheDocument();
     
     // Submit Revenue
     const submitBtn = screen.getByRole('button', { name: /Submit Revenue/i });
@@ -73,11 +83,12 @@ describe('RevenueCalculator Component', () => {
     await waitFor(() => {
       expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
         companyORs: [
-          { companyId: 'PRR', revenue: 110 }
+          { companyId: 'PRR', revenue: 60 }
         ]
       });
       // Should clear the calculator after submission
-      expect(screen.getByText('Total: $0')).toBeInTheDocument();
+      expect(screen.getByText(/Total: \$0/)).toBeInTheDocument();
+      expect(screen.getByText(/\(0 stops\)/)).toBeInTheDocument();
     });
   });
 
@@ -87,9 +98,9 @@ describe('RevenueCalculator Component', () => {
     
     fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
     fireEvent.click(screen.getByRole('button', { name: '30' }));
-    expect(screen.getByText('Total: $30')).toBeInTheDocument();
+    expect(screen.getByText(/Total: \$30/)).toBeInTheDocument();
     
     fireEvent.click(screen.getByRole('button', { name: /Clear/i }));
-    expect(screen.getByText('Total: $0')).toBeInTheDocument();
+    expect(screen.getByText(/Total: \$0/)).toBeInTheDocument();
   });
 });

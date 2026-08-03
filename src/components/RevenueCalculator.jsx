@@ -45,6 +45,10 @@ export default function RevenueCalculator() {
     setStops(prev => [...prev, val]);
   };
 
+  const handleRemoveStop = (indexToRemove) => {
+    setStops(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleClear = () => {
     setStops([]);
   };
@@ -114,9 +118,28 @@ export default function RevenueCalculator() {
 
         <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200" mb="6">
           <Flex justify="space-between" align="center" mb="6">
-            <VStack align="start" gap="0">
-              <Text color="gray.400" fontSize="sm">Stops: {stops.length > 0 ? stops.join(' + ') : 'None'}</Text>
-              <Heading size="2xl" color="white">Total: ${currentTotal}</Heading>
+            <VStack align="start" gap="2">
+              <Flex wrap="wrap" gap="1" align="center" minH="32px">
+                {stops.length === 0 && <Text color="gray.500" fontSize="sm">No stops added yet.</Text>}
+                {stops.map((stop, index) => (
+                  <Flex key={index} align="center">
+                    <Button 
+                      size="xs" 
+                      variant="ghost" 
+                      color="orange.300"
+                      aria-label={`Remove stop ${stop}`}
+                      onClick={() => handleRemoveStop(index)}
+                      _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+                    >
+                      {stop}
+                    </Button>
+                    {index < stops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
+                  </Flex>
+                ))}
+              </Flex>
+              <Heading size="2xl" color="white">
+                Total: ${currentTotal} <Text as="span" fontSize="lg" color="gray.400" fontWeight="normal">({stops.length} stops)</Text>
+              </Heading>
             </VStack>
             <Button variant="outline" colorPalette="red" onClick={handleClear} disabled={stops.length === 0}>
               Clear
