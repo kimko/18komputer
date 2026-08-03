@@ -219,36 +219,24 @@ export default function RevenueCalculator() {
           </Flex>
 
           <Box overflowX="auto" mb="6">
-            <Table.Root size="sm" color="white" bg="gray.800">
-              <Table.Header>
-                <Table.Row bg="gray.700">
-                  <Table.ColumnHeader color="gray.300">10%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">20%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">30%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">40%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">50%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">60%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">70%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">80%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="gray.300">90%</Table.ColumnHeader>
-                  <Table.ColumnHeader color="orange.300">100%</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.1)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.2)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.3)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.4)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.5)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.6)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.7)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.8)}</Table.Cell>
-                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.9)}</Table.Cell>
-                  <Table.Cell fontWeight="bold" color="orange.300">${isHalfPay ? Math.floor(grandTotal / 2) : grandTotal}</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            </Table.Root>
+            <Box minW="600px">
+              <SimpleGrid columns={10} bg="gray.700" borderTopRadius="md" border="1px solid" borderColor="whiteAlpha.300">
+                {['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'].map(pct => (
+                  <Center key={pct} p="2" borderRight="1px solid" borderColor="whiteAlpha.300">
+                    <Text fontWeight="bold" color={pct === '100%' ? 'orange.300' : 'gray.300'} fontSize="sm">{pct}</Text>
+                  </Center>
+                ))}
+              </SimpleGrid>
+              <SimpleGrid columns={10} bg="gray.800" borderBottomRadius="md" border="1px solid" borderTop="none" borderColor="whiteAlpha.300">
+                {[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1].map((mult, idx) => (
+                  <Center key={idx} p="2" borderRight="1px solid" borderColor="whiteAlpha.300">
+                    <Text color={mult === 1 ? 'orange.300' : 'white'} fontWeight={mult === 1 ? 'bold' : 'normal'} fontSize="sm">
+                      ${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * mult)}
+                    </Text>
+                  </Center>
+                ))}
+              </SimpleGrid>
+            </Box>
           </Box>
         </Box>
       </Box>
