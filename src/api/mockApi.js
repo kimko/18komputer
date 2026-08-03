@@ -1,4 +1,4 @@
-const STORAGE_KEY = '18xxc_games';
+const STORAGE_KEY = '18komputer_games';
 
 // Helper to simulate network latency
 const delay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));

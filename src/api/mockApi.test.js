@@ -19,7 +19,7 @@ describe('Mock API (LocalStorage)', () => {
     });
 
     // Verify it was saved to localStorage
-    const saved = JSON.parse(localStorage.getItem('18xxc_games'));
+    const saved = JSON.parse(localStorage.getItem('18komputer_games'));
     expect(saved[game.id]).toBeDefined();
     expect(saved[game.id].gameId).toBe('1830');
   });
