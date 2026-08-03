@@ -244,15 +244,6 @@ export default function RevenueCalculator() {
               </Table.Body>
             </Table.Root>
           </Box>
-
-          <Flex gap="4" justify="center">
-            <Button size="lg" colorPalette="red" variant="outline" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('withhold')}>
-              Withhold
-            </Button>
-            <Button size="lg" colorPalette="green" variant="solid" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit(isHalfPay ? 'half' : 'payout')}>
-              Pay Out
-            </Button>
-          </Flex>
         </Box>
       </Box>
     </Box>

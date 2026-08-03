@@ -107,17 +107,5 @@ describe('RevenueCalculator Component', () => {
     
     // Check payout table updates (10% of 50 should be $5)
     expect(screen.getByText('$5')).toBeInTheDocument();
-    
-    // Submit "Pay Out"
-    const payoutBtn = screen.getByRole('button', { name: /^Pay Out$/i });
-    fireEvent.click(payoutBtn);
-    
-    await waitFor(() => {
-      expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
-        companyORs: [
-          { companyId: 'PRR', revenue: 100, decision: 'half' }
-        ]
-      });
-    });
   });
 });
