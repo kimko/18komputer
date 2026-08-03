@@ -18,7 +18,7 @@ While there is no user-facing UI built just yet, the application's underlying da
 The central landing page has been implemented, serving as the user's primary entry point.
 - **UI:** A sleek, glassmorphism-styled dashboard utilizing a dark gray and teal color palette.
 - **Actions & Routing:**
-  - **NEW GAME:** Routes to `/new` (future game selection and player setup).
+  - **NEW GAME:** Routes to `/new`. Implements a form to select one of the 70 supported 18xx titles from a dropdown, add player names dynamically to a roster, and dispatch the data to the API state manager to initialize a new instance.
   - **RESUME GAME:** Routes to `/resume` (future existing game loader).
   - **USER MANAGEMENT:** Routes to `/users` (future player profile settings).
 

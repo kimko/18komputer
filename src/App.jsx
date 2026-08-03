@@ -1,14 +1,12 @@
 import { Route, Switch } from 'wouter';
 import MainMenu from './components/MainMenu.jsx';
+import NewGame from './components/NewGame.jsx';
 
 function App() {
   return (
     <Switch>
       <Route path="/" component={MainMenu} />
-      <Route path="/new">
-        {/* Placeholder for New Game */}
-        <div style={{ color: 'white', padding: '2rem' }}>New Game (Coming Soon)</div>
-      </Route>
+      <Route path="/new" component={NewGame} />
       <Route path="/resume">
         {/* Placeholder for Resume Game */}
         <div style={{ color: 'white', padding: '2rem' }}>Resume Game (Coming Soon)</div>
