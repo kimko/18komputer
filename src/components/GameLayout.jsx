@@ -15,7 +15,8 @@ export default function GameLayout({ children }) {
       <Flex 
         as="nav" 
         bg="gray.800" 
-        p="4" 
+        px="4" 
+        py="2"
         align="center" 
         justify="space-between"
         borderBottom="1px solid"
@@ -24,11 +25,11 @@ export default function GameLayout({ children }) {
         top="0"
         zIndex="10"
       >
-        <Heading as="h1" size="md" color="orange.400">
+        <Heading as="h1" size="sm" color="orange.400">
           <Link href="/">18komputer</Link>
         </Heading>
         
-        <Flex gap="4">
+        <Flex gap="1" flexWrap="wrap" justify="flex-end">
           <Link href={`/game/${gameId}/dashboard`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
               Dashboard
