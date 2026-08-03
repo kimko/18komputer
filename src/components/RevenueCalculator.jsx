@@ -10,8 +10,8 @@ export default function RevenueCalculator() {
   const [gameInstance, setGameInstance] = useState(null);
   
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
-  // State for multiple trains
   const [trains, setTrains] = useState([{ id: 1, stops: [] }]);
+  const [isHalfPay, setIsHalfPay] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -85,6 +85,7 @@ export default function RevenueCalculator() {
       
       // Reset calc
       setTrains([{ id: Date.now(), stops: [] }]);
+      setIsHalfPay(false);
     } catch (err) {
       console.error(err);
     } finally {
@@ -193,7 +194,30 @@ export default function RevenueCalculator() {
         <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="orange.400" mb="6">
           <Heading size="2xl" color="orange.400" textAlign="center" mb="6">Grand Total: ${grandTotal}</Heading>
           
-          <Text fontWeight="bold" mb="4">Revenue Per Share (Payout)</Text>
+          <Flex justify="space-between" align="center" mb="4">
+            <Text fontWeight="bold">Revenue Per Share (Payout)</Text>
+            <Flex>
+              <Button 
+                size="sm" 
+                variant={!isHalfPay ? "solid" : "outline"} 
+                colorPalette="orange" 
+                onClick={() => setIsHalfPay(false)}
+                borderRightRadius={0}
+              >
+                Full Pay
+              </Button>
+              <Button 
+                size="sm" 
+                variant={isHalfPay ? "solid" : "outline"} 
+                colorPalette="orange" 
+                onClick={() => setIsHalfPay(true)}
+                borderLeftRadius={0}
+              >
+                Half Pay
+              </Button>
+            </Flex>
+          </Flex>
+
           <Box overflowX="auto" mb="6">
             <Table.Root size="sm" variant="line" colorScheme="gray">
               <Table.Header>
@@ -209,13 +233,13 @@ export default function RevenueCalculator() {
               </Table.Header>
               <Table.Body>
                 <Table.Row>
-                  <Table.Cell>${Math.floor(grandTotal * 0.1)}</Table.Cell>
-                  <Table.Cell>${Math.floor(grandTotal * 0.2)}</Table.Cell>
-                  <Table.Cell>${Math.floor(grandTotal * 0.3)}</Table.Cell>
-                  <Table.Cell>${Math.floor(grandTotal * 0.4)}</Table.Cell>
-                  <Table.Cell>${Math.floor(grandTotal * 0.5)}</Table.Cell>
-                  <Table.Cell>${Math.floor(grandTotal * 0.6)}</Table.Cell>
-                  <Table.Cell fontWeight="bold" color="orange.300">${grandTotal}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.1)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.2)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.3)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.4)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.5)}</Table.Cell>
+                  <Table.Cell>${Math.floor((isHalfPay ? grandTotal / 2 : grandTotal) * 0.6)}</Table.Cell>
+                  <Table.Cell fontWeight="bold" color="orange.300">${isHalfPay ? Math.floor(grandTotal / 2) : grandTotal}</Table.Cell>
                 </Table.Row>
               </Table.Body>
             </Table.Root>
@@ -223,13 +247,10 @@ export default function RevenueCalculator() {
 
           <Flex gap="4" justify="center">
             <Button size="lg" colorPalette="red" variant="outline" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('withhold')}>
-              Withhold 100%
+              Withhold
             </Button>
-            <Button size="lg" colorPalette="yellow" variant="outline" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('half')}>
-              Half Pay
-            </Button>
-            <Button size="lg" colorPalette="green" variant="solid" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit('payout')}>
-              Pay Out 100%
+            <Button size="lg" colorPalette="green" variant="solid" flex="1" disabled={!selectedCompanyId || submitting} onClick={() => handleSubmit(isHalfPay ? 'half' : 'payout')}>
+              Pay Out
             </Button>
           </Flex>
         </Box>

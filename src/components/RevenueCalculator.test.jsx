@@ -97,18 +97,25 @@ describe('RevenueCalculator Component', () => {
     // Make total 100 for easy math
     fireEvent.click(screen.getByRole('button', { name: '100' }));
     
-    // Check payout table (10% should be $10)
+    // Check payout table (10% should be $10 on full pay)
     expect(screen.getByText('10%')).toBeInTheDocument();
     expect(screen.getByText('$10')).toBeInTheDocument();
     
-    // Submit "Pay Out 100%"
-    const payoutBtn = screen.getByRole('button', { name: /Pay Out 100%/i });
+    // Toggle to Half Pay
+    const halfPayToggle = screen.getByRole('button', { name: /Half Pay/i });
+    fireEvent.click(halfPayToggle);
+    
+    // Check payout table updates (10% of 50 should be $5)
+    expect(screen.getByText('$5')).toBeInTheDocument();
+    
+    // Submit "Pay Out"
+    const payoutBtn = screen.getByRole('button', { name: /^Pay Out$/i });
     fireEvent.click(payoutBtn);
     
     await waitFor(() => {
       expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
         companyORs: [
-          { companyId: 'PRR', revenue: 100, decision: 'payout' }
+          { companyId: 'PRR', revenue: 100, decision: 'half' }
         ]
       });
     });
