@@ -20,3 +20,4 @@ Before writing code, always reference:
 3. **State:** Keep Phase 1 state management clean and localized, masking `localStorage` interactions behind async functions to easily swap them for standard `fetch` API calls in Phase 2.
 4. **Task Tracking:** Always refer to and update the `TODO.md` file upon completing major milestones.
 5. **Version Control:** Always do incremental commits for easy rollback and branching. Keep commit messages terse.
+6. **User Journey:** Always update the `USER_JOURNEY.md` document every time a new feature is completed to reflect all current capabilities of the app.
