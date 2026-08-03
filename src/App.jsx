@@ -1,13 +1,16 @@
-import { Route, Switch } from 'wouter';
+import { Route, Switch, Router } from 'wouter';
 import MainMenu from './components/MainMenu.jsx';
 import NewGame from './components/NewGame.jsx';
 import RaiseFunds from './components/RaiseFunds.jsx';
 import GameLayout from './components/GameLayout.jsx';
 import RevenueCalculator from './components/RevenueCalculator.jsx';
 
+const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
+
 function App() {
   return (
-    <GameLayout>
+    <Router base={base}>
+      <GameLayout>
       <Switch>
       <Route path="/" component={MainMenu} />
       <Route path="/new" component={NewGame} />
@@ -24,8 +27,9 @@ function App() {
       <Route>
         <div style={{ color: 'white', padding: '2rem' }}>404 Not Found</div>
       </Route>
-    </Switch>
-    </GameLayout>
+      </Switch>
+      </GameLayout>
+    </Router>
   )
 }
 
