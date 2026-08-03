@@ -39,5 +39,15 @@ The initial game setup flow has been implemented.
   - Upon activation, a native dropdown appears allowing the user to select the company's initial par/market value (restricted only to the values valid for that specific 18xx title).
   - Completing setup merges these active companies into the game instance via the API state manager and routes the user to the dashboard.
 
+### 5. Revenue Calculator
+The core utility for running Operating Rounds has been implemented.
+- **UI:** A mobile-first, touch-friendly calculator layout optimized for rapid data entry.
+- **Features:**
+  - Dynamic selector for only the companies currently marked as "active".
+  - A grid of touch-friendly number pad buttons representing common stop values (10 through 100).
+  - A real-time running total display with an itemized string of tapped stops (e.g., `Stops: 40 + 50 + 20`).
+  - Clear and Undo capabilities.
+- **Data Flow:** Submitting the calculated revenue attaches an OR record (Operating Round) to the company within the mock API, paving the way for the final dashboard.
+
 ---
-*Next up: Revenue Calculator.*
+*Next up: Company Values & Results (Dashboard).*

@@ -11,7 +11,7 @@
 - [x] **Main Menu:** TDD the landing hub (New Game, Resume Game, User Management).
 - [x] **State API Mock:** TDD the `localStorage` manager that mimics asynchronous REST API calls.
 - [x] **Raise Funds (Setup):** TDD the form to activate companies and set initial market/par values.
-- [ ] **Revenue Calculator:** TDD the touch-friendly train revenue calculator with dynamic stops, multipliers, and bonuses.
+- [x] **Revenue Calculator:** TDD the touch-friendly train revenue calculator with dynamic stops, multipliers, and bonuses.
 - [ ] **Company Values & Results:** TDD the final dashboard (Company ORs Table, Player Assets Table, Net Worth).
 
 ## Phase 2: Backend Integration (Future)
