@@ -7,6 +7,7 @@ import gameIndex from '../data/games/index.json';
 export default function NewGame() {
   const [, navigate] = useLocation();
   const [selectedGame, setSelectedGame] = useState(gameIndex[0]?.id || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [players, setPlayers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,10 +62,28 @@ export default function NewGame() {
           </Box>
 
           <Box>
-            <Text mb="2" fontWeight="bold">Select Game</Text>
+            <Flex justify="space-between" align="center" mb="2">
+              <Text fontWeight="bold">Select Game</Text>
+              <Input
+                size="sm"
+                w="200px"
+                placeholder="Search titles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                bg="gray.700"
+                border="none"
+              />
+            </Flex>
             <Box maxH="200px" overflowY="auto" border="1px solid" borderColor="whiteAlpha.200" borderRadius="md" p="2" bg="gray.800">
               <VStack align="stretch" gap="1">
-                {gameIndex.map((game) => (
+                {gameIndex
+                  .filter(game => {
+                    const term = searchQuery.toLowerCase().replace(/\*/g, '');
+                    const name = game.name?.toLowerCase() || '';
+                    const id = game.id.toLowerCase();
+                    return name.includes(term) || id.includes(term);
+                  })
+                  .map((game) => (
                   <Button
                     key={game.id}
                     justifyContent="flex-start"
