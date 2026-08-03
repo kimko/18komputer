@@ -69,6 +69,20 @@ export async function updateGameState(instanceId, updates) {
   return db[instanceId];
 }
 
+export async function updateGamePlayers(instanceId, players) {
+  await delay();
+  const db = readStorage();
+  
+  if (!db[instanceId]) {
+    throw new Error('Game not found');
+  }
+  
+  db[instanceId].players = players;
+  writeStorage(db);
+  
+  return db[instanceId];
+}
+
 export async function getGamesList() {
   await delay();
   const db = readStorage();

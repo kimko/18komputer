@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Heading, Center, Spinner, Text, Table, Input } from '@chakra-ui/react';
+import { Box, Heading, Center, Spinner, Text, Table, Input, Flex, Button, IconButton } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { getGame, updateGameState } from '../api/mockApi.js';
+import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
@@ -12,6 +12,7 @@ export default function Dashboard() {
     shareValues: {},
     playerAssets: {}
   });
+  const [newPlayerName, setNewPlayerName] = useState('');
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -47,6 +48,23 @@ export default function Dashboard() {
     const nextState = { ...dashboardState, ...updates };
     setDashboardState(nextState);
     updateGameState(gameInstance.id, { dashboardState: nextState }).catch(console.error);
+  };
+
+  const handleAddPlayer = async (e) => {
+    e.preventDefault();
+    const name = newPlayerName.trim();
+    if (name && !players.includes(name)) {
+      const updatedPlayers = [...players, name];
+      setGameInstance(prev => ({ ...prev, players: updatedPlayers }));
+      setNewPlayerName('');
+      await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
+    }
+  };
+
+  const handleRemovePlayer = async (playerToRemove) => {
+    const updatedPlayers = players.filter(p => p !== playerToRemove);
+    setGameInstance(prev => ({ ...prev, players: updatedPlayers }));
+    await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
   };
 
   const handleORChange = (companyId, orIndex, value) => {
@@ -149,14 +167,46 @@ export default function Dashboard() {
             </Table.Root>
           </Box>
 
-          <Heading as="h3" size="lg" color="teal.400" mb="4">Player Net Worth</Heading>
+          <Flex justify="space-between" align="center" mb="4" wrap="wrap" gap="4">
+            <Heading as="h3" size="lg" color="teal.400">Player Net Worth</Heading>
+            <form onSubmit={handleAddPlayer}>
+              <Flex gap="2">
+                <Input 
+                  size="sm" 
+                  w="150px" 
+                  placeholder="New player..." 
+                  value={newPlayerName}
+                  onChange={(e) => setNewPlayerName(e.target.value)}
+                  bg="gray.700"
+                  border="none"
+                />
+                <Button size="sm" type="submit" colorPalette="teal">Add</Button>
+              </Flex>
+            </form>
+          </Flex>
+          
           <Box overflowX="auto" bg="gray.800" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200">
             <Table.Root size="sm" variant="line">
               <Table.Header>
                 <Table.Row bg="gray.700">
                   <Table.ColumnHeader color="white">Asset / Player</Table.ColumnHeader>
                   {players.map(p => (
-                    <Table.ColumnHeader key={p} color="white">{p}</Table.ColumnHeader>
+                    <Table.ColumnHeader key={p} color="white">
+                      <Flex align="center" justify="space-between">
+                        <Text>{p}</Text>
+                        <IconButton 
+                          size="xs" 
+                          variant="ghost" 
+                          colorPalette="red" 
+                          aria-label="Remove player" 
+                          onClick={() => handleRemovePlayer(p)}
+                          h="20px"
+                          minW="20px"
+                        >
+                          ✕
+                        </IconButton>
+                      </Flex>
+                    </Table.ColumnHeader>
                   ))}
                 </Table.Row>
               </Table.Header>
