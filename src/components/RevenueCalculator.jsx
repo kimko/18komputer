@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { getGame } from '../api/mockApi.js';
+import { getGame, updateGameState } from '../api/mockApi.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -19,10 +19,17 @@ export default function RevenueCalculator() {
     if (!selectedCompanyId) return;
     setCompanyStates(prev => {
       const currentState = prev[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false };
-      return {
+      const nextCompanyStates = {
         ...prev,
         [selectedCompanyId]: { ...currentState, ...updates }
       };
+      
+      // Fire-and-forget background save to API
+      if (gameInstance) {
+        updateGameState(gameInstance.id, { calculatorState: nextCompanyStates }).catch(console.error);
+      }
+      
+      return nextCompanyStates;
     });
   };
 
@@ -37,6 +44,9 @@ export default function RevenueCalculator() {
         setGameInstance(data);
         if (data.state?.activeCompanies?.length > 0) {
           setSelectedCompanyId(data.state.activeCompanies[0].shortName);
+        }
+        if (data.state?.calculatorState) {
+          setCompanyStates(data.state.calculatorState);
         }
       } catch (err) {
         console.error(err);

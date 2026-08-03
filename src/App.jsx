@@ -4,6 +4,7 @@ import NewGame from './components/NewGame.jsx';
 import RaiseFunds from './components/RaiseFunds.jsx';
 import GameLayout from './components/GameLayout.jsx';
 import RevenueCalculator from './components/RevenueCalculator.jsx';
+import Dashboard from './components/Dashboard.jsx';
 
 const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -18,6 +19,7 @@ function App() {
         {/* Placeholder for Resume Game */}
         <div style={{ color: 'white', padding: '2rem' }}>Resume Game (Coming Soon)</div>
       </Route>
+      <Route path="/game/:id/dashboard" component={Dashboard} />
       <Route path="/game/:id/calculator" component={RevenueCalculator} />
       <Route path="/game/:id/setup" component={RaiseFunds} />
       <Route path="/users">
