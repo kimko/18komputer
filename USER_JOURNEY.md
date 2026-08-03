@@ -14,5 +14,13 @@ While there is no user-facing UI built just yet, the application's underlying da
   - Custom `revenueBonuses` (e.g., "Bridge", "Coal" stops).
 - **Index:** A global `index.json` manifest is available to quickly populate dropdowns and game selection screens without loading massive datasets on startup.
 
+### 2. Main Menu & Navigation Hub
+The central landing page has been implemented, serving as the user's primary entry point.
+- **UI:** A sleek, glassmorphism-styled dashboard utilizing a dark gray and teal color palette.
+- **Actions & Routing:**
+  - **NEW GAME:** Routes to `/new` (future game selection and player setup).
+  - **RESUME GAME:** Routes to `/resume` (future existing game loader).
+  - **USER MANAGEMENT:** Routes to `/users` (future player profile settings).
+
 ---
-*Next up: Main Menu (New Game / Resume Game / User Management).*
+*Next up: State API Mock (`localStorage` implementation) and the Raise Funds setup flow.*

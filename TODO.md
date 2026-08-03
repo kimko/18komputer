@@ -8,7 +8,7 @@
 - [x] Generate the `index.json` manifest of all available games.
 
 ## Phase 1: Core UI Implementation
-- [ ] **Main Menu:** TDD the landing hub (New Game, Resume Game, User Management).
+- [x] **Main Menu:** TDD the landing hub (New Game, Resume Game, User Management).
 - [ ] **State API Mock:** TDD the `localStorage` manager that mimics asynchronous REST API calls.
 - [ ] **Raise Funds (Setup):** TDD the form to activate companies and set initial market/par values.
 - [ ] **Revenue Calculator:** TDD the touch-friendly train revenue calculator with dynamic stops, multipliers, and bonuses.
