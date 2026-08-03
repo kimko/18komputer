@@ -39,7 +39,9 @@ export default function RevenueCalculator() {
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const activeCompanies = gameInstance.state?.activeCompanies || [];
-  const grandTotal = trains.reduce((sum, t) => sum + t.stops.reduce((s, v) => s + v, 0), 0);
+  const grandTotal = trains
+    .filter(t => !t.isExcluded)
+    .reduce((sum, t) => sum + t.stops.reduce((s, v) => s + v, 0), 0);
 
   const handleAddStop = (trainId, val) => {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [...t.stops, val] } : t));
@@ -55,6 +57,10 @@ export default function RevenueCalculator() {
 
   const handleRemoveTrain = (trainId) => {
     setTrains(prev => prev.filter(t => t.id !== trainId));
+  };
+
+  const handleToggleExclude = (trainId) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, isExcluded: !t.isExcluded } : t));
   };
 
   const handleCopyTrain = (trainToCopy) => {
@@ -129,10 +135,21 @@ export default function RevenueCalculator() {
           {trains.map((train, i) => {
             const trainTotal = train.stops.reduce((s, v) => s + v, 0);
             return (
-              <Box key={train.id} bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200">
+              <Box 
+                key={train.id} 
+                bg="gray.800" 
+                p="6" 
+                borderRadius="md" 
+                border="1px solid" 
+                borderColor={train.isExcluded ? "gray.600" : "whiteAlpha.200"}
+                opacity={train.isExcluded ? 0.6 : 1}
+                transition="opacity 0.2s"
+              >
                 <Flex justify="space-between" align="center" mb="4">
                   <VStack align="start" gap="2">
-                    <Heading size="md" color="white">Train {i + 1} Total: ${trainTotal}</Heading>
+                    <Heading size="md" color={train.isExcluded ? "gray.400" : "white"}>
+                      Train {i + 1} Total: ${trainTotal} {train.isExcluded && "(Excluded)"}
+                    </Heading>
                     <Flex wrap="wrap" gap="1" align="center" minH="32px">
                       {train.stops.length === 0 && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
                       {train.stops.map((stop, index) => (
@@ -158,6 +175,9 @@ export default function RevenueCalculator() {
                     </Button>
                     <Button size="xs" variant="outline" colorPalette="orange" onClick={() => handleCopyTrain(train)}>
                       Copy Train
+                    </Button>
+                    <Button size="xs" variant={train.isExcluded ? "solid" : "ghost"} colorPalette={train.isExcluded ? "green" : "gray"} onClick={() => handleToggleExclude(train.id)}>
+                      {train.isExcluded ? "Include" : "Exclude"}
                     </Button>
                     {trains.length > 1 && (
                       <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemoveTrain(train.id)}>

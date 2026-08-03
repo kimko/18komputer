@@ -80,6 +80,20 @@ describe('RevenueCalculator Component', () => {
     // Grand total: 90 + 90 + 20 = 200
     expect(screen.getByText(/Grand Total: \$200/)).toBeInTheDocument();
 
+    // Exclude train 1
+    const excludeBtns = screen.getAllByRole('button', { name: /Exclude/i });
+    fireEvent.click(excludeBtns[0]);
+    
+    // Grand total: (90 excluded) + 90 + 20 = 110
+    expect(screen.getByText(/Grand Total: \$110/)).toBeInTheDocument();
+    
+    // Re-include train 1
+    const includeBtns = screen.getAllByRole('button', { name: /Include/i });
+    fireEvent.click(includeBtns[0]);
+    
+    // Grand total back to 200
+    expect(screen.getByText(/Grand Total: \$200/)).toBeInTheDocument();
+
     // Remove train 2
     const removeTrainBtns = screen.getAllByRole('button', { name: /Remove Train/i });
     fireEvent.click(removeTrainBtns[1]); // Remove the copied train
