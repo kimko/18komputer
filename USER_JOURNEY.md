@@ -31,5 +31,13 @@ An asynchronous API layer has been implemented to handle game state.
   - `updateGameState(instanceId, updates)`: Deep merges incoming state modifications (e.g., active companies, player assets).
   - `getGamesList()`: Retrieves a catalog of all saved instances, sorted by creation date (ready for the 'Resume Game' menu).
 
+### 4. Raise Funds (Setup Phase)
+The initial game setup flow has been implemented.
+- **UI:** A scrollable list of all valid companies for the selected 18xx title, displaying their full names, short names, and dynamically applying their correct hex market colors as borders.
+- **Actions:**
+  - Users can activate/deactivate companies dynamically.
+  - Upon activation, a native dropdown appears allowing the user to select the company's initial par/market value (restricted only to the values valid for that specific 18xx title).
+  - Completing setup merges these active companies into the game instance via the API state manager and routes the user to the dashboard.
+
 ---
-*Next up: Raise Funds (Setup) Flow.*
+*Next up: Revenue Calculator.*
