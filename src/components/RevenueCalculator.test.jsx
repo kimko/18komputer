@@ -67,11 +67,16 @@ describe('RevenueCalculator Component', () => {
     // Now there should be two trains with 90 each, grand total 180
     expect(screen.getByText(/Grand Total: \$180/)).toBeInTheDocument();
 
-    // Add a new empty train
-    fireEvent.click(screen.getByRole('button', { name: /Add Train/i }));
+    // Add an empty train by copying and clearing
+    const copyTrainBtns = screen.getAllByRole('button', { name: /Copy Train/i });
+    fireEvent.click(copyTrainBtns[1]); // Copy train 2
     
     // Now there should be 3 numpads
     expect(screen.getAllByRole('button', { name: '40' })).toHaveLength(3);
+
+    // Clear train 3
+    const clearBtns = screen.getAllByRole('button', { name: /^Clear$/i });
+    fireEvent.click(clearBtns[2]); // Clear train 3
     
     // Add 20 to train 3
     const numpads20 = screen.getAllByRole('button', { name: '20' });
@@ -86,7 +91,7 @@ describe('RevenueCalculator Component', () => {
     
     // Grand total: (90 excluded) + 90 + 20 = 110
     expect(screen.getByText(/Grand Total: \$110/)).toBeInTheDocument();
-    
+
     // Re-include train 1
     const includeBtns = screen.getAllByRole('button', { name: /Include/i });
     fireEvent.click(includeBtns[0]);

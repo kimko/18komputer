@@ -67,10 +67,6 @@ export default function RevenueCalculator() {
     setTrains(prev => [...prev, { id: Date.now(), stops: [...trainToCopy.stops] }]);
   };
 
-  const handleAddTrain = () => {
-    setTrains(prev => [...prev, { id: Date.now(), stops: [] }]);
-  };
-
   const handleSubmit = async (decision) => {
     if (!selectedCompanyId) return;
     
@@ -210,10 +206,6 @@ export default function RevenueCalculator() {
             );
           })}
         </VStack>
-
-        <Button size="lg" variant="outline" colorPalette="gray" w="100%" mb="8" onClick={handleAddTrain}>
-          + Add Train
-        </Button>
 
         <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="orange.400" mb="6">
           <Heading size="2xl" color="orange.400" textAlign="center" mb="6">Grand Total: ${grandTotal}</Heading>
