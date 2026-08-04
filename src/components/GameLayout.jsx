@@ -72,7 +72,7 @@ export default function GameLayout({ children }) {
       >
         <Link href={`/game/${gameId}/setup`}>
           <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
-            Activate Company
+            Company
           </Button>
         </Link>
         <Link href={`/game/${gameId}/calculator`}>

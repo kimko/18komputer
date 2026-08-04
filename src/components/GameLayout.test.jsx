@@ -34,8 +34,8 @@ describe('GameLayout', () => {
     
     expect(screen.getByText('Child Content')).toBeInTheDocument();
     
-    // We expect 2 of each because desktop and mobile navs are rendered
-    expect(screen.getAllByText('Activate Company').length).toBe(2);
+    expect(screen.getAllByText('Activate Company').length).toBe(1);
+    expect(screen.getAllByText('Company').length).toBe(1);
     expect(screen.getAllByText('Calculator').length).toBe(2);
     expect(screen.getAllByText('Results').length).toBe(2);
   });
