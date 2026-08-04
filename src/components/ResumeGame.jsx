@@ -7,6 +7,7 @@ export default function ResumeGame() {
   const [, navigate] = useLocation();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,6 +17,7 @@ export default function ResumeGame() {
         if (isMounted) setGames(list);
       } catch (err) {
         console.error('Error fetching games list:', err);
+        if (isMounted) setError('Failed to load games data. Storage might be corrupted.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -27,6 +29,13 @@ export default function ResumeGame() {
   }, []);
 
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
+
+  if (error) return (
+    <Center h="100vh" bg="gray.900" flexDirection="column" gap="4">
+      <Text color="red.400" fontSize="xl">{error}</Text>
+      <Button colorPalette="orange" onClick={() => { localStorage.removeItem('18komputer_games'); window.location.reload(); }}>Clear Data & Reload</Button>
+    </Center>
+  );
 
   return (
     <Box minH="100vh" bg="gray.900" color="white" p="8">

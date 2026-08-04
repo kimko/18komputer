@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import Dashboard from './Dashboard.jsx';
@@ -121,7 +121,8 @@ describe('Dashboard', () => {
     fireEvent.click(screen.getAllByText('40%')[0]);
     expect(screen.getByText("Set Alice's shares for")).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '50%' }));
-    
-    expect(updateGameState).toHaveBeenCalledTimes(4);
+    await waitFor(() => {
+      expect(updateGameState).toHaveBeenCalledTimes(1);
+    }, { timeout: 2000 });
   });
 });

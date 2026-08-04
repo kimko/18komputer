@@ -1,54 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, Input } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { getGame, updateGameState } from '../api/mockApi.js';
+import { useGameData } from '../hooks/useGameData.js';
 import { getContrastColor } from '../utils/colorUtils.js';
 
 export default function ActivateCompany() {
   const [match, params] = useRoute('/game/:id/setup');
-
-  const [loading, setLoading] = useState(true);
-  const [gameInstance, setGameInstance] = useState(null);
-  const [gameDef, setGameDef] = useState(null);
+  const { loading, gameInstance, updateGameStateDebounced } = useGameData(params?.id);
   const [activeCompanies, setActiveCompanies] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    if (!match || !params?.id) return;
-    
-    async function loadData() {
-      try {
-        const instance = await getGame(params.id);
-        setGameInstance(instance);
-        
-        // Dynamically import the JSON definition
-        const defModule = await import(`../data/games/${instance.gameId}.json`);
-        setGameDef(defModule.default);
-        
-        // Initialize local state if there are existing active companies
-        if (instance.state?.activeCompanies) {
-          const map = {};
-          instance.state.activeCompanies.forEach(c => {
-            map[c.shortName] = c.parValue;
-          });
-          setActiveCompanies(map);
-        }
-        
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    if (gameInstance?.state?.activeCompanies) {
+      const map = {};
+      gameInstance.state.activeCompanies.forEach(c => {
+        map[c.shortName] = c.parValue;
+      });
+      setActiveCompanies(map);
     }
-    
-    loadData();
-  }, [match, params?.id]);
+  }, [gameInstance]);
 
   if (!match) return null;
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
-  if (!gameInstance || !gameDef) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
+  if (!gameInstance || !gameInstance.staticConfig) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
-  const saveState = async (newState) => {
+  const gameDef = gameInstance.staticConfig;
+
+  const saveState = (newState) => {
     const finalCompanies = gameDef.companies
       .filter(c => newState[c.shortName] !== undefined)
       .map(c => ({
@@ -56,13 +34,7 @@ export default function ActivateCompany() {
         parValue: newState[c.shortName]
       }));
 
-    try {
-      await updateGameState(gameInstance.id, {
-        activeCompanies: finalCompanies
-      });
-    } catch (err) {
-      console.error(err);
-    }
+    updateGameStateDebounced({ activeCompanies: finalCompanies });
   };
 
   const hasPlayerShares = (shortName) => {

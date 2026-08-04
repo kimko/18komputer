@@ -113,6 +113,7 @@ export default function NewGame() {
               <Flex gap="2">
                 <Input
                   placeholder="Player Name"
+                  aria-label="Player Name"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
                   bg="gray.700"
@@ -127,10 +128,10 @@ export default function NewGame() {
 
           {players.length > 0 && (
             <VStack align="stretch" gap="2" mt="2" bg="gray.700" p="4" borderRadius="md">
-              {players.map((p, idx) => (
-                <Flex key={idx} justify="space-between" align="center">
+              {players.map((p) => (
+                <Flex key={p} justify="space-between" align="center">
                   <Text>{p}</Text>
-                  <Button size="xs" colorPalette="red" variant="outline" onClick={() => handleRemovePlayer(idx)}>
+                  <Button size="xs" colorPalette="red" variant="outline" onClick={() => handleRemovePlayer(players.indexOf(p))}>
                     Remove
                   </Button>
                 </Flex>

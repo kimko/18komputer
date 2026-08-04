@@ -9,8 +9,9 @@ export const getPlayerShareValue = (dashboardState, activeCompanies, player) => 
   const assets = dashboardState.playerAssets[player] || { shares: {} };
   let sv = 0;
   activeCompanies.forEach(c => {
+    const totalShares = c.totalShares || 10;
     const sharePct = Number(assets.shares[c.shortName] || 0);
-    sv += (sharePct / 10) * getShareValue(dashboardState, activeCompanies, c.shortName);
+    sv += (totalShares > 0 ? (sharePct / (totalShares > 0 ? (100 / totalShares) : 1)) : 0) * getShareValue(dashboardState, activeCompanies, c.shortName);
   });
   return sv;
 };
@@ -19,9 +20,10 @@ export const getPlayerTotalShares = (dashboardState, activeCompanies, player) =>
   const assets = dashboardState.playerAssets[player] || { shares: {} };
   let totalPct = 0;
   activeCompanies.forEach(c => {
-    totalPct += Number(assets.shares[c.shortName] || 0);
+    const totalShares = c.totalShares || 10;
+    totalPct += Number(assets.shares[c.shortName] || 0) / (100 / totalShares);
   });
-  return totalPct / 10;
+  return totalPct;
 };
 
 export const getCompanyOrTotal = (dashboardState, maxOr, shortName) => {
@@ -37,8 +39,11 @@ export const getPlayerOperatingIncome = (dashboardState, activeCompanies, maxOr,
   const assets = dashboardState.playerAssets[player] || { shares: {} };
   let income = 0;
   activeCompanies.forEach(c => {
+    const totalShares = c.totalShares || 10;
     const sharePct = Number(assets.shares[c.shortName] || 0);
-    income += (sharePct / 100) * getCompanyOrTotal(dashboardState, maxOr, c.shortName);
+    if (100 > 0) {
+      income += (sharePct / 100) * getCompanyOrTotal(dashboardState, maxOr, c.shortName);
+    }
   });
   return income;
 };
@@ -56,6 +61,7 @@ export const getBankShares = (dashboardState, players, companyId) => {
     const pShares = Number(dashboardState.playerAssets[p]?.shares?.[companyId] || 0);
     totalPlayerShares += pShares;
   });
+  const cInfo = dashboardState.shareValues[companyId] !== undefined ? null : null; // activeCompanies not passed, but we can assume total is 100% or 10 shares
   return Math.max(0, 100 - totalPlayerShares);
 };
 

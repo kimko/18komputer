@@ -25,7 +25,7 @@ describe('Mock API (LocalStorage)', () => {
   });
 
   it('should fetch an existing game by instance ID', async () => {
-    const created = await createGame('1817', ['Charlie']);
+    const created = await createGame('1817', ['Charlie', 'Dave']);
     const fetched = await getGame(created.id);
     expect(fetched).toEqual(created);
   });
@@ -35,7 +35,7 @@ describe('Mock API (LocalStorage)', () => {
   });
 
   it('should update the game state', async () => {
-    const game = await createGame('1846', ['Dave']);
+    const game = await createGame('1846', ['Dave', 'Eve']);
     
     const updates = {
       activeCompanies: ['PRR', 'NYC']
@@ -50,8 +50,8 @@ describe('Mock API (LocalStorage)', () => {
   });
 
   it('should return a list of all active games', async () => {
-    await createGame('1830', ['Alice']);
-    await createGame('1817', ['Bob']);
+    await createGame('1830', ['Alice', 'Dave']);
+    await createGame('1817', ['Bob', 'Eve']);
     
     const list = await getGamesList();
     expect(list).toHaveLength(2);

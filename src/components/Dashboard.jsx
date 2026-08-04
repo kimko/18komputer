@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Center, Spinner } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
+import { useGameData } from '../hooks/useGameData.js';
 
 import NumpadPopup from './popups/NumpadPopup.jsx';
 import PricePickerPopup from './popups/PricePickerPopup.jsx';
@@ -12,43 +12,17 @@ import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
-  const [loading, setLoading] = useState(true);
-  const [gameInstance, setGameInstance] = useState(null);
-  const [dashboardState, setDashboardState] = useState({
-    ors: {},
-    shareValues: {},
-    playerAssets: {}
-  });
+  const { loading, gameInstance, updateGameStateDebounced, updatePlayers } = useGameData(params?.id);
+  
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [activePopup, setActivePopup] = useState(null);
-
-  useEffect(() => {
-    if (!match || !params?.id) return;
-    
-    async function loadData() {
-      try {
-        const data = await getGame(params.id);
-        const configModule = await import(`../data/games/${data.gameId}.json`);
-        data.staticConfig = configModule.default || configModule;
-        setGameInstance(data);
-        if (data.state?.dashboardState) {
-          setDashboardState(data.state.dashboardState);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    loadData();
-  }, [match, params?.id]);
 
   if (!match) return null;
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="teal.400" size="xl" /></Center>;
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
+  const dashboardState = gameInstance.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} };
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   const maxOr = dashboardState.maxOr || gameInstance.staticConfig?.maxOr || 3;
   const players = gameInstance.players || [];
@@ -57,28 +31,27 @@ export default function Dashboard() {
     ? parseInt(gameInstance.staticConfig.maxPlayerHolding, 10) 
     : 60;
 
-  const handleAddPlayer = async (e) => {
+  const handleAddPlayer = (e) => {
     e.preventDefault();
     const name = newPlayerName.trim();
     if (name && !players.includes(name)) {
-      const updatedPlayers = [...players, name];
-      setGameInstance(prev => ({ ...prev, players: updatedPlayers }));
+      updatePlayers([...players, name]);
       setNewPlayerName('');
-      await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
     }
   };
 
-  const handleRemovePlayer = async (playerToRemove) => {
-    const updatedPlayers = players.filter(p => p !== playerToRemove);
-    setGameInstance(prev => ({ ...prev, players: updatedPlayers }));
-    await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
+  const handleRemovePlayer = (playerToRemove) => {
+    updatePlayers(players.filter(p => p !== playerToRemove));
   };
 
   const updateMaxOr = (newMax) => {
     if (newMax < 1) return;
-    const next = { ...dashboardState, maxOr: newMax };
-    setDashboardState(next);
-    updateGameState(gameInstance.id, { dashboardState: next });
+    updateGameStateDebounced({ dashboardState: { ...dashboardState, maxOr: newMax } });
+  };
+
+  const updateDashboardField = (field, updater) => {
+    const nextFieldState = typeof updater === 'function' ? updater(dashboardState[field] || {}) : updater;
+    updateGameStateDebounced({ dashboardState: { ...dashboardState, [field]: nextFieldState } });
   };
 
   return (
@@ -112,9 +85,7 @@ export default function Dashboard() {
           value={getShareValue(dashboardState, activeCompanies, activePopup.companyId)}
           options={sharePriceOptions}
           onChange={(val) => {
-            const next = { ...dashboardState.shareValues, [activePopup.companyId]: val };
-            setDashboardState(prev => ({ ...prev, shareValues: next }));
-            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, shareValues: next } });
+            updateDashboardField('shareValues', prev => ({ ...prev, [activePopup.companyId]: val }));
           }}
           onClose={() => setActivePopup(null)}
         />
@@ -129,27 +100,24 @@ export default function Dashboard() {
           onSubtitleClick={() => {
             const val = getCalculatorGrandTotal(gameInstance, activePopup.companyId);
             if (val > 0) {
-              const ors = { ...dashboardState.ors };
-              ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
-              ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
-              setDashboardState(prev => ({ ...prev, ors }));
-              updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+              updateDashboardField('ors', prev => ({
+                ...prev,
+                [activePopup.companyId]: { ...(prev[activePopup.companyId] || {}), [`or${activePopup.orIndex}`]: val }
+              }));
             }
           }}
           onCopyLast={activePopup.orIndex > 1 ? () => {
             const val = dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex - 1}`] || '';
-            const ors = { ...dashboardState.ors };
-            ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
-            ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
-            setDashboardState(prev => ({ ...prev, ors }));
-            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+            updateDashboardField('ors', prev => ({
+              ...prev,
+              [activePopup.companyId]: { ...(prev[activePopup.companyId] || {}), [`or${activePopup.orIndex}`]: val }
+            }));
           } : undefined}
           onChange={(val) => {
-            const ors = { ...dashboardState.ors };
-            ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
-            ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
-            setDashboardState(prev => ({ ...prev, ors }));
-            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+            updateDashboardField('ors', prev => ({
+              ...prev,
+              [activePopup.companyId]: { ...(prev[activePopup.companyId] || {}), [`or${activePopup.orIndex}`]: val }
+            }));
           }}
           onClose={() => setActivePopup(null)}
         />
@@ -161,11 +129,10 @@ export default function Dashboard() {
           subtitle={activePopup.player}
           value={dashboardState.playerAssets[activePopup.player]?.cash}
           onChange={(val) => {
-            const playerAssets = { ...dashboardState.playerAssets };
-            if (!playerAssets[activePopup.player]) playerAssets[activePopup.player] = { shares: {} };
-            playerAssets[activePopup.player].cash = val;
-            setDashboardState(prev => ({ ...prev, playerAssets }));
-            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, playerAssets } });
+            updateDashboardField('playerAssets', prev => ({
+              ...prev,
+              [activePopup.player]: { ...(prev[activePopup.player] || { shares: {} }), cash: val }
+            }));
           }}
           onClose={() => setActivePopup(null)}
         />
@@ -178,11 +145,13 @@ export default function Dashboard() {
           maxAvailable={Math.min(maxPlayerHolding, getBankShares(dashboardState, players, activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0))}
           value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId]}
           onChange={(val) => {
-            const playerAssets = { ...dashboardState.playerAssets };
-            if (!playerAssets[activePopup.player]) playerAssets[activePopup.player] = { shares: {} };
-            playerAssets[activePopup.player].shares[activePopup.companyId] = val;
-            setDashboardState(prev => ({ ...prev, playerAssets }));
-            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, playerAssets } });
+            updateDashboardField('playerAssets', prev => {
+              const pAssets = prev[activePopup.player] || { shares: {} };
+              return {
+                ...prev,
+                [activePopup.player]: { ...pAssets, shares: { ...pAssets.shares, [activePopup.companyId]: val } }
+              };
+            });
           }}
           onClose={() => setActivePopup(null)}
         />

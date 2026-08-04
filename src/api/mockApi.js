@@ -24,7 +24,11 @@ const readStorage = () => {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return {};
   try {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    Object.values(parsed).forEach(game => {
+      if (!game.version) game.version = 1;
+    });
+    return parsed;
   } catch (err) {
     console.error('Failed to parse localStorage data:', err);
     return {};
@@ -56,6 +60,8 @@ function deepMerge(target, source) {
 }
 
 export function createGame(gameId, players) {
+  if (!gameId || typeof gameId !== 'string') throw new Error('Invalid gameId');
+  if (!Array.isArray(players) || players.length < 2) throw new Error('Invalid players array');
   return enqueue(async () => {
     await delay();
     const db = readStorage();
@@ -68,6 +74,7 @@ export function createGame(gameId, players) {
       gameId,
       players,
       createdAt: new Date().toISOString(),
+      version: 1,
       state: {
         activeCompanies: [],
         playerAssets: {},
@@ -96,6 +103,8 @@ export function getGame(instanceId) {
 }
 
 export function updateGameState(instanceId, updates) {
+  if (!instanceId || typeof instanceId !== 'string') throw new Error('Invalid instanceId');
+  if (!updates || typeof updates !== 'object') throw new Error('Invalid updates object');
   return enqueue(async () => {
     await delay();
     const db = readStorage();

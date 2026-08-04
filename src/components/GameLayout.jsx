@@ -12,6 +12,11 @@ export default function GameLayout({ children }) {
     return <>{children}</>; // If not in a game route, just render children
   }
 
+  if (match && !gameId) {
+    navigate('/');
+    return null;
+  }
+
   return (
     <Box minH="100vh" bg="gray.900" color="white">
       {/* Top Navigation Bar (Desktop Only) */}
@@ -96,7 +101,7 @@ export default function GameLayout({ children }) {
       </Flex>
 
       {showConfirm && (
-        <Box role="dialog" aria-modal="true" aria-labelledby="modal-title" position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
+        <Box role="dialog" aria-modal="true" aria-labelledby="modal-title" position="fixed" tabIndex="-1" onKeyDown={(e) => { if(e.key === 'Escape') setShowConfirm(false); }} top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
           <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="xs" w="100%" textAlign="center">
             <Heading id="modal-title" size="md" mb="2" color="white">Are you sure?</Heading>
             <Text color="gray.300" mb="6" fontSize="sm">This will leave the current game.</Text>
