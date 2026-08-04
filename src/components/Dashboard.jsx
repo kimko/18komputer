@@ -394,7 +394,10 @@ export default function Dashboard() {
           company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
           player={activePopup.player}
           value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0}
-          maxAvailable={getBankShares(activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0)}
+          maxAvailable={Math.min(
+            gameInstance.staticConfig?.maxPlayerHolding || 60,
+            getBankShares(activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0)
+          )}
           onChange={(val) => {
             const assets = { ...dashboardState.playerAssets };
             if (!assets[activePopup.player]) assets[activePopup.player] = { cash: '', shares: {} };
