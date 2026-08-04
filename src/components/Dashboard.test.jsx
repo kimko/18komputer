@@ -94,4 +94,34 @@ describe('Dashboard', () => {
     expect(screen.getAllByText('$120').length).toBeGreaterThan(1);
     expect(screen.getByText('↳ Op Income')).toBeInTheDocument();
   });
+
+  it('opens and updates via popups', async () => {
+    renderWithChakra(<Dashboard />);
+    await screen.findByText('Company Values & Results');
+    
+    // 1. Share Value Popup
+    const shareValBtn = screen.getAllByRole('button', { name: '50' })[0]; // First 50 is share value, second is cash
+    fireEvent.click(shareValBtn);
+    expect(screen.getByText('Set final price for')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '67' }));
+    
+    // 2. OR Popup
+    fireEvent.click(screen.getByText('100'));
+    expect(screen.getByText('Set OR 1 revenue for')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '9' }));
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    
+    const cashBtn = screen.getByRole('button', { name: '20' }); // Bob's cash
+    fireEvent.click(cashBtn);
+    expect(screen.getByText('Set cash for')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+
+    // 4. Share Count Popup
+    fireEvent.click(screen.getAllByText('40%')[0]);
+    expect(screen.getByText("Set Alice's shares for")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '50%' }));
+    
+    expect(updateGameState).toHaveBeenCalledTimes(4);
+  });
 });
