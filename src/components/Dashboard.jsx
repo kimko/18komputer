@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, VStack, SimpleGrid } from '@chakra-ui/react';
+import { useEffect, useState, Fragment } from 'react';
+import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, SimpleGrid, Grid, GridItem, VStack } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
 
-function Numpad({ value, onChange, onClose }) {
+function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose }) {
   const handleType = (num) => {
     onChange(String(value || '') + num);
   };
@@ -11,63 +11,99 @@ function Numpad({ value, onChange, onClose }) {
     const str = String(value || '');
     onChange(str.slice(0, -1));
   };
+  const handleClear = () => onChange('');
   
   return (
-    <Box bg="gray.900" p="2" borderRadius="md" mt="2" border="1px solid" borderColor="whiteAlpha.200">
-      <SimpleGrid columns={3} gap="2">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-          <Button key={n} size="sm" variant="outline" colorPalette="gray" onClick={() => handleType(n)}>{n}</Button>
-        ))}
-        <Button size="sm" variant="outline" colorPalette="red" onClick={handleBackspace}>⌫</Button>
-        <Button size="sm" variant="outline" colorPalette="gray" onClick={() => handleType(0)}>0</Button>
-        <Button size="sm" colorPalette="teal" onClick={onClose}>OK</Button>
-      </SimpleGrid>
+    <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
+      <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
+        <Flex align="center" gap="2" mb="4">
+          <Text fontWeight="bold">{title}</Text>
+          {subtitle && (
+            <Box bg={badgeColor || 'gray.700'} px="2" py="1" borderRadius="md">
+              <Text fontSize="sm" color="white">{subtitle}</Text>
+            </Box>
+          )}
+        </Flex>
+        
+        <Box bg="gray.800" p="3" borderRadius="md" mb="4" textAlign="right" h="12" display="flex" alignItems="center" justifyContent="flex-end">
+          <Text fontSize="xl" fontWeight="bold">{value || '0'}</Text>
+        </Box>
+
+        <SimpleGrid columns={4} gap="2">
+          <GridItem colSpan={3}>
+            <SimpleGrid columns={3} gap="2">
+              {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(n => (
+                <Button key={n} h="12" variant="outline" colorPalette="gray" onClick={() => handleType(n)}>{n}</Button>
+              ))}
+              <Button h="12" variant="outline" colorPalette="red" onClick={handleClear}>C</Button>
+              <Button h="12" variant="outline" colorPalette="gray" onClick={() => handleType(0)}>0</Button>
+              <Button h="12" variant="outline" colorPalette="orange" onClick={handleBackspace}>⌫</Button>
+            </SimpleGrid>
+          </GridItem>
+          <GridItem colSpan={1}>
+            <VStack h="100%" gap="2" align="stretch">
+              <Button flex="1" colorPalette="teal" onClick={onClose}>OK</Button>
+            </VStack>
+          </GridItem>
+        </SimpleGrid>
+      </Box>
     </Box>
   );
 }
 
-function SharePricePicker({ options, value, onChange, onClose }) {
-  return (
-    <Box bg="gray.900" p="2" borderRadius="md" mt="2" border="1px solid" borderColor="whiteAlpha.200">
-      <SimpleGrid columns={4} gap="2">
-        {options.map(opt => (
-          <Button 
-            key={opt} 
-            size="sm" 
-            variant={Number(value) === opt ? 'solid' : 'outline'} 
-            colorPalette="orange"
-            onClick={() => {
-              onChange(opt);
-              onClose();
-            }}
-          >
-            ${opt}
-          </Button>
-        ))}
-      </SimpleGrid>
-    </Box>
-  );
-}
+function PricePickerPopup({ company, value, options, onChange, onClose }) {
+  const currentIndex = options.findIndex(opt => opt === Number(value));
+  
+  const handlePrev = () => {
+    if (currentIndex > 0) onChange(options[currentIndex - 1]);
+    else if (currentIndex === -1 && options.length > 0) onChange(options[0]);
+  };
+  
+  const handleNext = () => {
+    if (currentIndex < options.length - 1 && currentIndex !== -1) onChange(options[currentIndex + 1]);
+    else if (currentIndex === -1 && options.length > 0) onChange(options[0]);
+  };
 
-function ShareCountPicker({ value, onChange, onClose }) {
   return (
-    <Box bg="gray.900" p="2" borderRadius="md" mt="2" border="1px solid" borderColor="whiteAlpha.200">
-      <SimpleGrid columns={6} gap="2">
-        {[0,1,2,3,4,5,6,7,8,9,10].map(opt => (
-          <Button 
-            key={opt} 
-            size="sm" 
-            variant={Number(value) === opt ? 'solid' : 'outline'} 
-            colorPalette="blue"
-            onClick={() => {
-              onChange(opt);
-              onClose();
-            }}
-          >
-            {opt}
-          </Button>
-        ))}
-      </SimpleGrid>
+    <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
+      <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
+        <Flex align="center" gap="2" mb="4">
+          <Text fontWeight="bold">Set final price for</Text>
+          <Box bg={company.color || 'gray.700'} px="2" py="1" borderRadius="md">
+            <Text fontSize="sm" color="white">{company.shortName}</Text>
+          </Box>
+        </Flex>
+
+        <Flex gap="4">
+          <Box flex="1" maxH="300px" overflowY="auto">
+            <SimpleGrid columns={4} gap="2">
+              {options.slice().reverse().map(opt => (
+                <Button 
+                  key={opt} 
+                  size="sm" 
+                  variant={Number(value) === opt ? 'solid' : 'ghost'} 
+                  color={Number(value) === opt ? 'black' : 'white'}
+                  bg={Number(value) === opt ? 'white' : 'transparent'}
+                  _hover={{ bg: 'whiteAlpha.200' }}
+                  onClick={() => {
+                    onChange(opt);
+                    onClose();
+                  }}
+                >
+                  {opt}
+                </Button>
+              ))}
+            </SimpleGrid>
+          </Box>
+          
+          <VStack gap="2" w="50px">
+            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={() => onChange('')}>C</Button>
+            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={handlePrev}>←</Button>
+            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={handleNext}>→</Button>
+            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={onClose}>X</Button>
+          </VStack>
+        </Flex>
+      </Box>
     </Box>
   );
 }
@@ -83,9 +119,8 @@ export default function Dashboard() {
   });
   const [newPlayerName, setNewPlayerName] = useState('');
   
-  // Track which field is currently expanded
-  // Format: 'shareValue-PRR', 'or-PRR-1', 'cash-Alice', 'shares-Alice-PRR'
-  const [activeInput, setActiveInput] = useState(null);
+  // Track active popup state: { type: 'shareValue' | 'or' | 'cash' | 'shares', companyId?, player?, orIndex? }
+  const [activePopup, setActivePopup] = useState(null);
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -116,15 +151,9 @@ export default function Dashboard() {
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   const maxOr = gameInstance.staticConfig?.maxOr || 3;
   const players = gameInstance.players || [];
-  
-  // Fallback to parValues if sharePrices are missing
-  const sharePriceOptions = gameInstance.staticConfig?.sharePrices || gameInstance.staticConfig?.parValues || [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const sharePriceOptions = gameInstance.staticConfig?.sharePrices || gameInstance.staticConfig?.parValues || [];
 
-  const updateState = (updates) => {
-    const nextState = { ...dashboardState, ...updates };
-    setDashboardState(nextState);
-    updateGameState(gameInstance.id, { dashboardState: nextState }).catch(console.error);
-  };
+
 
   const handleAddPlayer = async (e) => {
     e.preventDefault();
@@ -143,37 +172,11 @@ export default function Dashboard() {
     await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
   };
 
-  const handleORChange = (companyId, orIndex, value) => {
-    const ors = { ...dashboardState.ors };
-    if (!ors[companyId]) ors[companyId] = {};
-    ors[companyId][`or${orIndex}`] = value;
-    updateState({ ors });
-  };
-
-  const handleShareValueChange = (companyId, value) => {
-    const shareValues = { ...dashboardState.shareValues };
-    shareValues[companyId] = value;
-    updateState({ shareValues });
-  };
-
-  const handlePlayerCashChange = (player, value) => {
-    const playerAssets = { ...dashboardState.playerAssets };
-    if (!playerAssets[player]) playerAssets[player] = { cash: '', shares: {} };
-    playerAssets[player].cash = value;
-    updateState({ playerAssets });
-  };
-
-  const handlePlayerShareChange = (player, companyId, value) => {
-    const playerAssets = { ...dashboardState.playerAssets };
-    if (!playerAssets[player]) playerAssets[player] = { cash: '', shares: {} };
-    playerAssets[player].shares[companyId] = value;
-    updateState({ playerAssets });
-  };
-
-  const getShareValue = (c) => {
-    const val = dashboardState.shareValues[c.shortName];
+  const getShareValue = (shortName) => {
+    const val = dashboardState.shareValues[shortName];
     if (val !== undefined && val !== '') return Number(val);
-    return c.initialValue || 0;
+    const c = activeCompanies.find(comp => comp.shortName === shortName);
+    return c?.initialValue || 0;
   };
 
   const getPlayerNetWorth = (player) => {
@@ -181,180 +184,173 @@ export default function Dashboard() {
     let nw = Number(assets.cash || 0);
     activeCompanies.forEach(c => {
       const sharePct = Number(assets.shares[c.shortName] || 0);
-      const shareVal = getShareValue(c);
-      nw += sharePct * shareVal;
+      nw += sharePct * getShareValue(c.shortName);
     });
     return nw;
   };
 
-  const toggleInput = (key) => {
-    setActiveInput(prev => prev === key ? null : key);
-  };
-
   return (
-    <Box p="4" pb="24">
-      <Heading as="h2" size="xl" color="teal.400" mb="6">Company Values & Results</Heading>
+    <Box p="2" pb="24" maxW="100%" overflowX="hidden">
+      <Heading as="h2" size="lg" color="teal.400" mb="4" textAlign="center">Company Values & Results</Heading>
       
-      {activeCompanies.length === 0 ? (
-        <Text color="gray.400">No active companies. Go to Raise Funds first.</Text>
-      ) : (
-        <VStack align="stretch" gap="4" mb="8">
-          {activeCompanies.map(c => (
-            <Box key={c.shortName} bg="gray.800" p="4" borderRadius="md" borderLeft="4px solid" borderLeftColor={c.color || "white"}>
-              <Heading size="md" mb="3" color={c.color || "white"}>{c.name} ({c.shortName})</Heading>
-              
-              <Flex justify="space-between" align="center" mb="2">
-                <Text color="gray.400">Share Value</Text>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  colorPalette="orange"
-                  onClick={() => toggleInput(`shareValue-${c.shortName}`)}
-                >
-                  ${getShareValue(c)}
-                </Button>
-              </Flex>
-              {activeInput === `shareValue-${c.shortName}` && (
-                <SharePricePicker 
-                  options={sharePriceOptions}
-                  value={getShareValue(c)}
-                  onChange={(val) => handleShareValueChange(c.shortName, val)}
-                  onClose={() => setActiveInput(null)}
-                />
-              )}
+      {activeCompanies.length > 0 && (
+        <Box overflowX="auto" mb="8">
+          <Grid templateColumns={`80px 100px repeat(${maxOr}, 80px)`} gap="2" alignItems="center">
+            <GridItem></GridItem>
+            <GridItem textAlign="center"><Text fontWeight="bold" color="white">Price</Text></GridItem>
+            {Array.from({ length: maxOr }).map((_, i) => (
+              <GridItem key={i} textAlign="center"><Text fontWeight="bold" color="white">OR {i + 1}</Text></GridItem>
+            ))}
 
-              <SimpleGrid columns={maxOr} gap="2" mt="4">
+            {activeCompanies.map(c => (
+              <Fragment key={c.shortName}>
+                <GridItem>
+                  <Box bg={c.color || 'gray.700'} color="white" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
+                    {c.shortName}
+                  </Box>
+                </GridItem>
+                <GridItem>
+                  <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>
+                    {getShareValue(c.shortName)}
+                  </Button>
+                </GridItem>
                 {Array.from({ length: maxOr }).map((_, i) => {
                   const val = dashboardState.ors[c.shortName]?.[`or${i + 1}`];
-                  const inputKey = `or-${c.shortName}-${i+1}`;
                   return (
-                    <Box key={i}>
-                      <Text fontSize="xs" color="gray.500" mb="1">OR {i + 1}</Text>
-                      <Button 
-                        size="sm" 
-                        w="100%"
-                        variant="outline"
-                        colorPalette="teal"
-                        onClick={() => toggleInput(inputKey)}
-                      >
-                        {val !== undefined && val !== '' ? `$${val}` : '—'}
+                    <GridItem key={i}>
+                      <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'or', companyId: c.shortName, orIndex: i + 1 })}>
+                        {val !== undefined && val !== '' ? val : ''}
                       </Button>
-                      {activeInput === inputKey && (
-                        <Box position="absolute" zIndex="10" mt="1" right="4" left="4">
-                          <Numpad 
-                            value={val}
-                            onChange={(newVal) => handleORChange(c.shortName, i + 1, newVal)}
-                            onClose={() => setActiveInput(null)}
-                          />
-                        </Box>
-                      )}
-                    </Box>
+                    </GridItem>
                   );
                 })}
-              </SimpleGrid>
-            </Box>
-          ))}
-        </VStack>
+              </Fragment>
+            ))}
+          </Grid>
+        </Box>
       )}
 
       <Flex justify="space-between" align="center" mb="4" wrap="wrap" gap="4">
         <Heading as="h3" size="lg" color="teal.400">Player Net Worth</Heading>
         <form onSubmit={handleAddPlayer}>
           <Flex gap="2">
-            <Input 
-              size="sm" 
-              w="120px" 
-              placeholder="New player..." 
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              bg="gray.700"
-              border="none"
-            />
+            <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none"/>
             <Button size="sm" type="submit" colorPalette="teal">Add</Button>
           </Flex>
         </form>
       </Flex>
       
-      {players.length === 0 ? (
-        <Text color="gray.400">No players.</Text>
-      ) : (
-        <VStack align="stretch" gap="4">
-          {players.map(p => (
-            <Box key={p} bg="gray.800" p="4" borderRadius="md" border="1px solid" borderColor="whiteAlpha.200">
-              <Flex justify="space-between" align="center" mb="4">
-                <Heading size="md" color="white">{p}</Heading>
-                <Flex align="center" gap="3">
-                  <Text fontWeight="bold" color="green.300" fontSize="lg">${getPlayerNetWorth(p)}</Text>
-                  <IconButton 
-                    size="xs" 
-                    variant="ghost" 
-                    colorPalette="red" 
-                    aria-label="Remove player" 
-                    onClick={() => handleRemovePlayer(p)}
-                  >
-                    ✕
-                  </IconButton>
+      {players.length > 0 && (
+        <Box overflowX="auto">
+          <Grid templateColumns={`100px repeat(${players.length}, 100px)`} gap="2" alignItems="center">
+            <GridItem></GridItem>
+            {players.map(p => (
+              <GridItem key={p} textAlign="center">
+                <Flex align="center" justify="center" gap="1">
+                  <Text fontWeight="bold" color="white" isTruncated>{p}</Text>
+                  <IconButton size="2xs" variant="ghost" colorPalette="red" aria-label="Remove" onClick={() => handleRemovePlayer(p)}>✕</IconButton>
                 </Flex>
-              </Flex>
+              </GridItem>
+            ))}
 
-              <Flex justify="space-between" align="center" mb="3">
-                <Text color="gray.400">Cash</Text>
-                <Box>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    colorPalette="green"
-                    onClick={() => toggleInput(`cash-${p}`)}
-                  >
-                    ${dashboardState.playerAssets[p]?.cash || 0}
-                  </Button>
-                  {activeInput === `cash-${p}` && (
-                    <Box position="absolute" zIndex="10" mt="1" right="4" left="4">
-                      <Numpad 
-                        value={dashboardState.playerAssets[p]?.cash}
-                        onChange={(newVal) => handlePlayerCashChange(p, newVal)}
-                        onClose={() => setActiveInput(null)}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Flex>
+            <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={p} textAlign="center">
+                <Text fontWeight="bold" color="green.300">${getPlayerNetWorth(p)}</Text>
+              </GridItem>
+            ))}
 
-              <VStack align="stretch" gap="2" mt="4">
-                <Text fontSize="sm" color="gray.500" fontWeight="bold">SHARES</Text>
-                <SimpleGrid columns={2} gap="2">
-                  {activeCompanies.map(c => {
-                    const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0;
-                    return (
-                      <Box key={c.shortName} bg="gray.900" p="2" borderRadius="md">
-                        <Flex justify="space-between" align="center">
-                          <Text color={c.color || "white"} fontSize="sm">{c.shortName}</Text>
-                          <Button 
-                            size="xs" 
-                            variant="outline"
-                            colorPalette="blue"
-                            onClick={() => toggleInput(`shares-${p}-${c.shortName}`)}
-                          >
-                            {shares} certs
-                          </Button>
-                        </Flex>
-                        {activeInput === `shares-${p}-${c.shortName}` && (
-                          <Box position="absolute" zIndex="10" mt="1" right="4" left="4">
-                            <ShareCountPicker 
-                              value={shares}
-                              onChange={(newVal) => handlePlayerShareChange(p, c.shortName, newVal)}
-                              onClose={() => setActiveInput(null)}
-                            />
-                          </Box>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </SimpleGrid>
-              </VStack>
-            </Box>
-          ))}
-        </VStack>
+            <GridItem><Text color="gray.400" fontSize="sm">Cash</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={p}>
+                <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'cash', player: p })}>
+                  {dashboardState.playerAssets[p]?.cash !== undefined && dashboardState.playerAssets[p]?.cash !== '' ? dashboardState.playerAssets[p]?.cash : ''}
+                </Button>
+              </GridItem>
+            ))}
+
+            {activeCompanies.map(c => (
+              <Fragment key={c.shortName}>
+                <GridItem><Text color={c.color || "white"} fontSize="sm" fontWeight="bold">{c.shortName}</Text></GridItem>
+                {players.map(p => {
+                  const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName];
+                  return (
+                    <GridItem key={p}>
+                      <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shares', player: p, companyId: c.shortName })}>
+                        {shares !== undefined && shares !== '' ? shares : ''}
+                      </Button>
+                    </GridItem>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </Grid>
+        </Box>
+      )}
+
+      {/* Popups */}
+      {activePopup?.type === 'shareValue' && (
+        <PricePickerPopup
+          company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
+          value={getShareValue(activePopup.companyId)}
+          options={sharePriceOptions}
+          onChange={(val) => {
+            const next = { ...dashboardState.shareValues, [activePopup.companyId]: val };
+            setDashboardState(prev => ({ ...prev, shareValues: next }));
+            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, shareValues: next } });
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {activePopup?.type === 'or' && (
+        <NumpadPopup
+          title={`Set OR ${activePopup.orIndex} revenue for`}
+          subtitle={activePopup.companyId}
+          badgeColor={activeCompanies.find(c => c.shortName === activePopup.companyId)?.color}
+          value={dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex}`]}
+          onChange={(val) => {
+            const ors = { ...dashboardState.ors };
+            if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+            ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
+            setDashboardState(prev => ({ ...prev, ors }));
+            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {activePopup?.type === 'cash' && (
+        <NumpadPopup
+          title="Set cash for"
+          subtitle={activePopup.player}
+          value={dashboardState.playerAssets[activePopup.player]?.cash}
+          onChange={(val) => {
+            const assets = { ...dashboardState.playerAssets };
+            if (!assets[activePopup.player]) assets[activePopup.player] = { cash: '', shares: {} };
+            assets[activePopup.player].cash = val;
+            setDashboardState(prev => ({ ...prev, playerAssets: assets }));
+            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, playerAssets: assets } });
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {activePopup?.type === 'shares' && (
+        <NumpadPopup
+          title={`Set ${activePopup.companyId} shares for`}
+          subtitle={activePopup.player}
+          badgeColor={activeCompanies.find(c => c.shortName === activePopup.companyId)?.color}
+          value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId]}
+          onChange={(val) => {
+            const assets = { ...dashboardState.playerAssets };
+            if (!assets[activePopup.player]) assets[activePopup.player] = { cash: '', shares: {} };
+            assets[activePopup.player].shares[activePopup.companyId] = val;
+            setDashboardState(prev => ({ ...prev, playerAssets: assets }));
+            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, playerAssets: assets } });
+          }}
+          onClose={() => setActivePopup(null)}
+        />
       )}
     </Box>
   );
