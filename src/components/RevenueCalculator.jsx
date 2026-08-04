@@ -184,7 +184,6 @@ export default function RevenueCalculator() {
                     <Text as="span" fontSize="sm" color="gray.400" fontWeight="normal" ml="2">
                       ({train.stops.length} {train.stops.length === 1 ? 'stop' : 'stops'})
                     </Text>
-                    {train.isExcluded && <Text as="span" ml="2" color="red.400">(Excluded)</Text>}
                   </Heading>
                   <Flex wrap="wrap" gap="1" align="center" minH="32px">
                     {train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
