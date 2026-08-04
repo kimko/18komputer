@@ -259,7 +259,7 @@ export default function Dashboard() {
     let income = 0;
     activeCompanies.forEach(c => {
       const sharePct = Number(assets.shares[c.shortName] || 0);
-      income += (sharePct / 10) * getCompanyOrTotal(c.shortName);
+      income += (sharePct / 100) * getCompanyOrTotal(c.shortName);
     });
     return income;
   };
