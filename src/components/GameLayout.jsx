@@ -96,9 +96,9 @@ export default function GameLayout({ children }) {
       </Flex>
 
       {showConfirm && (
-        <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
+        <Box role="dialog" aria-modal="true" aria-labelledby="modal-title" position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
           <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="xs" w="100%" textAlign="center">
-            <Heading size="md" mb="2" color="white">Are you sure?</Heading>
+            <Heading id="modal-title" size="md" mb="2" color="white">Are you sure?</Heading>
             <Text color="gray.300" mb="6" fontSize="sm">This will leave the current game.</Text>
             <Flex gap="4">
               <Button flex="1" variant="outline" color="white" onClick={() => setShowConfirm(false)}>Cancel</Button>

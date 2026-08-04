@@ -2,7 +2,8 @@ import { Box, Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
 import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function PricePickerPopup({ company, value, options, onChange, onClose }) {
-  const currentIndex = options.findIndex(opt => opt === Number(value));
+  const valNum = value === '' || value === undefined ? null : Number(value);
+  const currentIndex = options.findIndex(opt => opt === valNum);
   
   const handlePrev = () => {
     if (currentIndex > 0) onChange(options[currentIndex - 1]);
@@ -33,9 +34,9 @@ export default function PricePickerPopup({ company, value, options, onChange, on
                 <Button 
                   key={opt} 
                   size="sm" 
-                  variant={Number(value) === opt ? 'solid' : 'ghost'} 
-                  color={Number(value) === opt ? 'black' : 'gray.300'}
-                  bg={Number(value) === opt ? 'white' : 'transparent'}
+                  variant={valNum === opt ? 'solid' : 'ghost'} 
+                  color={valNum === opt ? 'black' : 'gray.300'}
+                  bg={valNum === opt ? 'white' : 'transparent'}
                   _hover={{ bg: 'whiteAlpha.200' }}
                   onClick={() => {
                     onChange(opt);
