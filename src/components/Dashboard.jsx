@@ -246,6 +246,15 @@ export default function Dashboard() {
     return sv;
   };
 
+  const getPlayerTotalShares = (player) => {
+    const assets = dashboardState.playerAssets[player] || { shares: {} };
+    let totalPct = 0;
+    activeCompanies.forEach(c => {
+      totalPct += Number(assets.shares[c.shortName] || 0);
+    });
+    return totalPct / 10;
+  };
+
   const getCompanyOrTotal = (shortName) => {
     let total = 0;
     for (let i = 1; i <= maxOr; i++) {
@@ -432,6 +441,14 @@ export default function Dashboard() {
                 )}
               </Fragment>
             ))}
+
+            <GridItem><Text color="gray.400" fontSize="sm">Total Shares</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={`ts-${p}`} textAlign="center">
+                <Text fontWeight="bold" color="purple.300">{getPlayerTotalShares(p)}</Text>
+              </GridItem>
+            ))}
+            <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Share Value</Text></GridItem>
             {players.map(p => (
