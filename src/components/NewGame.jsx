@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Input, Flex, IconButton } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
 import { createGame } from '../api/mockApi.js';
@@ -14,18 +14,28 @@ export default function NewGame() {
 
   const handleAddPlayer = (e) => {
     e.preventDefault();
-    if (playerName.trim()) {
-      setPlayers([...players, playerName.trim()]);
+    const name = playerName.trim();
+    if (name && !players.includes(name)) {
+      setPlayers([...players, name]);
       setPlayerName('');
     }
   };
+
+  const filteredGames = useMemo(() => {
+    return gameIndex.filter(game => {
+      const term = searchQuery.toLowerCase().replace(/\*/g, '');
+      const name = game.name?.toLowerCase() || '';
+      const id = game.id.toLowerCase();
+      return name.includes(term) || id.includes(term);
+    });
+  }, [searchQuery]);
 
   const handleRemovePlayer = (index) => {
     setPlayers(players.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
-    if (!selectedGame || players.length === 0) return;
+    if (!selectedGame || players.length < 2) return;
     setIsLoading(true);
     try {
       const game = await createGame(selectedGame, players);
@@ -76,14 +86,7 @@ export default function NewGame() {
             </Flex>
             <Box maxH="200px" overflowY="auto" overflowX="hidden" border="1px solid" borderColor="whiteAlpha.200" borderRadius="md" p="2" bg="gray.800">
               <VStack align="stretch" gap="1">
-                {gameIndex
-                  .filter(game => {
-                    const term = searchQuery.toLowerCase().replace(/\*/g, '');
-                    const name = game.name?.toLowerCase() || '';
-                    const id = game.id.toLowerCase();
-                    return name.includes(term) || id.includes(term);
-                  })
-                  .map((game) => (
+                {filteredGames.map((game) => (
                   <Button
                     key={game.id}
                     justifyContent="flex-start"
@@ -143,7 +146,7 @@ export default function NewGame() {
             h="14"
             mt="4"
             onClick={handleSubmit}
-            disabled={players.length === 0 || isLoading}
+            disabled={players.length < 2 || isLoading}
             loading={isLoading}
           >
             Start Game
