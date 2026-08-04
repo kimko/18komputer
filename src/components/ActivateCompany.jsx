@@ -141,7 +141,7 @@ export default function ActivateCompany() {
                     onClick={() => toggleCompany(company.shortName)}
                     disabled={isActive && hasShares}
                   >
-                    {isActive ? (hasShares ? 'Shares Held' : 'Deactivate') : `Activate ${company.shortName}`}
+                    {isActive ? (hasShares ? 'Shares Held' : 'Deactivate') : 'Activate'}
                   </Button>
                 </Flex>
 

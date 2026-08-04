@@ -76,7 +76,7 @@ describe('ActivateCompany', () => {
     await screen.findByText(/Activate Company/i);
     
     // Activate PRR
-    const activatePrrBtn = screen.getByRole('button', { name: /Activate PRR/i });
+    const activatePrrBtn = screen.getAllByRole('button', { name: 'Activate' })[0];
     fireEvent.click(activatePrrBtn);
     
     // It should auto-save with default par value (which is 67)
