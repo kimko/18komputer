@@ -3,7 +3,7 @@ import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, S
 import { useRoute } from 'wouter';
 import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
 
-function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose }) {
+function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, onCopyLast }) {
   const handleType = (num) => {
     onChange(String(value || '') + num);
   };
@@ -41,7 +41,12 @@ function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose }) 
             </SimpleGrid>
           </GridItem>
           <GridItem colSpan={1}>
-            <Flex direction="column" h="100%">
+            <Flex direction="column" h="100%" gap="2">
+              {onCopyLast && (
+                <Button flex="1" fontSize="xs" whiteSpace="normal" lineHeight="1.2" variant="outline" color="white" borderColor="gray.600" _hover={{ bg: 'gray.800' }} onClick={onCopyLast}>
+                  Copy Prev
+                </Button>
+              )}
               <Button flex="1" colorPalette="teal" onClick={onClose}>OK</Button>
             </Flex>
           </GridItem>
@@ -189,7 +194,7 @@ export default function Dashboard() {
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const activeCompanies = gameInstance.state?.activeCompanies || [];
-  const maxOr = gameInstance.staticConfig?.maxOr || 3;
+  const maxOr = dashboardState.maxOr || gameInstance.staticConfig?.maxOr || 3;
   const players = gameInstance.players || [];
   const sharePriceOptions = gameInstance.staticConfig?.sharePrices || gameInstance.staticConfig?.parValues || [];
 
@@ -208,6 +213,13 @@ export default function Dashboard() {
     const updatedPlayers = players.filter(p => p !== playerToRemove);
     setGameInstance(prev => ({ ...prev, players: updatedPlayers }));
     await updateGamePlayers(gameInstance.id, updatedPlayers).catch(console.error);
+  };
+
+  const updateMaxOr = (newMax) => {
+    if (newMax < 1) return;
+    const next = { ...dashboardState, maxOr: newMax };
+    setDashboardState(next);
+    updateGameState(gameInstance.id, { dashboardState: next });
   };
 
   const getShareValue = (shortName) => {
@@ -238,7 +250,13 @@ export default function Dashboard() {
 
   return (
     <Box p="2" pb="24" maxW="100%" overflowX="hidden">
-      <Heading as="h2" size="lg" color="teal.400" mb="4" textAlign="center">Company Values & Results</Heading>
+      <Flex justify="center" align="center" gap="4" mb="4" wrap="wrap">
+        <Heading as="h2" size="lg" color="teal.400" textAlign="center">Company Values & Results</Heading>
+        <Flex gap="1">
+          <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => updateMaxOr(maxOr - 1)} disabled={maxOr <= 1}>- OR</Button>
+          <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => updateMaxOr(maxOr + 1)}>+ OR</Button>
+        </Flex>
+      </Flex>
       
       {activeCompanies.length > 0 && (
         <Box overflowX="auto" mb="8">
@@ -362,6 +380,14 @@ export default function Dashboard() {
           subtitle={activePopup.companyId}
           badgeColor={activeCompanies.find(c => c.shortName === activePopup.companyId)?.color}
           value={dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex}`]}
+          onCopyLast={activePopup.orIndex > 1 ? () => {
+            const val = dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex - 1}`] || '';
+            const ors = { ...dashboardState.ors };
+            if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+            ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
+            setDashboardState(prev => ({ ...prev, ors }));
+            updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+          } : undefined}
           onChange={(val) => {
             const ors = { ...dashboardState.ors };
             if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
