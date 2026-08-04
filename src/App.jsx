@@ -5,6 +5,7 @@ import ActivateCompany from './components/ActivateCompany.jsx';
 import GameLayout from './components/GameLayout.jsx';
 import RevenueCalculator from './components/RevenueCalculator.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import ResumeGame from './components/ResumeGame.jsx';
 
 const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -15,10 +16,7 @@ function App() {
       <Switch>
       <Route path="/" component={MainMenu} />
       <Route path="/new" component={NewGame} />
-      <Route path="/resume">
-        {/* Placeholder for Resume Game */}
-        <div style={{ color: 'white', padding: '2rem' }}>Resume Game (Coming Soon)</div>
-      </Route>
+      <Route path="/resume" component={ResumeGame} />
       <Route path="/game/:id/dashboard" component={Dashboard} />
       <Route path="/game/:id/calculator" component={RevenueCalculator} />
       <Route path="/game/:id/setup" component={ActivateCompany} />
