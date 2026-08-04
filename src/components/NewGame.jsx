@@ -74,7 +74,7 @@ export default function NewGame() {
                 border="none"
               />
             </Flex>
-            <Box maxH="200px" overflowY="auto" border="1px solid" borderColor="whiteAlpha.200" borderRadius="md" p="2" bg="gray.800">
+            <Box maxH="200px" overflowY="auto" overflowX="hidden" border="1px solid" borderColor="whiteAlpha.200" borderRadius="md" p="2" bg="gray.800">
               <VStack align="stretch" gap="1">
                 {gameIndex
                   .filter(game => {
@@ -92,6 +92,10 @@ export default function NewGame() {
                     variant={selectedGame === game.id ? "solid" : "ghost"}
                     colorPalette={selectedGame === game.id ? "orange" : "gray"}
                     onClick={() => setSelectedGame(game.id)}
+                    whiteSpace="normal"
+                    height="auto"
+                    py="2"
+                    textAlign="left"
                   >
                     {game.name || game.id}
                   </Button>
