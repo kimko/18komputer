@@ -50,5 +50,15 @@ The core utility for running Operating Rounds has been implemented.
   - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table dynamically generates the Revenue Per Share payout (from 10% to 100%).
 - **Data Flow:** The calculator currently acts as a pure visual aid. Users will reference the Grand Total and Payout tables to manually enter operating decisions into the final dashboard.
 
+### 6. Company Values & Results (Dashboard)
+The final game summary dashboard is implemented and provides real-time mathematical aggregation.
+- **UI:** A unified view consisting of two main grids (Company Values & Results, Player Holdings).
+- **Features:**
+  - **Company Values Grid:** Displays each active company, its current Share Value, and rows for its Operating Rounds (ORs). Clicking any numerical cell opens a touch-friendly Numpad or Price Picker popup to quickly set values.
+  - **Player Holdings Grid:** Displays each player (and the Bank) as columns. Tracks Cash, per-company share percentages, Total Shares, Share Value, Operating Income, and total Net Worth. 
+  - **Smart Validation:** The Share Count popup dynamically restricts available share percentages based on what remains in the Bank, preventing users from allocating more than 100% of a company.
+  - **Details Toggle:** A "Details" button expands the Player Holdings grid to show a breakdown of how the final Net Worth is calculated (showing the separate Share Value and Op Income values).
+- **Data Flow:** All interactions (updating ORs, changing prices, modifying shares or cash) immediately dispatch updates to the mock API, persisting the state to `localStorage`.
+
 ---
-*Next up: Company Values & Results (Dashboard).*
+*Phase 1 (Stateless Frontend) is functionally complete.*

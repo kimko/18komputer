@@ -49,9 +49,9 @@ A highly interactive, touch-friendly calculator for computing the revenue of a c
 1. **Company ORs Table:**
    - One row per active company.
    - Columns: Company Name, Share Value, OR1, OR2, OR3.
-2. **Player Assets Table:**
-   - Rows: 1 row for total cash, followed by 1 row per company.
-   - Columns: 1 column per player.
+2. **Player Holdings (Assets) Table:**
+   - Rows: Total Cash, followed by 1 row per active company for ownership percentages. The bottom rows contain calculated aggregates: Total Shares, Share Value, Operating Income, and Net Worth.
+   - Columns: 1 column per player, plus a dedicated "Bank" column that dynamically tracks remaining unallocated shares.
 - **Behavior:** The available companies in these tables are determined by the selections made in the "Raise Funds" menu. Operating round revenues will be entered manually (e.g., pulling from the Revenue calculator).
 
 A final dashboard providing a summary of the game state.
