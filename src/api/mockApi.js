@@ -19,15 +19,42 @@ const enqueue = (operation) => {
   });
 };
 
+// Run schema migrations for backwards compatibility
+const runMigrations = (game) => {
+  let migrated = false;
+  
+  if (!game.version) {
+    game.version = 1;
+    migrated = true;
+  }
+  
+  // Example for future migrations:
+  // if (game.version === 1) {
+  //   game.version = 2;
+  //   migrated = true;
+  // }
+  
+  return { game, migrated };
+};
+
 // Helper to get all games from local storage
 const readStorage = () => {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return {};
   try {
     const parsed = JSON.parse(data);
-    Object.values(parsed).forEach(game => {
-      if (!game.version) game.version = 1;
+    let needsSave = false;
+    
+    Object.keys(parsed).forEach(key => {
+      const { game, migrated } = runMigrations(parsed[key]);
+      parsed[key] = game;
+      if (migrated) needsSave = true;
     });
+    
+    if (needsSave) {
+      writeStorage(parsed);
+    }
+    
     return parsed;
   } catch (err) {
     console.error('Failed to parse localStorage data:', err);

@@ -57,4 +57,26 @@ describe('Mock API (LocalStorage)', () => {
     expect(list).toHaveLength(2);
     expect(list[0].gameId).toBeDefined();
   });
+
+  it('should run schema migrations on legacy data', async () => {
+    // Write a game without a version
+    const legacyGame = {
+      id: 'legacy-game',
+      gameId: '1830',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [],
+        playerAssets: {},
+        companyORs: []
+      }
+    };
+    localStorage.setItem('18komputer_games', JSON.stringify({ 'legacy-game': legacyGame }));
+
+    const fetched = await getGame('legacy-game');
+    expect(fetched.version).toBe(1);
+    
+    // Test that the storage was updated
+    const saved = JSON.parse(localStorage.getItem('18komputer_games'));
+    expect(saved['legacy-game'].version).toBe(1);
+  });
 });
