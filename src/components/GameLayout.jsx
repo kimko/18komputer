@@ -85,6 +85,11 @@ export default function GameLayout({ children }) {
             Results
           </Button>
         </Link>
+        <Link href={`/new`}>
+          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+            New
+          </Button>
+        </Link>
       </Flex>
     </Box>
   );
