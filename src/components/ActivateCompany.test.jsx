@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
-import RaiseFunds from './RaiseFunds.jsx';
+import ActivateCompany from './ActivateCompany.jsx';
 import * as mockApi from '../api/mockApi.js';
 import { useRoute } from 'wouter';
 
@@ -41,7 +41,7 @@ const renderWithChakra = (ui) => {
   );
 };
 
-describe('RaiseFunds Component', () => {
+describe('ActivateCompany', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useRoute.mockReturnValue([true, { id: 'inst_123' }]);
@@ -59,7 +59,7 @@ describe('RaiseFunds Component', () => {
   });
 
   it('should load game data and display available companies', async () => {
-    renderWithChakra(<RaiseFunds />);
+    renderWithChakra(<ActivateCompany />);
     
     // Wait for async load
     expect(await screen.findByText(/Activate Company/i)).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('RaiseFunds Component', () => {
   });
 
   it('should allow activating a company, setting its par value, and saving', async () => {
-    renderWithChakra(<RaiseFunds />);
+    renderWithChakra(<ActivateCompany />);
     
     // Wait for load
     await screen.findByText(/Activate Company/i);

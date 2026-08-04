@@ -1,7 +1,7 @@
 import { Route, Switch, Router } from 'wouter';
 import MainMenu from './components/MainMenu.jsx';
 import NewGame from './components/NewGame.jsx';
-import RaiseFunds from './components/RaiseFunds.jsx';
+import ActivateCompany from './components/ActivateCompany.jsx';
 import GameLayout from './components/GameLayout.jsx';
 import RevenueCalculator from './components/RevenueCalculator.jsx';
 import Dashboard from './components/Dashboard.jsx';
@@ -21,7 +21,7 @@ function App() {
       </Route>
       <Route path="/game/:id/dashboard" component={Dashboard} />
       <Route path="/game/:id/calculator" component={RevenueCalculator} />
-      <Route path="/game/:id/setup" component={RaiseFunds} />
+      <Route path="/game/:id/setup" component={ActivateCompany} />
       <Route path="/users">
         {/* Placeholder for User Management */}
         <div style={{ color: 'white', padding: '2rem' }}>User Management (Coming Soon)</div>

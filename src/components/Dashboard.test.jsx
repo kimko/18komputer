@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import Dashboard from './Dashboard.jsx';
@@ -11,7 +11,8 @@ vi.mock('wouter', () => ({
 // Mock API
 vi.mock('../api/mockApi.js', () => ({
   getGame: vi.fn(),
-  updateGameState: vi.fn()
+  updateGameState: vi.fn(),
+  updateGamePlayers: vi.fn()
 }));
 import { getGame, updateGameState } from '../api/mockApi.js';
 
@@ -30,8 +31,20 @@ describe('Dashboard', () => {
     players: ['Alice', 'Bob'],
     state: {
       activeCompanies: [
-        { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', initialValue: 67 }
-      ]
+        { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
+      ],
+      dashboardState: {
+        ors: {
+          'PRR': { or1: 100, or2: 200 }
+        },
+        playerAssets: {
+          'Alice': { cash: 50, shares: { 'PRR': 40 } },
+          'Bob': { cash: 20, shares: { 'PRR': 20 } }
+        },
+        shareValues: {
+          'PRR': 50
+        }
+      }
     },
     staticConfig: {
       maxOr: 3
@@ -40,26 +53,45 @@ describe('Dashboard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getGame.mockResolvedValue(mockGameData);
+    getGame.mockResolvedValue(JSON.parse(JSON.stringify(mockGameData)));
     updateGameState.mockResolvedValue();
   });
 
   it('renders the dashboard tables correctly', async () => {
     renderWithChakra(<Dashboard />);
     
-    // Check for sections
     expect(await screen.findByText('Company Values & Results')).toBeInTheDocument();
-    
-    // Check for Company row
     expect(screen.getAllByText(/PRR/).length).toBeGreaterThan(0);
-    
-    // Check for OR columns based on maxOr
     expect(screen.getAllByText(/OR 1/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/OR 2/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/OR 3/).length).toBeGreaterThan(0);
+  });
+
+  it('calculates player holdings math correctly', async () => {
+    renderWithChakra(<Dashboard />);
+    await screen.findByText('Player Holdings');
     
-    // Check for Player columns
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('Bob')).toBeInTheDocument();
+    // Alice math: PRR price 50, shares 40%. Share value = 50 * 4 = 200
+    // OR total = 300. Op income = 300 * 0.4 = 120. Net worth = 50 + 200 + 120 = 370
+    // Bob math: PRR price 50, shares 20%. Share value = 50 * 2 = 100
+    // Op income = 300 * 0.2 = 60. Net worth = 20 + 100 + 60 = 180
+
+    expect(screen.getByText('$370')).toBeInTheDocument(); // Alice net worth
+    expect(screen.getByText('$180')).toBeInTheDocument(); // Bob net worth
+  });
+
+  it('toggles details view', async () => {
+    renderWithChakra(<Dashboard />);
+    await screen.findByText('Player Holdings');
+    
+    const detailsButton = screen.getByText('Details');
+    fireEvent.click(detailsButton);
+    
+    expect(screen.getByText('Hide Details')).toBeInTheDocument();
+    
+    // Alice details: share value 200, op income 120
+    expect(screen.getAllByText('$200').length).toBeGreaterThan(1);
+    expect(screen.getAllByText('$120').length).toBeGreaterThan(1);
+    expect(screen.getByText('↳ Op Income')).toBeInTheDocument();
   });
 });

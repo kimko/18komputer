@@ -3,7 +3,7 @@ import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner } from '@chak
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
 
-export default function RaiseFunds() {
+export default function ActivateCompany() {
   const [match, params] = useRoute('/game/:id/setup');
 
   const [loading, setLoading] = useState(true);
