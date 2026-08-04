@@ -170,6 +170,7 @@ export default function Dashboard() {
     playerAssets: {}
   });
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
   
   const [activePopup, setActivePopup] = useState(null);
 
@@ -345,7 +346,12 @@ export default function Dashboard() {
       )}
 
       <Flex justify="space-between" align="center" mb="4" wrap="wrap" gap="4">
-        <Heading as="h3" size="lg" color="teal.400">Player Holdings</Heading>
+        <Flex gap="4" align="center">
+          <Heading as="h3" size="lg" color="teal.400">Player Holdings</Heading>
+          <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => setShowDetails(!showDetails)}>
+            {showDetails ? "Hide Details" : "Details"}
+          </Button>
+        </Flex>
         <form onSubmit={handleAddPlayer}>
           <Flex gap="2">
             <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none" color="white"/>
@@ -396,6 +402,34 @@ export default function Dashboard() {
                 <GridItem textAlign="center">
                   <Text color="gray.400" fontWeight="bold">{getBankShares(c.shortName)}%</Text>
                 </GridItem>
+
+                {showDetails && (
+                  <>
+                    <GridItem><Text color="gray.500" fontSize="xs" pl="2">↳ Share Value</Text></GridItem>
+                    {players.map(p => {
+                      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
+                      const sv = (sharePct / 10) * getShareValue(c.shortName);
+                      return (
+                        <GridItem key={`sv-${p}`} textAlign="center">
+                          <Text color="gray.400" fontSize="sm">${sv}</Text>
+                        </GridItem>
+                      );
+                    })}
+                    <GridItem></GridItem>
+
+                    <GridItem><Text color="gray.500" fontSize="xs" pl="2">↳ Op Income</Text></GridItem>
+                    {players.map(p => {
+                      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
+                      const income = (sharePct / 100) * getCompanyOrTotal(c.shortName);
+                      return (
+                        <GridItem key={`inc-${p}`} textAlign="center">
+                          <Text color="cyan.600" fontSize="sm">${income}</Text>
+                        </GridItem>
+                      );
+                    })}
+                    <GridItem></GridItem>
+                  </>
+                )}
               </Fragment>
             ))}
 
