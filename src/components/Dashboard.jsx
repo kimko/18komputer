@@ -305,7 +305,7 @@ export default function Dashboard() {
         <Box overflowX="auto" mb="8">
           <Grid templateColumns={`80px 100px repeat(${maxOr}, 80px)`} gap="2" alignItems="center">
             <GridItem></GridItem>
-            <GridItem textAlign="center"><Text fontWeight="bold" color="white">Price</Text></GridItem>
+            <GridItem textAlign="center"><Text fontWeight="bold" color="white">Share Price</Text></GridItem>
             {Array.from({ length: maxOr }).map((_, i) => (
               <GridItem key={i} textAlign="center"><Text fontWeight="bold" color="white">OR {i + 1}</Text></GridItem>
             ))}
