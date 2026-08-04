@@ -14,6 +14,25 @@ const writeStorage = (data) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
+// Helper for deep merging objects
+function deepMerge(target, source) {
+  const output = { ...target };
+  if (target && typeof target === 'object' && !Array.isArray(target) && source && typeof source === 'object' && !Array.isArray(source)) {
+    Object.keys(source).forEach(key => {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (!(key in target)) {
+          Object.assign(output, { [key]: source[key] });
+        } else {
+          output[key] = deepMerge(target[key], source[key]);
+        }
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
+  }
+  return output;
+}
+
 export async function createGame(gameId, players) {
   await delay();
   const db = readStorage();
@@ -59,10 +78,7 @@ export async function updateGameState(instanceId, updates) {
   }
   
   // Merge the new state updates into the existing state
-  db[instanceId].state = {
-    ...db[instanceId].state,
-    ...updates
-  };
+  db[instanceId].state = deepMerge(db[instanceId].state, updates);
   
   writeStorage(db);
   

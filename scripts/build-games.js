@@ -43,6 +43,7 @@ for (const file of files) {
     }
   } catch (err) {
     console.error(`Failed to parse ${file}: ${err.message}`);
+    process.exit(1);
   }
 }
 

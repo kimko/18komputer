@@ -37,7 +37,7 @@ export function parseGameFile(content) {
   // 3. Parse nested blocks
   // Helper to extract nested block content
   const extractBlock = (blockName) => {
-    const regex = new RegExp(blockName + ':\\n([\\s\\S]*?)(?:\\n[a-z]+[a-z ]*:|$)');
+    const regex = new RegExp(blockName + ':\\r?\\n([\\s\\S]*?)(?:\\r?\\n[a-zA-Z]+[a-zA-Z ]*:|$)');
     const match = content.match(regex);
     return match ? match[1] : '';
   };
@@ -46,7 +46,7 @@ export function parseGameFile(content) {
   const companiesBlock = extractBlock('companies');
   if (companiesBlock) {
     const companies = [];
-    const chunks = companiesBlock.split(/\n\s*\n/).filter(c => c.trim().length > 0);
+    const chunks = companiesBlock.split(/\r?\n\s*\r?\n/).filter(c => c.trim().length > 0);
     
     for (const chunk of chunks) {
       const company = {};
@@ -58,10 +58,15 @@ export function parseGameFile(content) {
 
       const colorMatch = chunk.match(/Color\(.*red:\s*([\d.]+),\s*green:\s*([\d.]+),\s*blue:\s*([\d.]+)/);
       if (colorMatch) {
-        const r = Math.round(parseFloat(colorMatch[1]) * 255).toString(16).padStart(2, '0');
-        const g = Math.round(parseFloat(colorMatch[2]) * 255).toString(16).padStart(2, '0');
-        const b = Math.round(parseFloat(colorMatch[3]) * 255).toString(16).padStart(2, '0');
-        company.color = `#${r}${g}${b}`;
+        const rVal = parseFloat(colorMatch[1]);
+        const gVal = parseFloat(colorMatch[2]);
+        const bVal = parseFloat(colorMatch[3]);
+        if (!isNaN(rVal) && !isNaN(gVal) && !isNaN(bVal)) {
+          const r = Math.round(rVal * 255).toString(16).padStart(2, '0');
+          const g = Math.round(gVal * 255).toString(16).padStart(2, '0');
+          const b = Math.round(bVal * 255).toString(16).padStart(2, '0');
+          company.color = `#${r}${g}${b}`;
+        }
       }
       
       if (Object.keys(company).length > 0) {
@@ -75,7 +80,7 @@ export function parseGameFile(content) {
   const bonusesBlock = extractBlock('revenue bonuses');
   if (bonusesBlock) {
     const bonuses = [];
-    const chunks = bonusesBlock.split(/\n\s*\n/).filter(c => c.trim().length > 0);
+    const chunks = bonusesBlock.split(/\r?\n\s*\r?\n/).filter(c => c.trim().length > 0);
     
     for (const chunk of chunks) {
       const bonus = {};
