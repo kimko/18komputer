@@ -42,7 +42,7 @@ export default function PlayerHoldingsGrid({
       
       {players.length > 0 && (
         <Box overflowX="auto">
-          <Grid templateColumns={`100px repeat(${players.length}, 100px) 100px`} gap="2" alignItems="center">
+          <Grid templateColumns={`100px repeat(${players.length}, 100px) 100px`} gap="2" alignItems="center" w="max-content" mx="auto">
             <GridItem></GridItem>
             {players.map(p => (
               <GridItem key={p} textAlign="center">

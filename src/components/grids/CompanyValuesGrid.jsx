@@ -22,7 +22,7 @@ export default function CompanyValuesGrid({
       </Flex>
       
       <Box overflowX="auto" mb="8">
-        <Grid templateColumns={`80px 100px 80px repeat(${maxOr}, 80px)`} gap="2" alignItems="center">
+        <Grid templateColumns={`80px 100px 80px repeat(${maxOr}, 80px)`} gap="2" alignItems="center" w="max-content" mx="auto">
           <GridItem></GridItem>
           <GridItem textAlign="center"><Text fontWeight="bold" color="white">Share Price</Text></GridItem>
           <GridItem textAlign="center"><Text fontWeight="bold" color="cyan.300">OR Total</Text></GridItem>
