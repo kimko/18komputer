@@ -94,10 +94,9 @@ export default function ActivateCompany() {
   return (
     <Box minH="100vh" bg="gray.900" color="white" p="8">
       <Box maxW="2xl" mx="auto">
-        <Heading as="h2" size="xl" color="orange.400" mb="2">
+        <Heading as="h2" size="xl" color="orange.400" mb="6">
           Activate Company
         </Heading>
-        <Text color="gray.400" mb="8">Activate companies and set their initial par values.</Text>
 
         {gameDef.companies?.length > 6 && (
           <Box mb="6">
