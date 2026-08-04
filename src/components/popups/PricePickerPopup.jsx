@@ -6,11 +6,13 @@ export default function PricePickerPopup({ company, value, options, onChange, on
   const handlePrev = () => {
     if (currentIndex > 0) onChange(options[currentIndex - 1]);
     else if (currentIndex === -1 && options.length > 0) onChange(options[0]);
+    onClose();
   };
   
   const handleNext = () => {
     if (currentIndex < options.length - 1 && currentIndex !== -1) onChange(options[currentIndex + 1]);
     else if (currentIndex === -1 && options.length > 0) onChange(options[0]);
+    onClose();
   };
 
   return (
