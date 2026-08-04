@@ -303,9 +303,10 @@ export default function Dashboard() {
       
       {activeCompanies.length > 0 && (
         <Box overflowX="auto" mb="8">
-          <Grid templateColumns={`80px 100px repeat(${maxOr}, 80px)`} gap="2" alignItems="center">
+          <Grid templateColumns={`80px 100px 80px repeat(${maxOr}, 80px)`} gap="2" alignItems="center">
             <GridItem></GridItem>
             <GridItem textAlign="center"><Text fontWeight="bold" color="white">Share Price</Text></GridItem>
+            <GridItem textAlign="center"><Text fontWeight="bold" color="cyan.300">OR Total</Text></GridItem>
             {Array.from({ length: maxOr }).map((_, i) => (
               <GridItem key={i} textAlign="center"><Text fontWeight="bold" color="white">OR {i + 1}</Text></GridItem>
             ))}
@@ -321,6 +322,11 @@ export default function Dashboard() {
                   <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>
                     {getShareValue(c.shortName)}
                   </Button>
+                </GridItem>
+                <GridItem>
+                  <Box w="100%" bg="gray.900" color="cyan.300" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
+                    {getCompanyOrTotal(c.shortName) > 0 ? getCompanyOrTotal(c.shortName) : ''}
+                  </Box>
                 </GridItem>
                 {Array.from({ length: maxOr }).map((_, i) => {
                   const val = dashboardState.ors[c.shortName]?.[`or${i + 1}`];
@@ -445,7 +451,7 @@ export default function Dashboard() {
             const val = getCalculatorGrandTotal(activePopup.companyId);
             if (val > 0) {
               const ors = { ...dashboardState.ors };
-              if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+              ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
               ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
               setDashboardState(prev => ({ ...prev, ors }));
               updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
@@ -454,14 +460,14 @@ export default function Dashboard() {
           onCopyLast={activePopup.orIndex > 1 ? () => {
             const val = dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex - 1}`] || '';
             const ors = { ...dashboardState.ors };
-            if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+            ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
             ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
             setDashboardState(prev => ({ ...prev, ors }));
             updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
           } : undefined}
           onChange={(val) => {
             const ors = { ...dashboardState.ors };
-            if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+            ors[activePopup.companyId] = { ...(ors[activePopup.companyId] || {}) };
             ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
             setDashboardState(prev => ({ ...prev, ors }));
             updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
