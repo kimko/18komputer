@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner } from '@chakra-ui/react';
+import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, Input } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
 import { getContrastColor } from '../utils/colorUtils.js';
@@ -11,6 +11,7 @@ export default function ActivateCompany() {
   const [gameInstance, setGameInstance] = useState(null);
   const [gameDef, setGameDef] = useState(null);
   const [activeCompanies, setActiveCompanies] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -98,8 +99,25 @@ export default function ActivateCompany() {
         </Heading>
         <Text color="gray.400" mb="8">Activate companies and set their initial par values.</Text>
 
+        {gameDef.companies?.length > 6 && (
+          <Box mb="6">
+            <Input 
+              placeholder="Search companies..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              bg="gray.800"
+              border="1px solid"
+              borderColor="whiteAlpha.300"
+            />
+          </Box>
+        )}
+
         <VStack gap="4" align="stretch" mb="8">
-          {gameDef.companies?.map(company => {
+          {gameDef.companies?.filter(c => {
+            if (!searchQuery) return true;
+            const term = searchQuery.toLowerCase();
+            return c.name.toLowerCase().includes(term) || c.shortName.toLowerCase().includes(term);
+          }).map(company => {
             const isActive = activeCompanies[company.shortName] !== undefined;
             const hasShares = hasPlayerShares(company.shortName);
             return (
