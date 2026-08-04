@@ -8,7 +8,7 @@ import PricePickerPopup from './popups/PricePickerPopup.jsx';
 import ShareCountPopup from './popups/ShareCountPopup.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
 import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
-import { getShareValue, getCalculatorGrandTotal } from '../utils/dashboardMath.js';
+import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/dashboardMath.js';
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
@@ -175,7 +175,7 @@ export default function Dashboard() {
         <ShareCountPopup
           company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
           player={activePopup.player}
-          maxAvailable={maxPlayerHolding}
+          maxAvailable={Math.min(maxPlayerHolding, getBankShares(dashboardState, players, activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0))}
           value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId]}
           onChange={(val) => {
             const playerAssets = { ...dashboardState.playerAssets };
