@@ -125,7 +125,7 @@ export default function RevenueCalculator() {
       <Box maxW="2xl" mx="auto">
         <Box mb="6">
           {activeCompanies.length === 0 ? (
-            <Text color="red.400">No active companies. Go to Raise Funds first.</Text>
+            <Text color="red.400">No active companies. Go to Activate Company first.</Text>
           ) : (
             <Flex wrap="wrap" gap="2">
               {activeCompanies.map(c => (

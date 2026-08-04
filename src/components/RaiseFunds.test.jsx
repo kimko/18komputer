@@ -62,7 +62,7 @@ describe('RaiseFunds Component', () => {
     renderWithChakra(<RaiseFunds />);
     
     // Wait for async load
-    expect(await screen.findByText(/Raise Funds/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Activate Company/i)).toBeInTheDocument();
     
     // Should display the companies from 1830.json
     expect(screen.getByText('Pennsylvania Railroad (PRR)')).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('RaiseFunds Component', () => {
     renderWithChakra(<RaiseFunds />);
     
     // Wait for load
-    await screen.findByText(/Raise Funds/i);
+    await screen.findByText(/Activate Company/i);
     
     // Activate PRR
     const activatePrrBtn = screen.getByRole('button', { name: /Activate PRR/i });

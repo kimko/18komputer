@@ -73,7 +73,7 @@ describe('NewGame Component', () => {
 
     await waitFor(() => {
       expect(mockApi.createGame).toHaveBeenCalledWith('1830', ['Player 1', 'Player 2', 'Player 3', 'Alice', 'Bob']);
-      // Should navigate to the setup phase (Raise Funds)
+      // Should navigate to the setup phase (Activate Company)
       expect(mockNavigate).toHaveBeenCalledWith('/game/inst_123/setup');
     });
   });
