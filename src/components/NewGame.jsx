@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Input, Flex, IconButton } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
 import { createGame } from '../api/mockApi.js';
-import gameIndex from '../data/games/index.json';
+import gameIndex from '../data/gamesIndex.json';
 
 export default function NewGame() {
   const [, navigate] = useLocation();

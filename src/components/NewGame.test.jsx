@@ -15,7 +15,7 @@ vi.mock('../api/mockApi.js', () => ({
 }));
 
 // Mock the JSON import
-vi.mock('../data/games/index.json', () => ({
+vi.mock('../data/gamesIndex.json', () => ({
   default: [
     { id: '1830', name: '1830: Railways & Robber Barons', bggId: 421 },
     { id: '1817', name: '1817: Modern Trains', bggId: 123 }

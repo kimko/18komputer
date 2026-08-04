@@ -46,10 +46,10 @@ for (const file of files) {
   }
 }
 
-// Write the global index.json
+// Write the global gamesIndex.json
 fs.writeFileSync(
-  path.join(OUT_DIR, 'index.json'),
+  path.join(OUT_DIR, '..', 'gamesIndex.json'),
   JSON.stringify(index, null, 2)
 );
 
-console.log('Successfully generated JSON files and index.json.');
+console.log('Successfully generated JSON files and gamesIndex.json.');
