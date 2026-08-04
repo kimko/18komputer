@@ -266,7 +266,7 @@ export default function Dashboard() {
 
   const getPlayerNetWorth = (player) => {
     const assets = dashboardState.playerAssets[player] || { cash: 0 };
-    return Number(assets.cash || 0) + getPlayerShareValue(player);
+    return Number(assets.cash || 0) + getPlayerShareValue(player) + getPlayerOperatingIncome(player);
   };
 
   const getBankShares = (companyId) => {
