@@ -3,7 +3,7 @@ import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, S
 import { useRoute } from 'wouter';
 import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
 
-function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, onCopyLast }) {
+function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, onCopyLast, onSubtitleClick }) {
   const handleType = (num) => {
     onChange(String(value || '') + num);
   };
@@ -19,9 +19,15 @@ function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, on
         <Flex align="center" gap="2" mb="4">
           <Text fontWeight="bold" color="white">{title}</Text>
           {subtitle && (
-            <Box bg={badgeColor || 'gray.700'} px="2" py="1" borderRadius="md">
-              <Text fontSize="sm" color="white">{subtitle}</Text>
-            </Box>
+            onSubtitleClick ? (
+              <Button size="sm" bg={badgeColor || 'gray.700'} color="white" onClick={onSubtitleClick} _hover={{ bg: 'whiteAlpha.300' }}>
+                {subtitle}
+              </Button>
+            ) : (
+              <Box bg={badgeColor || 'gray.700'} px="2" py="1" borderRadius="md">
+                <Text fontSize="sm" color="white">{subtitle}</Text>
+              </Box>
+            )
           )}
         </Flex>
         
@@ -248,6 +254,19 @@ export default function Dashboard() {
     return Math.max(0, 100 - totalPlayerShares);
   };
 
+  const getCalculatorGrandTotal = (companyId) => {
+    const calcState = gameInstance?.state?.calculatorState?.[companyId];
+    if (!calcState || !calcState.trains) return 0;
+    
+    return calcState.trains
+      .filter(t => !t.isExcluded)
+      .reduce((sum, t) => {
+        const stopsSum = t.stops.reduce((s, v) => s + v, 0);
+        const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
+        return sum + stopsSum + bonusSum;
+      }, 0);
+  };
+
   return (
     <Box p="2" pb="24" maxW="100%" overflowX="hidden">
       <Flex justify="center" align="center" gap="4" mb="4" wrap="wrap">
@@ -380,6 +399,16 @@ export default function Dashboard() {
           subtitle={activePopup.companyId}
           badgeColor={activeCompanies.find(c => c.shortName === activePopup.companyId)?.color}
           value={dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex}`]}
+          onSubtitleClick={() => {
+            const val = getCalculatorGrandTotal(activePopup.companyId);
+            if (val > 0) {
+              const ors = { ...dashboardState.ors };
+              if (!ors[activePopup.companyId]) ors[activePopup.companyId] = {};
+              ors[activePopup.companyId][`or${activePopup.orIndex}`] = val;
+              setDashboardState(prev => ({ ...prev, ors }));
+              updateGameState(gameInstance.id, { dashboardState: { ...dashboardState, ors } });
+            }
+          }}
           onCopyLast={activePopup.orIndex > 1 ? () => {
             const val = dashboardState.ors[activePopup.companyId]?.[`or${activePopup.orIndex - 1}`] || '';
             const ors = { ...dashboardState.ors };
