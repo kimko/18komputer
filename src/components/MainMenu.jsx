@@ -19,7 +19,7 @@ export default function MainMenu() {
         <VStack gap="8" align="stretch">
           <Box textAlign="center">
             <Heading as="h1" size="3xl" mb="2" color="orange.400" lineHeight="1.2">
-              18KOMPUTER
+              🚂 18KOMPUTER
             </Heading>
             <Text color="gray.400">18XX Board Game Assistant</Text>
           </Box>

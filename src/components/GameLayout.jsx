@@ -27,7 +27,7 @@ export default function GameLayout({ children }) {
         zIndex="10"
       >
         <Heading as="h1" size="sm" color="orange.400">
-          <Link href="/">18komputer</Link>
+          <Link href="/">🚂 18komputer</Link>
         </Heading>
         
         <Flex gap="1" flexWrap="wrap" justify="flex-end">
