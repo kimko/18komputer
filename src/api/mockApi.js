@@ -3,6 +3,22 @@ const STORAGE_KEY = '18komputer_games';
 // Helper to simulate network latency
 const delay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Queue to serialize operations and prevent race conditions
+let apiQueue = Promise.resolve();
+
+const enqueue = (operation) => {
+  return new Promise((resolve, reject) => {
+    apiQueue = apiQueue.then(async () => {
+      try {
+        const result = await operation();
+        resolve(result);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+};
+
 // Helper to get all games from local storage
 const readStorage = () => {
   const data = localStorage.getItem(STORAGE_KEY);
@@ -33,78 +49,88 @@ function deepMerge(target, source) {
   return output;
 }
 
-export async function createGame(gameId, players) {
-  await delay();
-  const db = readStorage();
-  
-  // Generate a simple unique instance ID
-  const id = `game_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-  
-  const newGame = {
-    id,
-    gameId,
-    players,
-    createdAt: new Date().toISOString(),
-    state: {
-      activeCompanies: [],
-      playerAssets: {},
-      companyORs: []
+export function createGame(gameId, players) {
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    // Generate a simple unique instance ID
+    const id = `game_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    
+    const newGame = {
+      id,
+      gameId,
+      players,
+      createdAt: new Date().toISOString(),
+      state: {
+        activeCompanies: [],
+        playerAssets: {},
+        companyORs: []
+      }
+    };
+    
+    db[id] = newGame;
+    writeStorage(db);
+    
+    return newGame;
+  });
+}
+
+export function getGame(instanceId) {
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    if (!db[instanceId]) {
+      throw new Error('Game not found');
     }
-  };
-  
-  db[id] = newGame;
-  writeStorage(db);
-  
-  return newGame;
+    
+    return db[instanceId];
+  });
 }
 
-export async function getGame(instanceId) {
-  await delay();
-  const db = readStorage();
-  
-  if (!db[instanceId]) {
-    throw new Error('Game not found');
-  }
-  
-  return db[instanceId];
+export function updateGameState(instanceId, updates) {
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    if (!db[instanceId]) {
+      throw new Error('Game not found');
+    }
+    
+    // Merge the new state updates into the existing state
+    db[instanceId].state = deepMerge(db[instanceId].state, updates);
+    
+    writeStorage(db);
+    
+    return db[instanceId];
+  });
 }
 
-export async function updateGameState(instanceId, updates) {
-  await delay();
-  const db = readStorage();
-  
-  if (!db[instanceId]) {
-    throw new Error('Game not found');
-  }
-  
-  // Merge the new state updates into the existing state
-  db[instanceId].state = deepMerge(db[instanceId].state, updates);
-  
-  writeStorage(db);
-  
-  return db[instanceId];
+export function updateGamePlayers(instanceId, players) {
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    if (!db[instanceId]) {
+      throw new Error('Game not found');
+    }
+    
+    db[instanceId].players = players;
+    writeStorage(db);
+    
+    return db[instanceId];
+  });
 }
 
-export async function updateGamePlayers(instanceId, players) {
-  await delay();
-  const db = readStorage();
-  
-  if (!db[instanceId]) {
-    throw new Error('Game not found');
-  }
-  
-  db[instanceId].players = players;
-  writeStorage(db);
-  
-  return db[instanceId];
-}
-
-export async function getGamesList() {
-  await delay();
-  const db = readStorage();
-  
-  // Return as an array, sorted by creation date descending
-  return Object.values(db).sort((a, b) => {
-    return new Date(b.createdAt) - new Date(a.createdAt);
+export function getGamesList() {
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    // Return as an array, sorted by creation date descending
+    return Object.values(db).sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
   });
 }
