@@ -31,9 +31,9 @@ export default function GameLayout({ children }) {
         </Heading>
         
         <Flex gap="1" flexWrap="wrap" justify="flex-end">
-          <Link href={`/game/${gameId}/dashboard`}>
+          <Link href={`/game/${gameId}/setup`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
-              Dashboard
+              Activate Company
             </Button>
           </Link>
           <Link href={`/game/${gameId}/calculator`}>
@@ -41,9 +41,9 @@ export default function GameLayout({ children }) {
               Calculator
             </Button>
           </Link>
-          <Link href={`/game/${gameId}/setup`}>
+          <Link href={`/game/${gameId}/dashboard`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
-              Activate Company
+              Dashboard
             </Button>
           </Link>
         </Flex>
@@ -70,9 +70,9 @@ export default function GameLayout({ children }) {
         py="2"
         justify="space-between"
       >
-        <Link href={`/game/${gameId}/dashboard`}>
+        <Link href={`/game/${gameId}/setup`}>
           <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
-            Dashboard
+            Activate Company
           </Button>
         </Link>
         <Link href={`/game/${gameId}/calculator`}>
@@ -80,9 +80,9 @@ export default function GameLayout({ children }) {
             Calculator
           </Button>
         </Link>
-        <Link href={`/game/${gameId}/setup`}>
+        <Link href={`/game/${gameId}/dashboard`}>
           <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
-            Activate Company
+            Dashboard
           </Button>
         </Link>
       </Flex>
