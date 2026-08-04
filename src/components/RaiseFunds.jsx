@@ -63,6 +63,12 @@ export default function RaiseFunds() {
     }
   };
 
+  const hasPlayerShares = (shortName) => {
+    if (!gameInstance?.state?.dashboardState?.playerAssets) return false;
+    const assets = gameInstance.state.dashboardState.playerAssets;
+    return Object.values(assets).some(player => player.shares && Number(player.shares[shortName]) > 0);
+  };
+
   const toggleCompany = (shortName) => {
     const next = { ...activeCompanies };
     if (next[shortName] !== undefined) {
@@ -94,6 +100,7 @@ export default function RaiseFunds() {
         <VStack gap="4" align="stretch" mb="8">
           {gameDef.companies?.map(company => {
             const isActive = activeCompanies[company.shortName] !== undefined;
+            const hasShares = hasPlayerShares(company.shortName);
             return (
               <Box
                 key={company.shortName} 
@@ -113,8 +120,9 @@ export default function RaiseFunds() {
                     color="white"
                     variant={isActive ? "outline" : "solid"}
                     onClick={() => toggleCompany(company.shortName)}
+                    disabled={isActive && hasShares}
                   >
-                    {isActive ? 'Deactivate' : `Activate ${company.shortName}`}
+                    {isActive ? (hasShares ? 'Shares Held' : 'Deactivate') : `Activate ${company.shortName}`}
                   </Button>
                 </Flex>
 
