@@ -131,10 +131,11 @@ export default function RevenueCalculator() {
               {activeCompanies.map(c => (
                 <Button
                   key={c.shortName}
-                  color="white"
+                  bg={selectedCompanyId === c.shortName ? (c.color || 'gray.700') : "transparent"}
+                  borderColor={c.color || 'gray.700'}
+                  color={selectedCompanyId === c.shortName ? "white" : (c.color || "white")}
                   _hover={{ bg: selectedCompanyId === c.shortName ? undefined : 'whiteAlpha.200' }}
                   variant={selectedCompanyId === c.shortName ? "solid" : "outline"}
-                  colorPalette={selectedCompanyId === c.shortName ? "orange" : "gray"}
                   onClick={() => setSelectedCompanyId(c.shortName)}
                 >
                   {c.shortName}

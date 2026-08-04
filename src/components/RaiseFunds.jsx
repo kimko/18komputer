@@ -108,7 +108,9 @@ export default function RaiseFunds() {
                   
                   <Button 
                     size="sm" 
-                    colorPalette={isActive ? "red" : "orange"}
+                    colorPalette={isActive ? "red" : undefined}
+                    bg={isActive ? undefined : (company.color || 'gray.700')}
+                    color="white"
                     variant={isActive ? "outline" : "solid"}
                     onClick={() => toggleCompany(company.shortName)}
                   >
