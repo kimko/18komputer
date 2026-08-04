@@ -296,7 +296,7 @@ export default function Dashboard() {
       )}
 
       <Flex justify="space-between" align="center" mb="4" wrap="wrap" gap="4">
-        <Heading as="h3" size="lg" color="teal.400">Player Net Worth</Heading>
+        <Heading as="h3" size="lg" color="teal.400">Player Holdings</Heading>
         <form onSubmit={handleAddPlayer}>
           <Flex gap="2">
             <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none" color="white"/>
