@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from 'react';
-import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, SimpleGrid, Grid, GridItem, VStack } from '@chakra-ui/react';
+import { Box, Heading, Center, Spinner, Text, Input, Flex, Button, IconButton, SimpleGrid, Grid, GridItem } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
 
@@ -17,7 +17,7 @@ function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose }) 
     <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
       <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
         <Flex align="center" gap="2" mb="4">
-          <Text fontWeight="bold">{title}</Text>
+          <Text fontWeight="bold" color="white">{title}</Text>
           {subtitle && (
             <Box bg={badgeColor || 'gray.700'} px="2" py="1" borderRadius="md">
               <Text fontSize="sm" color="white">{subtitle}</Text>
@@ -26,24 +26,24 @@ function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose }) 
         </Flex>
         
         <Box bg="gray.800" p="3" borderRadius="md" mb="4" textAlign="right" h="12" display="flex" alignItems="center" justifyContent="flex-end">
-          <Text fontSize="xl" fontWeight="bold">{value || '0'}</Text>
+          <Text fontSize="xl" fontWeight="bold" color="white">{value || '0'}</Text>
         </Box>
 
         <SimpleGrid columns={4} gap="2">
           <GridItem colSpan={3}>
             <SimpleGrid columns={3} gap="2">
               {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(n => (
-                <Button key={n} h="12" variant="outline" colorPalette="gray" onClick={() => handleType(n)}>{n}</Button>
+                <Button key={n} h="12" variant="outline" color="white" borderColor="gray.600" _hover={{ bg: 'gray.800' }} onClick={() => handleType(n)}>{n}</Button>
               ))}
-              <Button h="12" variant="outline" colorPalette="red" onClick={handleClear}>C</Button>
-              <Button h="12" variant="outline" colorPalette="gray" onClick={() => handleType(0)}>0</Button>
-              <Button h="12" variant="outline" colorPalette="orange" onClick={handleBackspace}>⌫</Button>
+              <Button h="12" variant="outline" color="red.300" borderColor="gray.600" _hover={{ bg: 'gray.800' }} onClick={handleClear}>C</Button>
+              <Button h="12" variant="outline" color="white" borderColor="gray.600" _hover={{ bg: 'gray.800' }} onClick={() => handleType(0)}>0</Button>
+              <Button h="12" variant="outline" color="orange.300" borderColor="gray.600" _hover={{ bg: 'gray.800' }} onClick={handleBackspace}>⌫</Button>
             </SimpleGrid>
           </GridItem>
           <GridItem colSpan={1}>
-            <VStack h="100%" gap="2" align="stretch">
+            <Flex direction="column" h="100%">
               <Button flex="1" colorPalette="teal" onClick={onClose}>OK</Button>
-            </VStack>
+            </Flex>
           </GridItem>
         </SimpleGrid>
       </Box>
@@ -68,7 +68,7 @@ function PricePickerPopup({ company, value, options, onChange, onClose }) {
     <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
       <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
         <Flex align="center" gap="2" mb="4">
-          <Text fontWeight="bold">Set final price for</Text>
+          <Text fontWeight="bold" color="white">Set final price for</Text>
           <Box bg={company.color || 'gray.700'} px="2" py="1" borderRadius="md">
             <Text fontSize="sm" color="white">{company.shortName}</Text>
           </Box>
@@ -82,7 +82,7 @@ function PricePickerPopup({ company, value, options, onChange, onClose }) {
                   key={opt} 
                   size="sm" 
                   variant={Number(value) === opt ? 'solid' : 'ghost'} 
-                  color={Number(value) === opt ? 'black' : 'white'}
+                  color={Number(value) === opt ? 'black' : 'gray.300'}
                   bg={Number(value) === opt ? 'white' : 'transparent'}
                   _hover={{ bg: 'whiteAlpha.200' }}
                   onClick={() => {
@@ -96,13 +96,54 @@ function PricePickerPopup({ company, value, options, onChange, onClose }) {
             </SimpleGrid>
           </Box>
           
-          <VStack gap="2" w="50px">
-            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={() => onChange('')}>C</Button>
-            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={handlePrev}>←</Button>
-            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={handleNext}>→</Button>
-            <Button w="100%" h="50px" variant="outline" colorPalette="gray" onClick={onClose}>X</Button>
-          </VStack>
+          <Flex direction="column" gap="2" w="50px">
+            <Button w="100%" h="50px" variant="outline" color="white" borderColor="gray.600" onClick={() => onChange('')}>C</Button>
+            <Button w="100%" h="50px" variant="outline" color="white" borderColor="gray.600" onClick={handlePrev}>←</Button>
+            <Button w="100%" h="50px" variant="outline" color="white" borderColor="gray.600" onClick={handleNext}>→</Button>
+            <Button w="100%" h="50px" variant="outline" color="white" borderColor="gray.600" onClick={onClose}>X</Button>
+          </Flex>
         </Flex>
+      </Box>
+    </Box>
+  );
+}
+
+function ShareCountPopup({ company, player, value, maxAvailable, onChange, onClose }) {
+  const options = [];
+  for (let i = 0; i <= maxAvailable; i += 10) {
+    options.push(i);
+  }
+
+  return (
+    <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
+      <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
+        <Flex align="center" gap="2" mb="4">
+          <Text fontWeight="bold" color="white">Set {player}'s shares for</Text>
+          <Box bg={company.color || 'gray.700'} px="2" py="1" borderRadius="md">
+            <Text fontSize="sm" color="white">{company.shortName}</Text>
+          </Box>
+        </Flex>
+
+        <SimpleGrid columns={4} gap="2" mb="4">
+          {options.map(opt => (
+            <Button 
+              key={opt} 
+              size="sm" 
+              variant={Number(value) === opt ? 'solid' : 'outline'} 
+              color={Number(value) === opt ? 'black' : 'white'}
+              bg={Number(value) === opt ? 'white' : 'transparent'}
+              borderColor="gray.600"
+              _hover={{ bg: 'whiteAlpha.200' }}
+              onClick={() => {
+                onChange(opt);
+                onClose();
+              }}
+            >
+              {opt}%
+            </Button>
+          ))}
+        </SimpleGrid>
+        <Button w="100%" variant="outline" color="white" borderColor="gray.600" onClick={onClose}>Cancel</Button>
       </Box>
     </Box>
   );
@@ -119,7 +160,6 @@ export default function Dashboard() {
   });
   const [newPlayerName, setNewPlayerName] = useState('');
   
-  // Track active popup state: { type: 'shareValue' | 'or' | 'cash' | 'shares', companyId?, player?, orIndex? }
   const [activePopup, setActivePopup] = useState(null);
 
   useEffect(() => {
@@ -153,8 +193,6 @@ export default function Dashboard() {
   const players = gameInstance.players || [];
   const sharePriceOptions = gameInstance.staticConfig?.sharePrices || gameInstance.staticConfig?.parValues || [];
 
-
-
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     const name = newPlayerName.trim();
@@ -184,9 +222,18 @@ export default function Dashboard() {
     let nw = Number(assets.cash || 0);
     activeCompanies.forEach(c => {
       const sharePct = Number(assets.shares[c.shortName] || 0);
-      nw += sharePct * getShareValue(c.shortName);
+      nw += (sharePct / 10) * getShareValue(c.shortName);
     });
     return nw;
+  };
+
+  const getBankShares = (companyId) => {
+    let totalPlayerShares = 0;
+    players.forEach(p => {
+      const pShares = Number(dashboardState.playerAssets[p]?.shares?.[companyId] || 0);
+      totalPlayerShares += pShares;
+    });
+    return Math.max(0, 100 - totalPlayerShares);
   };
 
   return (
@@ -234,7 +281,7 @@ export default function Dashboard() {
         <Heading as="h3" size="lg" color="teal.400">Player Net Worth</Heading>
         <form onSubmit={handleAddPlayer}>
           <Flex gap="2">
-            <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none"/>
+            <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none" color="white"/>
             <Button size="sm" type="submit" colorPalette="teal">Add</Button>
           </Flex>
         </form>
@@ -242,7 +289,7 @@ export default function Dashboard() {
       
       {players.length > 0 && (
         <Box overflowX="auto">
-          <Grid templateColumns={`100px repeat(${players.length}, 100px)`} gap="2" alignItems="center">
+          <Grid templateColumns={`100px repeat(${players.length}, 100px) 100px`} gap="2" alignItems="center">
             <GridItem></GridItem>
             {players.map(p => (
               <GridItem key={p} textAlign="center">
@@ -252,6 +299,7 @@ export default function Dashboard() {
                 </Flex>
               </GridItem>
             ))}
+            <GridItem textAlign="center"><Text fontWeight="bold" color="gray.400">Bank</Text></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
             {players.map(p => (
@@ -259,6 +307,7 @@ export default function Dashboard() {
                 <Text fontWeight="bold" color="green.300">${getPlayerNetWorth(p)}</Text>
               </GridItem>
             ))}
+            <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Cash</Text></GridItem>
             {players.map(p => (
@@ -268,6 +317,7 @@ export default function Dashboard() {
                 </Button>
               </GridItem>
             ))}
+            <GridItem></GridItem>
 
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
@@ -277,11 +327,14 @@ export default function Dashboard() {
                   return (
                     <GridItem key={p}>
                       <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shares', player: p, companyId: c.shortName })}>
-                        {shares !== undefined && shares !== '' ? shares : ''}
+                        {shares !== undefined && shares !== '' ? `${shares}%` : ''}
                       </Button>
                     </GridItem>
                   );
                 })}
+                <GridItem textAlign="center">
+                  <Text color="gray.400" fontWeight="bold">{getBankShares(c.shortName)}%</Text>
+                </GridItem>
               </Fragment>
             ))}
           </Grid>
@@ -337,11 +390,11 @@ export default function Dashboard() {
       )}
 
       {activePopup?.type === 'shares' && (
-        <NumpadPopup
-          title={`Set ${activePopup.companyId} shares for`}
-          subtitle={activePopup.player}
-          badgeColor={activeCompanies.find(c => c.shortName === activePopup.companyId)?.color}
-          value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId]}
+        <ShareCountPopup
+          company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
+          player={activePopup.player}
+          value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0}
+          maxAvailable={getBankShares(activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0)}
           onChange={(val) => {
             const assets = { ...dashboardState.playerAssets };
             if (!assets[activePopup.player]) assets[activePopup.player] = { cash: '', shares: {} };
