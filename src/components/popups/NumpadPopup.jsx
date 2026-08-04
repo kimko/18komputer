@@ -1,4 +1,5 @@
 import { Box, Flex, Text, Button, SimpleGrid, GridItem } from '@chakra-ui/react';
+import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, onCopyLast, onSubtitleClick }) {
   const handleType = (num) => {
@@ -17,12 +18,12 @@ export default function NumpadPopup({ title, subtitle, badgeColor, value, onChan
           <Text fontWeight="bold" color="white">{title}</Text>
           {subtitle && (
             onSubtitleClick ? (
-              <Button size="sm" bg={badgeColor || 'gray.700'} color="white" onClick={onSubtitleClick} _hover={{ bg: 'whiteAlpha.300' }}>
+              <Button size="sm" bg={badgeColor || 'gray.700'} color={getContrastColor(badgeColor || '#2d3748')} onClick={onSubtitleClick} _hover={{ bg: 'whiteAlpha.300' }}>
                 {subtitle}
               </Button>
             ) : (
               <Box bg={badgeColor || 'gray.700'} px="2" py="1" borderRadius="md">
-                <Text fontSize="sm" color="white">{subtitle}</Text>
+                <Text fontSize="sm" color={getContrastColor(badgeColor || '#2d3748')}>{subtitle}</Text>
               </Box>
             )
           )}

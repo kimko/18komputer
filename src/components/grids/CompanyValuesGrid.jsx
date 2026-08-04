@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text } from '@chakra-ui/react';
 import { getShareValue, getCompanyOrTotal } from '../../utils/dashboardMath.js';
+import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function CompanyValuesGrid({ 
   activeCompanies, 
@@ -33,7 +34,7 @@ export default function CompanyValuesGrid({
           {activeCompanies.map(c => (
             <Fragment key={c.shortName}>
               <GridItem>
-                <Box bg={c.color || 'gray.700'} color="white" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
+                <Box bg={c.color || 'gray.700'} color={getContrastColor(c.color || '#2d3748')} textAlign="center" py="2" borderRadius="md" fontWeight="bold">
                   {c.shortName}
                 </Box>
               </GridItem>

@@ -1,4 +1,5 @@
 import { Box, Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
+import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function PricePickerPopup({ company, value, options, onChange, onClose }) {
   const currentIndex = options.findIndex(opt => opt === Number(value));
@@ -21,7 +22,7 @@ export default function PricePickerPopup({ company, value, options, onChange, on
         <Flex align="center" gap="2" mb="4">
           <Text fontWeight="bold" color="white">Set final price for</Text>
           <Box bg={company.color || 'gray.700'} px="2" py="1" borderRadius="md">
-            <Text fontSize="sm" color="white">{company.shortName}</Text>
+            <Text fontSize="sm" color={getContrastColor(company.color || '#2d3748')}>{company.shortName}</Text>
           </Box>
         </Flex>
 

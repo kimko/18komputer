@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { getGame, updateGameState } from '../api/mockApi.js';
+import { getContrastColor } from '../utils/colorUtils.js';
 
 export default function ActivateCompany() {
   const [match, params] = useRoute('/game/:id/setup');
@@ -117,7 +118,7 @@ export default function ActivateCompany() {
                     size="sm" 
                     colorPalette={isActive ? "red" : undefined}
                     bg={isActive ? undefined : (company.color || 'gray.700')}
-                    color="white"
+                    color={isActive ? "white" : getContrastColor(company.color || '#2d3748')}
                     variant={isActive ? "outline" : "solid"}
                     onClick={() => toggleCompany(company.shortName)}
                     disabled={isActive && hasShares}
