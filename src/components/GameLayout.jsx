@@ -1,20 +1,66 @@
 import { Box, Flex, Heading, Button, Text } from '@chakra-ui/react';
 import { Link, useRoute, useLocation } from 'wouter';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useGameData } from '../hooks/useGameData.js';
 
 export default function GameLayout({ children }) {
   const [match, params] = useRoute('/game/:id/*any');
   const [, navigate] = useLocation();
   const [showConfirm, setShowConfirm] = useState(false);
   const gameId = params?.id;
+  const modalRef = useRef(null);
+
+  const { error } = useGameData(match ? gameId : null);
+
+  useEffect(() => {
+    if (error) {
+      navigate('/');
+    }
+  }, [error, navigate]);
+
+  useEffect(() => {
+    if (match && !gameId) {
+      navigate('/');
+    }
+  }, [match, gameId, navigate]);
+
+  useEffect(() => {
+    if (showConfirm && modalRef.current) {
+      const focusable = modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length > 0) focusable[0].focus();
+    }
+  }, [showConfirm]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setShowConfirm(false);
+      return;
+    }
+    
+    if (e.key === 'Tab') {
+      if (!modalRef.current) return;
+      const focusable = Array.from(modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
+      if (focusable.length === 0) return;
+      
+      const firstElement = focusable[0];
+      const lastElement = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    }
+  };
 
   if (!match || !gameId) {
     return <>{children}</>; // If not in a game route, just render children
-  }
-
-  if (match && !gameId) {
-    navigate('/');
-    return null;
   }
 
   return (
@@ -101,7 +147,22 @@ export default function GameLayout({ children }) {
       </Flex>
 
       {showConfirm && (
-        <Box role="dialog" aria-modal="true" aria-labelledby="modal-title" position="fixed" tabIndex="-1" onKeyDown={(e) => { if(e.key === 'Escape') setShowConfirm(false); }} top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
+        <Box 
+          ref={modalRef}
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="modal-title" 
+          position="fixed" 
+          tabIndex="-1" 
+          onKeyDown={handleKeyDown} 
+          top="0" left="0" w="100vw" h="100vh" 
+          bg="blackAlpha.700" 
+          zIndex="1000" 
+          display="flex" 
+          alignItems="center" 
+          justifyContent="center" 
+          onClick={() => setShowConfirm(false)}
+        >
           <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="xs" w="100%" textAlign="center">
             <Heading id="modal-title" size="md" mb="2" color="white">Are you sure?</Heading>
             <Text color="gray.300" mb="6" fontSize="sm">This will leave the current game.</Text>

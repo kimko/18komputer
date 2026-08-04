@@ -10,7 +10,11 @@ vi.mock('wouter', () => ({
   Link: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 
-import { useRoute } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
+vi.mock('../hooks/useGameData.js', () => ({
+  useGameData: vi.fn()
+}));
+import { useGameData } from '../hooks/useGameData.js';
 
 const renderWithChakra = (ui) => {
   return render(
@@ -23,6 +27,7 @@ const renderWithChakra = (ui) => {
 describe('GameLayout', () => {
   it('renders children without navigation when not in a game route', () => {
     useRoute.mockReturnValue([false, null]);
+    useGameData.mockReturnValue({ error: null, loading: false });
     renderWithChakra(<GameLayout><div>Child Content</div></GameLayout>);
     
     expect(screen.getByText('Child Content')).toBeInTheDocument();
@@ -31,6 +36,7 @@ describe('GameLayout', () => {
 
   it('renders navigation when in a game route', () => {
     useRoute.mockReturnValue([true, { id: 'test-game' }]);
+    useGameData.mockReturnValue({ error: null, loading: false });
     renderWithChakra(<GameLayout><div>Child Content</div></GameLayout>);
     
     expect(screen.getByText('Child Content')).toBeInTheDocument();
@@ -40,5 +46,16 @@ describe('GameLayout', () => {
     expect(screen.getAllByText('Calculator').length).toBe(1);
     expect(screen.getAllByText('Calc').length).toBe(1);
     expect(screen.getAllByText('Results').length).toBe(2);
+  });
+
+  it('redirects to home if game does not exist in storage', () => {
+    useRoute.mockReturnValue([true, { id: 'invalid-game' }]);
+    useGameData.mockReturnValue({ error: new Error('Game not found'), loading: false });
+    const mockNavigate = vi.fn();
+    useLocation.mockReturnValue(['/', mockNavigate]);
+    
+    renderWithChakra(<GameLayout><div>Child Content</div></GameLayout>);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });
