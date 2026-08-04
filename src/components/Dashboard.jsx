@@ -235,14 +235,38 @@ export default function Dashboard() {
     return c?.parValue || 0;
   };
 
-  const getPlayerNetWorth = (player) => {
-    const assets = dashboardState.playerAssets[player] || { cash: 0, shares: {} };
-    let nw = Number(assets.cash || 0);
+  const getPlayerShareValue = (player) => {
+    const assets = dashboardState.playerAssets[player] || { shares: {} };
+    let sv = 0;
     activeCompanies.forEach(c => {
       const sharePct = Number(assets.shares[c.shortName] || 0);
-      nw += (sharePct / 10) * getShareValue(c.shortName);
+      sv += (sharePct / 10) * getShareValue(c.shortName);
     });
-    return nw;
+    return sv;
+  };
+
+  const getCompanyOrTotal = (shortName) => {
+    let total = 0;
+    for (let i = 1; i <= maxOr; i++) {
+      const val = dashboardState.ors[shortName]?.[`or${i}`];
+      if (val !== undefined && val !== '') total += Number(val);
+    }
+    return total;
+  };
+
+  const getPlayerOperatingIncome = (player) => {
+    const assets = dashboardState.playerAssets[player] || { shares: {} };
+    let income = 0;
+    activeCompanies.forEach(c => {
+      const sharePct = Number(assets.shares[c.shortName] || 0);
+      income += (sharePct / 10) * getCompanyOrTotal(c.shortName);
+    });
+    return income;
+  };
+
+  const getPlayerNetWorth = (player) => {
+    const assets = dashboardState.playerAssets[player] || { cash: 0 };
+    return Number(assets.cash || 0) + getPlayerShareValue(player);
   };
 
   const getBankShares = (companyId) => {
@@ -338,14 +362,6 @@ export default function Dashboard() {
             ))}
             <GridItem textAlign="center"><Text fontWeight="bold" color="gray.400">Bank</Text></GridItem>
 
-            <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
-            {players.map(p => (
-              <GridItem key={p} textAlign="center">
-                <Text fontWeight="bold" color="green.300">${getPlayerNetWorth(p)}</Text>
-              </GridItem>
-            ))}
-            <GridItem></GridItem>
-
             <GridItem><Text color="gray.400" fontSize="sm">Cash</Text></GridItem>
             {players.map(p => (
               <GridItem key={p}>
@@ -355,6 +371,8 @@ export default function Dashboard() {
               </GridItem>
             ))}
             <GridItem></GridItem>
+
+
 
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
@@ -374,6 +392,30 @@ export default function Dashboard() {
                 </GridItem>
               </Fragment>
             ))}
+
+            <GridItem><Text color="gray.400" fontSize="sm">Share Value</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={p} textAlign="center">
+                <Text fontWeight="bold" color="white">${getPlayerShareValue(p)}</Text>
+              </GridItem>
+            ))}
+            <GridItem></GridItem>
+
+            <GridItem><Text color="gray.400" fontSize="sm">Operating Income</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={p} textAlign="center">
+                <Text fontWeight="bold" color="cyan.300">${getPlayerOperatingIncome(p)}</Text>
+              </GridItem>
+            ))}
+            <GridItem></GridItem>
+
+            <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
+            {players.map(p => (
+              <GridItem key={p} textAlign="center">
+                <Text fontWeight="bold" color="green.300">${getPlayerNetWorth(p)}</Text>
+              </GridItem>
+            ))}
+            <GridItem></GridItem>
           </Grid>
         </Box>
       )}
