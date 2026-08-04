@@ -43,7 +43,7 @@ export default function GameLayout({ children }) {
           </Link>
           <Link href={`/game/${gameId}/dashboard`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
-              Dashboard
+              Results
             </Button>
           </Link>
         </Flex>
@@ -82,7 +82,7 @@ export default function GameLayout({ children }) {
         </Link>
         <Link href={`/game/${gameId}/dashboard`}>
           <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
-            Dashboard
+            Results
           </Button>
         </Link>
       </Flex>
