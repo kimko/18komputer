@@ -36,7 +36,8 @@ describe('GameLayout', () => {
     
     expect(screen.getAllByText('Activate Company').length).toBe(1);
     expect(screen.getAllByText('Company').length).toBe(1);
-    expect(screen.getAllByText('Calculator').length).toBe(2);
+    expect(screen.getAllByText('Calculator').length).toBe(1);
+    expect(screen.getAllByText('Calc').length).toBe(1);
     expect(screen.getAllByText('Results').length).toBe(2);
   });
 });

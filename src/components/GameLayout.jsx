@@ -67,26 +67,26 @@ export default function GameLayout({ children }) {
         borderColor="whiteAlpha.200"
         zIndex="10"
         px="2"
-        py="2"
+        py="3"
         justify="space-between"
       >
-        <Link href={`/game/${gameId}/setup`}>
-          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+        <Link href={`/game/${gameId}/setup`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
             Company
           </Button>
         </Link>
-        <Link href={`/game/${gameId}/calculator`}>
-          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
-            Calculator
+        <Link href={`/game/${gameId}/calculator`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
+            Calc
           </Button>
         </Link>
-        <Link href={`/game/${gameId}/dashboard`}>
-          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+        <Link href={`/game/${gameId}/dashboard`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
             Results
           </Button>
         </Link>
-        <Link href={`/new`}>
-          <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" flex="1" px="2">
+        <Link href={`/new`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
             New
           </Button>
         </Link>
