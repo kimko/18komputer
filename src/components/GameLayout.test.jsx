@@ -6,6 +6,7 @@ import GameLayout from './GameLayout.jsx';
 // Mock wouter
 vi.mock('wouter', () => ({
   useRoute: vi.fn(),
+  useLocation: vi.fn(() => ['/', vi.fn()]),
   Link: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 

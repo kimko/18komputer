@@ -1,8 +1,11 @@
-import { Box, Flex, Heading, Button } from '@chakra-ui/react';
-import { Link, useRoute } from 'wouter';
+import { Box, Flex, Heading, Button, Text } from '@chakra-ui/react';
+import { Link, useRoute, useLocation } from 'wouter';
+import { useState } from 'react';
 
 export default function GameLayout({ children }) {
   const [match, params] = useRoute('/game/:id/*any');
+  const [, navigate] = useLocation();
+  const [showConfirm, setShowConfirm] = useState(false);
   const gameId = params?.id;
 
   if (!match || !gameId) {
@@ -85,12 +88,25 @@ export default function GameLayout({ children }) {
             Results
           </Button>
         </Link>
-        <Link href={`/new`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
-          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
+        <Box style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" onClick={() => setShowConfirm(true)}>
             New
           </Button>
-        </Link>
+        </Box>
       </Flex>
+
+      {showConfirm && (
+        <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={() => setShowConfirm(false)}>
+          <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="xs" w="100%" textAlign="center">
+            <Heading size="md" mb="2" color="white">Are you sure?</Heading>
+            <Text color="gray.300" mb="6" fontSize="sm">This will leave the current game.</Text>
+            <Flex gap="4">
+              <Button flex="1" variant="outline" color="white" onClick={() => setShowConfirm(false)}>Cancel</Button>
+              <Button flex="1" colorPalette="red" onClick={() => { setShowConfirm(false); navigate('/new'); }}>Leave</Button>
+            </Flex>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 }
