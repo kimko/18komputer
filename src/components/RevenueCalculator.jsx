@@ -116,7 +116,7 @@ export default function RevenueCalculator() {
   };
 
   const handleCopyTrain = (trainToCopy) => {
-    const updatedTrains = [...trains, { id: Date.now(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }];
+    const updatedTrains = [...trains, { id: Date.now() + Math.random(), stops: [...trainToCopy.stops], bonusStops: [...trainToCopy.bonusStops] }];
     updateCompanyState({ trains: updatedTrains });
   };
 

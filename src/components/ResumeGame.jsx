@@ -9,17 +9,21 @@ export default function ResumeGame() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadData() {
       try {
         const list = await getGamesList();
-        setGames(list);
+        if (isMounted) setGames(list);
       } catch (err) {
         console.error('Error fetching games list:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     loadData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
@@ -45,13 +49,15 @@ export default function ResumeGame() {
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="4">
             {games.map(game => {
               const hash = game.id.split('_').pop();
-              const date = new Date(game.createdAt).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
+              const date = game.createdAt 
+                ? new Date(game.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : 'Unknown Date';
               
               return (
                 <Box 

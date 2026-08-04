@@ -22,7 +22,13 @@ const enqueue = (operation) => {
 // Helper to get all games from local storage
 const readStorage = () => {
   const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : {};
+  if (!data) return {};
+  try {
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Failed to parse localStorage data:', err);
+    return {};
+  }
 };
 
 // Helper to save all games to local storage
