@@ -214,7 +214,7 @@ export default function Dashboard() {
     const val = dashboardState.shareValues[shortName];
     if (val !== undefined && val !== '') return Number(val);
     const c = activeCompanies.find(comp => comp.shortName === shortName);
-    return c?.initialValue || 0;
+    return c?.parValue || 0;
   };
 
   const getPlayerNetWorth = (player) => {

@@ -126,7 +126,7 @@ export default function RaiseFunds() {
                   </Button>
                 </Flex>
 
-                {isActive && gameDef.parValues && gameDef.parValues.length > 0 && (
+                {isActive && !hasShares && gameDef.parValues && gameDef.parValues.length > 0 && (
                   <Box mt="4">
                     <Text fontSize="sm" color="gray.400" mb="2">Select Initial Par Value</Text>
                     <Flex wrap="wrap" gap="2">
