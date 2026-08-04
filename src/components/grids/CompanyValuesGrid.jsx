@@ -31,7 +31,9 @@ export default function CompanyValuesGrid({
             <GridItem key={i} textAlign="center"><Text fontWeight="bold" color="white">OR {i + 1}</Text></GridItem>
           ))}
 
-          {activeCompanies.map(c => (
+          {activeCompanies.map(c => {
+            const companyOrTotal = getCompanyOrTotal(dashboardState, maxOr, c.shortName);
+            return (
             <Fragment key={c.shortName}>
               <GridItem>
                 <Box bg={c.color || 'gray.700'} color={getContrastColor(c.color || '#2d3748')} textAlign="center" py="2" borderRadius="md" fontWeight="bold">
@@ -45,7 +47,7 @@ export default function CompanyValuesGrid({
               </GridItem>
               <GridItem>
                 <Box w="100%" bg="gray.900" color="cyan.300" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
-                  {getCompanyOrTotal(dashboardState, maxOr, c.shortName) > 0 ? getCompanyOrTotal(dashboardState, maxOr, c.shortName) : ''}
+                  {companyOrTotal > 0 ? companyOrTotal : ''}
                 </Box>
               </GridItem>
               {Array.from({ length: maxOr }).map((_, i) => {
@@ -59,7 +61,7 @@ export default function CompanyValuesGrid({
                 );
               })}
             </Fragment>
-          ))}
+          )})}
         </Grid>
       </Box>
     </Box>
