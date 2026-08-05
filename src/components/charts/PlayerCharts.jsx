@@ -127,8 +127,8 @@ export default function PlayerCharts({ assetData, dividendData, radarData, bubbl
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis dataKey="player" type="category" stroke={textColor} />
-              <YAxis dataKey="company" type="category" stroke={textColor} width={80} />
+              <XAxis dataKey="player" type="category" stroke={textColor} allowDuplicatedCategory={false} />
+              <YAxis dataKey="company" type="category" stroke={textColor} width={80} allowDuplicatedCategory={false} />
               <ZAxis dataKey="value" type="number" range={[50, 800]} />
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }}
