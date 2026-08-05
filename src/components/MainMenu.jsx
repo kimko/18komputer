@@ -50,6 +50,7 @@ export default function MainMenu() {
               size="lg"
               colorPalette="gray"
               variant="outline"
+              color="white"
               w="100%"
               h="16"
               onClick={() => navigate('/users')}

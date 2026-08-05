@@ -14,8 +14,14 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
     }
   });
 
-  // We need clipboard permissions for the share test
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  // Intercept clipboard writes at the page level (works on Chromium, Firefox, and WebKit)
+  await page.addInitScript(() => {
+    window.__clipboardText = '';
+    navigator.clipboard.writeText = (text) => {
+      window.__clipboardText = text;
+      return Promise.resolve();
+    };
+  });
 
   // Start test
   console.log('--- STARTING CHAOS MONKEY E2E TEST ---');
@@ -51,8 +57,8 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
     const last = lastNames[Math.floor(Math.random() * lastNames.length)];
     const pName = `${first} ${last} ${i + 1}`;
     playerNames.push(pName);
-    await page.getByPlaceholder('Player Name').fill(pName);
-    await page.getByRole('button', { name: 'Add Player' }).click();
+    await page.getByPlaceholder('New player name...').fill(pName);
+    await page.getByRole('button', { name: '+ Add' }).click();
   }
   
   // Verify players are added
@@ -276,7 +282,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   await page.getByRole('button', { name: '📤 Share' }).click();
   await expect(page.getByText('Magic Link copied!')).toBeVisible();
 
-  const clipboardText = await page.evaluate("navigator.clipboard.readText()");
+  const clipboardText = await page.evaluate(() => window.__clipboardText);
   expect(clipboardText).toContain('#import=');
 
   // Output the magic link for manual inspection
