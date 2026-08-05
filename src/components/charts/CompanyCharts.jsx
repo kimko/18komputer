@@ -1,73 +1,115 @@
-import { Box, Heading, SimpleGrid } from '@chakra-ui/react';
+import { Box, Heading, SimpleGrid, Flex, Text } from '@chakra-ui/react';
 import {
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
-  BarChart, Bar
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  BarChart, Bar,
+  PieChart, Pie, Cell
 } from 'recharts';
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <Box bg="gray.800" p="3" border="1px solid" borderColor="gray.600" borderRadius="md" color="white">
-        <Heading size="sm" mb="2" color={data.fill}>{data.fullName} ({data.name})</Heading>
-        <p>Share Price: ${data.sharePrice}</p>
-        <p>Operating Income: ${data.operatingIncome}</p>
-        <p>Market Cap: ${data.marketCap}</p>
-      </Box>
-    );
-  }
-  return null;
-};
-
-export default function CompanyCharts({ data }) {
+export default function CompanyCharts({ trajectoryData, yieldData, activeCompanies }) {
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
+
+  // Lookup color by shortName for the LineChart
+  const getCompanyColor = (shortName) => {
+    const comp = activeCompanies.find(c => c.shortName === shortName);
+    return comp?.color || '#8884d8';
+  };
 
   return (
     <SimpleGrid columns={[1, null, 2]} gap={8} w="100%" mt="6">
       
-      {/* 1. Value vs Income (Scatter Plot) */}
-      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
-        <Heading size="md" color="teal.300" mb="6" textAlign="center">Efficiency: Share Price vs Op Income</Heading>
-        <Box h="350px">
+      {/* 1. Revenue Trajectory (Line Chart) */}
+      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl" gridColumn={["1", null, "1 / span 2"]}>
+        <Flex justify="space-between" align="center" mb="2">
+          <Heading size="md" color="teal.300">Revenue Trajectory</Heading>
+          <Text fontSize="sm" color="gray.500">Acceleration of operating income across rounds</Text>
+        </Flex>
+        <Box h="300px">
           <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <LineChart data={trajectoryData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis type="number" dataKey="sharePrice" name="Share Price" unit="$" stroke={textColor} />
-              <YAxis type="number" dataKey="operatingIncome" name="Op Income" unit="$" stroke={textColor} />
-              <ZAxis type="number" dataKey="marketCap" range={[100, 1000]} name="Market Cap" />
-              <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-              <Scatter name="Companies" data={data} fill="#8884d8">
-                {data.map((entry, index) => (
-                  <cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-                <LabelList dataKey="name" position="inside" fill="#fff" fontSize={11} fontWeight="bold" />
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
-        </Box>
-      </Box>
-
-      {/* 2. Relative Market Cap (Bar Chart) */}
-      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
-        <Heading size="md" color="teal.300" mb="6" textAlign="center">Relative Market Cap</Heading>
-        <Box h="350px">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="name" stroke={textColor} />
               <YAxis stroke={textColor} tickFormatter={(val) => `$${val}`} />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
                 itemStyle={{ color: 'white' }}
-                cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
               />
-              <Bar dataKey="marketCap" name="Market Cap" radius={[4, 4, 0, 0]}>
-                {data.map((entry, index) => (
-                  <cell key={`cell-${index}`} fill={entry.fill} />
+              <Legend wrapperStyle={{ paddingTop: '10px' }} />
+              {activeCompanies.map(c => (
+                <Line 
+                  key={c.shortName} 
+                  type="monotone" 
+                  dataKey={c.shortName} 
+                  name={c.shortName}
+                  stroke={c.color || '#8884d8'} 
+                  strokeWidth={3}
+                  activeDot={{ r: 6 }} 
+                  connectNulls
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+
+      {/* 2. Dividend Yield (Bar Chart) */}
+      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
+        <Flex justify="space-between" align="center" mb="6">
+          <Heading size="md" color="teal.300">Dividend Yield</Heading>
+          <Text fontSize="sm" color="gray.500">Total OR Income / Market Cap</Text>
+        </Flex>
+        <Box h="300px">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={yieldData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="name" stroke={textColor} />
+              <YAxis stroke={textColor} tickFormatter={(val) => `${val}%`} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
+                itemStyle={{ color: 'white' }}
+                cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                formatter={(value) => [`${value}%`, 'Yield']}
+              />
+              <Bar dataKey="yieldPct" name="Yield" radius={[4, 4, 0, 0]}>
+                {yieldData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Bar>
             </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+
+      {/* 3. Market Dominance (Donut Chart) */}
+      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
+        <Flex justify="space-between" align="center" mb="2">
+          <Heading size="md" color="teal.300">Market Dominance</Heading>
+          <Text fontSize="sm" color="gray.500">Share of total economy</Text>
+        </Flex>
+        <Box h="300px">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={yieldData}
+                dataKey="marketCap"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={2}
+                label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+              >
+                {yieldData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
+                itemStyle={{ color: 'white' }}
+                formatter={(value) => [`$${value}`, 'Market Cap']}
+              />
+            </PieChart>
           </ResponsiveContainer>
         </Box>
       </Box>

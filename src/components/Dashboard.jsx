@@ -13,7 +13,13 @@ import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
 import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/dashboardMath.js';
 import CompanyCharts from './charts/CompanyCharts.jsx';
 import PlayerCharts from './charts/PlayerCharts.jsx';
-import { getCompanyChartData, getPlayerLeaderboardData, getPortfolioRadarData } from '../utils/chartDataSelectors.js';
+import {
+  getRevenueTrajectoryData,
+  getCompanyYieldAndDominanceData,
+  getPlayerAssetBreakdownData,
+  getPlayerDividendDependencyData,
+  getControllingInterestData
+} from '../utils/chartDataSelectors.js';
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
@@ -152,14 +158,20 @@ export default function Dashboard() {
         </Tabs.Content>
 
         <Tabs.Content value="companies">
-          <CompanyCharts data={getCompanyChartData(dashboardState, activeCompanies, maxOr)} />
+          <CompanyCharts 
+            trajectoryData={getRevenueTrajectoryData(dashboardState, activeCompanies, maxOr)}
+            yieldData={getCompanyYieldAndDominanceData(dashboardState, activeCompanies, maxOr)}
+            activeCompanies={activeCompanies}
+          />
         </Tabs.Content>
 
         <Tabs.Content value="players">
           <PlayerCharts 
-            leaderboardData={getPlayerLeaderboardData(dashboardState, activeCompanies, maxOr, players)}
-            radarData={getPortfolioRadarData(dashboardState, activeCompanies, players)}
+            assetData={getPlayerAssetBreakdownData(dashboardState, activeCompanies, maxOr, players)}
+            dividendData={getPlayerDividendDependencyData(dashboardState, activeCompanies, maxOr, players)}
+            radarData={getControllingInterestData(dashboardState, activeCompanies, players)}
             players={players}
+            activeCompanies={activeCompanies}
           />
         </Tabs.Content>
       </Tabs.Root>
