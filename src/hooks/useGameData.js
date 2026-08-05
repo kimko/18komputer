@@ -8,6 +8,7 @@ export function useGameData(instanceId) {
   
   const timeoutRef = useRef(null);
   const previousStateRef = useRef(null);
+  const pendingUpdatesRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,7 +34,18 @@ export function useGameData(instanceId) {
     }
     
     loadData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      // If we have pending updates when the component unmounts (e.g. user navigating tabs rapidly),
+      // flush them immediately to the mockApi queue so the next mounted component reads the correct state.
+      if (timeoutRef.current && pendingUpdatesRef.current) {
+        clearTimeout(timeoutRef.current);
+        const finalUpdates = pendingUpdatesRef.current;
+        timeoutRef.current = null;
+        pendingUpdatesRef.current = null;
+        updateGameState(instanceId, finalUpdates).catch(console.error);
+      }
+    };
   }, [instanceId]);
 
   const updateGameStateDebounced = useCallback((updates) => {
@@ -44,8 +56,11 @@ export function useGameData(instanceId) {
       previousStateRef.current = gameInstance.state;
     }
     
+    // Accumulate all pending updates during the debounce window
+    pendingUpdatesRef.current = { ...pendingUpdatesRef.current, ...updates };
+    
     // Optimistic update
-    const nextState = { ...gameInstance.state, ...updates };
+    const nextState = { ...gameInstance.state, ...pendingUpdatesRef.current };
     setGameInstance(prev => ({ ...prev, state: nextState }));
     
     if (timeoutRef.current) {
@@ -53,8 +68,12 @@ export function useGameData(instanceId) {
     }
     
     timeoutRef.current = setTimeout(async () => {
+      const updatesToSend = pendingUpdatesRef.current;
+      pendingUpdatesRef.current = null;
+      timeoutRef.current = null;
+      
       try {
-        await updateGameState(instanceId, updates);
+        await updateGameState(instanceId, updatesToSend);
         previousStateRef.current = null; // Clear rollback state on success
       } catch (err) {
         console.error('Failed to update game state, rolling back:', err);
