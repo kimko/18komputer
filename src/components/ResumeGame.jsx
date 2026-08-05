@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
+import LZString from 'lz-string';
 import { getGamesList, deleteGame, importGame } from '../api/mockApi.js';
 
 export default function ResumeGame() {
@@ -27,6 +28,26 @@ export default function ResumeGame() {
       }
     }
     loadData();
+
+    // Check for Magic Link import
+    const hash = window.location.hash;
+    if (hash.startsWith('#import=')) {
+      const compressedData = hash.replace('#import=', '');
+      try {
+        const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
+        if (jsonString) {
+          const gameData = JSON.parse(jsonString);
+          importGame(gameData).then(() => {
+            window.location.hash = ''; // Clear hash
+            navigate(`/game/${gameData.id}/dashboard`);
+          });
+        }
+      } catch (err) {
+        console.error("Failed to parse magic link", err);
+        setImportError('Invalid or corrupted share link.');
+      }
+    }
+
     return () => {
       isMounted = false;
     };

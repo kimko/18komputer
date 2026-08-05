@@ -9,7 +9,8 @@ A mobile-first web assistant designed specifically for playing 18XX board games.
 - **Dynamic Revenue Calculator**: Add multiple trains, calculate grand totals, and generate payout tables instantly.
 - **Title-Specific Mechanics**: Includes specialized features like Pullman tracking for the 1822 series.
 - **Mobile-First Design**: A clean, dark-mode interface powered by Chakra UI, optimized specifically for playing at the table on your phone.
-- **Local Persistence**: Games are automatically saved to your browser's local storage.
+- **Seamless Sharing**: Instantly share your active game state with other players using Magic Links (compressed URLs), bypassing the need for manual file transfers.
+- **Resume & Persistence**: Safely close the app and resume games later. Games are automatically saved to your browser's local storage. You can also import shared games directly.
 
 ## Tech Stack
 - **Framework**: React (via Vite)

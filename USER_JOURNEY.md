@@ -19,8 +19,9 @@ The central landing page has been implemented, serving as the user's primary ent
 - **UI:** A sleek, glassmorphism-styled dashboard utilizing a dark gray and teal color palette.
 - **Actions & Routing:**
   - **NEW GAME:** Routes to `/new`. Implements a form to select one of the 70 supported 18xx titles from a dropdown (with a real-time wildcard text search filter), add player names dynamically to a roster, and dispatch the data to the API state manager to initialize a new instance.
-  - **RESUME GAME:** Routes to `/resume` (future existing game loader).
+  - **RESUME GAME:** Routes to `/resume`. Displays a grid of all active games loaded from `localStorage`. Users can delete games, import a game from a JSON file, or click a game to instantly resume where they left off.
   - **USER MANAGEMENT:** Routes to `/users` (future player profile settings).
+  - **Active Game Navigation:** When inside a game, both desktop and mobile views feature a unified `Home` button that safely returns the user to the Main Menu without risking data loss.
 
 ### 3. Persistent State Manager
 An asynchronous API layer has been implemented to handle game state.
@@ -29,7 +30,9 @@ An asynchronous API layer has been implemented to handle game state.
   - `createGame(gameId, players)`: Spawns a new game instance with a unique ID and initialized data schema.
   - `getGame(instanceId)`: Fetches the current state of a running game instance.
   - `updateGameState(instanceId, updates)`: Deep merges incoming state modifications (e.g., active companies, player assets).
-  - `getGamesList()`: Retrieves a catalog of all saved instances, sorted by creation date (ready for the 'Resume Game' menu).
+  - `deleteGame(instanceId)`: Permanently removes a game from local storage.
+  - `importGame(gameData)`: Saves an imported JSON game payload directly to local storage.
+  - `getGamesList()`: Retrieves a catalog of all saved instances, sorted by creation date (used by the 'Resume Game' menu).
 
 ### 4. Raise Funds (Setup Phase)
 The initial game setup flow has been implemented.
@@ -58,6 +61,7 @@ The final game summary dashboard is implemented and provides real-time mathemati
   - **Player Holdings Grid:** Displays each player (and the Bank) as columns. Tracks Cash, per-company share percentages, Total Shares, Share Value, Operating Income, and total Net Worth. 
   - **Smart Validation:** The Share Count popup dynamically restricts available share percentages based on what remains in the Bank, preventing users from allocating more than 100% of a company.
   - **Details Toggle:** A "Details" button expands the Player Holdings grid to show a breakdown of how the final Net Worth is calculated (showing the separate Share Value and Op Income values).
+  - **Magic Links (Share):** A "Share" button at the top-right allows users to instantly export the current game state. It generates a compressed URL (via LZString) and copies it to the clipboard. Anyone who clicks the link will automatically have the game imported and opened on their device.
 - **Data Flow:** All interactions (updating ORs, changing prices, modifying shares or cash) immediately dispatch updates to the mock API, persisting the state to `localStorage`.
 
 ---

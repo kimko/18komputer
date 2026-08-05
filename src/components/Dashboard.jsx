@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Box, Center, Spinner, Flex, Heading, Button, Text } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
+import LZString from 'lz-string';
 import { useGameData } from '../hooks/useGameData.js';
 
 import NumpadPopup from './popups/NumpadPopup.jsx';
@@ -33,24 +34,16 @@ export default function Dashboard() {
       exportedAt: new Date().toISOString(),
     };
 
-    // Download JSON file
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${gameInstance.gameId}_${gameInstance.id}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Generate magic link with compressed state
+    const compressedData = LZString.compressToEncodedURIComponent(JSON.stringify(exportData));
+    const resumeLink = `${window.location.origin}/18komputer/resume#import=${compressedData}`;
 
     // Copy resume link to clipboard
-    const resumeLink = `${window.location.origin}/18komputer/resume`;
     try {
       await navigator.clipboard.writeText(resumeLink);
-      setShareMessage('Exported! Resume link copied to clipboard.');
+      setShareMessage('Magic Link copied! Anyone with this link can open the game.');
     } catch {
-      setShareMessage('Exported! Could not copy link — use /18komputer/resume to find your games.');
+      setShareMessage('Exported! Could not copy link automatically.');
     }
 
     setTimeout(() => setShareMessage(null), 3000);

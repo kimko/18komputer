@@ -6,9 +6,7 @@ import { useGameData } from '../hooks/useGameData.js';
 export default function GameLayout({ children }) {
   const [match, params] = useRoute('/game/:id/*any');
   const [, navigate] = useLocation();
-  const [showConfirm, setShowConfirm] = useState(false);
   const gameId = params?.id;
-  const modalRef = useRef(null);
 
   const { error } = useGameData(match ? gameId : null);
 
@@ -24,40 +22,6 @@ export default function GameLayout({ children }) {
     }
   }, [match, gameId, navigate]);
 
-  useEffect(() => {
-    if (showConfirm && modalRef.current) {
-      const focusable = modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-      if (focusable.length > 0) focusable[0].focus();
-    }
-  }, [showConfirm]);
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      setShowConfirm(false);
-      return;
-    }
-    
-    if (e.key === 'Tab') {
-      if (!modalRef.current) return;
-      const focusable = Array.from(modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
-      if (focusable.length === 0) return;
-      
-      const firstElement = focusable[0];
-      const lastElement = focusable[focusable.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          lastElement.focus();
-          e.preventDefault();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          firstElement.focus();
-          e.preventDefault();
-        }
-      }
-    }
-  };
 
   if (!match || !gameId) {
     return <>{children}</>; // If not in a game route, just render children
@@ -85,6 +49,11 @@ export default function GameLayout({ children }) {
         </Heading>
         
         <Flex gap="1" flexWrap="wrap" justify="flex-end">
+          <Link href="/">
+            <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
+              Home
+            </Button>
+          </Link>
           <Link href={`/game/${gameId}/setup`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
               Activate Company
@@ -139,40 +108,13 @@ export default function GameLayout({ children }) {
             Results
           </Button>
         </Link>
-        <Box style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
-          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm" onClick={() => setShowConfirm(true)}>
-            New
+        <Link href="/" style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
+          <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
+            Home
           </Button>
-        </Box>
+        </Link>
       </Flex>
 
-      {showConfirm && (
-        <Box 
-          ref={modalRef}
-          role="dialog" 
-          aria-modal="true" 
-          aria-labelledby="modal-title" 
-          position="fixed" 
-          tabIndex="-1" 
-          onKeyDown={handleKeyDown} 
-          top="0" left="0" w="100vw" h="100vh" 
-          bg="blackAlpha.700" 
-          zIndex="1000" 
-          display="flex" 
-          alignItems="center" 
-          justifyContent="center" 
-          onClick={() => setShowConfirm(false)}
-        >
-          <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="xs" w="100%" textAlign="center">
-            <Heading id="modal-title" size="md" mb="2" color="white">Are you sure?</Heading>
-            <Text color="gray.300" mb="6" fontSize="sm">This will leave the current game.</Text>
-            <Flex gap="4">
-              <Button flex="1" variant="outline" color="white" onClick={() => setShowConfirm(false)}>Cancel</Button>
-              <Button flex="1" colorPalette="red" onClick={() => { setShowConfirm(false); navigate('/new'); }}>Leave</Button>
-            </Flex>
-          </Box>
-        </Box>
-      )}
     </Box>
   );
 }

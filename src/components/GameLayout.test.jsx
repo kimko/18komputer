@@ -41,6 +41,7 @@ describe('GameLayout', () => {
     
     expect(screen.getByText('Child Content')).toBeInTheDocument();
     
+    expect(screen.getAllByText('Home').length).toBe(2);
     expect(screen.getAllByText('Activate Company').length).toBe(1);
     expect(screen.getAllByText('Company').length).toBe(1);
     expect(screen.getAllByText('Calculator').length).toBe(1);
