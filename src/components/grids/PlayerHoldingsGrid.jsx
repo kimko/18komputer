@@ -47,12 +47,16 @@ export default function PlayerHoldingsGrid({
     });
     data.grandTotalOpIncome = grandTotalOpIncome;
 
+    let grandTotalCash = 0;
     players.forEach(p => {
+      grandTotalCash += Number(dashboardState.playerAssets[p]?.cash || 0);
       data.totalShares[p] = getPlayerTotalShares(dashboardState, activeCompanies, p);
       data.totalShareValues[p] = getPlayerShareValue(dashboardState, activeCompanies, p);
       data.totalOpIncomes[p] = getPlayerOperatingIncome(dashboardState, activeCompanies, maxOr, p);
       data.netWorths[p] = getPlayerNetWorth(dashboardState, activeCompanies, maxOr, p);
     });
+    data.grandTotalCash = grandTotalCash;
+    data.totalBankFundsUsed = grandTotalCash + grandTotalOpIncome;
 
     data.maxNetWorth = players.length > 0 ? Math.max(...players.map(p => data.netWorths[p])) : 0;
 
@@ -98,7 +102,11 @@ export default function PlayerHoldingsGrid({
                 </Button>
               </GridItem>
             ))}
-            <GridItem></GridItem>
+            <GridItem textAlign="center">
+              <Text fontWeight="bold" color="gray.400" fontSize="sm" title="Total Cash">
+                {formatCurrency(gridData.grandTotalCash)}
+              </Text>
+            </GridItem>
 
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
@@ -198,6 +206,18 @@ export default function PlayerHoldingsGrid({
               );
             })}
             <GridItem></GridItem>
+
+            {showDetails && (
+              <Fragment>
+                <GridItem><Text color="gray.400" fontSize="sm">Total bank funds used</Text></GridItem>
+                <GridItem colSpan={players.length}></GridItem>
+                <GridItem textAlign="center">
+                  <Text fontWeight="bold" color="red.300" fontSize="sm" title="Total Cash + Total OR Income">
+                    {formatCurrency(gridData.totalBankFundsUsed)}
+                  </Text>
+                </GridItem>
+              </Fragment>
+            )}
           </Grid>
         </Box>
       )}
