@@ -145,6 +145,7 @@ export default function NewGame() {
                         size="sm"
                         variant={selected ? 'solid' : 'outline'}
                         colorPalette={selected ? 'orange' : 'gray'}
+                        color={selected ? undefined : 'white'}
                         onClick={() => handleToggleUser(name)}
                       >
                         {selected ? '✓ ' : ''}{name}

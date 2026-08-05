@@ -56,6 +56,7 @@ export default function ManageUsers() {
                 value={newUserName}
                 onChange={(e) => setNewUserName(e.target.value)}
                 bg="gray.900"
+                color="white"
                 border="none"
                 _focus={{ ring: 2, ringColor: 'orange.400' }}
               />
