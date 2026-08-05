@@ -86,7 +86,7 @@ export default function PlayerHoldingsGrid({
             <GridItem><Text color="gray.400" fontSize="sm">Cash</Text></GridItem>
             {players.map(p => (
               <GridItem key={p}>
-                <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'cash', player: p })}>
+                <Button data-testid="cash-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'cash', player: p })}>
                   {dashboardState.playerAssets[p]?.cash !== undefined && dashboardState.playerAssets[p]?.cash !== '' ? dashboardState.playerAssets[p]?.cash : ''}
                 </Button>
               </GridItem>
@@ -100,7 +100,7 @@ export default function PlayerHoldingsGrid({
                   const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName];
                   return (
                     <GridItem key={p}>
-                      <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shares', player: p, companyId: c.shortName })}>
+                      <Button data-testid="share-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shares', player: p, companyId: c.shortName })}>
                         {shares !== undefined && shares !== '' ? `${shares}%` : ''}
                       </Button>
                     </GridItem>

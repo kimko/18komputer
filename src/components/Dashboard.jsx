@@ -20,23 +20,34 @@ export default function Dashboard() {
   const [activePopup, setActivePopup] = useState(null);
   const [shareMessage, setShareMessage] = useState(null);
 
+  const dashboardState = gameInstance?.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} };
+
   const handleShare = useCallback(async () => {
     if (!gameInstance) return;
 
-    // Build export payload
-    const exportData = {
-      id: gameInstance.id,
-      gameId: gameInstance.gameId,
-      players: gameInstance.players,
-      createdAt: gameInstance.createdAt,
-      version: gameInstance.version,
-      state: gameInstance.state,
-      exportedAt: new Date().toISOString(),
+    // Create a copy of the game instance to share, injecting the freshest local dashboardState
+    const shareInstance = { 
+      ...gameInstance, 
+      state: {
+        ...gameInstance.state,
+        dashboardState: dashboardState
+      },
+      exportedAt: new Date().toISOString() 
     };
+    
+    // Log for Playwright debugging
+    console.error('MAGIC_LINK_DASHBOARD_STATE', JSON.stringify(dashboardState));
 
     // Generate magic link with compressed state
-    const compressedData = LZString.compressToEncodedURIComponent(JSON.stringify(exportData));
-    const resumeLink = `${window.location.origin}/18komputer/resume#import=${compressedData}`;
+    const compressedData = LZString.compressToEncodedURIComponent(JSON.stringify(shareInstance));
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    let rootSegment = '';
+    // If the first segment is NOT 'game', we assume it's the repo name for GitHub pages (e.g. /18komputer)
+    if (pathSegments.length > 0 && pathSegments[0] !== 'game') {
+      rootSegment = `/${pathSegments[0]}`;
+    }
+    
+    const resumeLink = `${window.location.origin}${rootSegment}/resume#import=${compressedData}`;
 
     // Copy resume link to clipboard
     try {
@@ -47,13 +58,12 @@ export default function Dashboard() {
     }
 
     setTimeout(() => setShareMessage(null), 3000);
-  }, [gameInstance]);
+  }, [gameInstance, dashboardState]);
 
   if (!match) return null;
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="teal.400" size="xl" /></Center>;
   if (!gameInstance) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
-  const dashboardState = gameInstance.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} };
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   const maxOr = dashboardState.maxOr || gameInstance.staticConfig?.maxOr || 3;
   const players = gameInstance.players || [];

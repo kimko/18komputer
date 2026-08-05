@@ -41,7 +41,7 @@ export default function CompanyValuesGrid({
                 </Box>
               </GridItem>
               <GridItem>
-                <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>
+                <Button data-testid="share-price-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>
                   {getShareValue(dashboardState, activeCompanies, c.shortName)}
                 </Button>
               </GridItem>
@@ -54,7 +54,7 @@ export default function CompanyValuesGrid({
                 const val = dashboardState.ors[c.shortName]?.[`or${i + 1}`];
                 return (
                   <GridItem key={i}>
-                    <Button w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'or', companyId: c.shortName, orIndex: i + 1 })}>
+                    <Button data-testid="or-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'or', companyId: c.shortName, orIndex: i + 1 })}>
                       {val !== undefined && val !== '' ? val : ''}
                     </Button>
                   </GridItem>

@@ -21,6 +21,7 @@ export default function ShareCountPopup({ company, player, value, maxAvailable, 
           {options.map(opt => (
             <Button 
               key={opt} 
+              data-testid="share-pct-btn"
               size="sm" 
               variant={Number(value) === opt ? 'solid' : 'outline'} 
               color={Number(value) === opt ? 'black' : 'white'}
