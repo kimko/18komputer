@@ -133,6 +133,8 @@ export default function PlayerCharts({ assetData, dividendData, radarData, bubbl
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }}
                 contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
+                itemStyle={{ color: 'white' }}
+                labelStyle={{ color: 'white' }}
                 formatter={(value, name) => [name === 'value' ? `$${value}` : value, name === 'value' ? 'Value' : name]}
               />
               <Scatter data={bubbleData}>
