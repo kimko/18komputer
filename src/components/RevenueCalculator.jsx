@@ -4,7 +4,6 @@ import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import TrainCard from './calculator/TrainCard.jsx';
 import GrandTotalCard from './calculator/GrandTotalCard.jsx';
-import { getContrastColor } from '../utils/colorUtils.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -63,25 +62,19 @@ export default function RevenueCalculator() {
             <Text color="red.400">No active companies. Go to Activate Company first.</Text>
           ) : (
             <Flex wrap="wrap" gap="2">
-              {activeCompanies.map(c => {
-                const isSelected = selectedCompanyId === c.shortName;
-                return (
+              {activeCompanies.map(c => (
                 <Button
                   key={c.shortName}
-                  bg={c.color || 'gray.700'}
-                  color={getContrastColor(c.color || '#2d3748')}
-                  borderRadius="md"
-                  fontWeight="bold"
-                  py="2"
-                  opacity={isSelected ? 1 : 0.5}
-                  transform={isSelected ? "scale(1.05)" : "none"}
-                  _hover={{ opacity: 1, transform: "scale(1.05)" }}
-                  transition="all 0.2s"
+                  bg={selectedCompanyId === c.shortName ? 'gray.700' : 'gray.800'}
+                  _hover={{ bg: 'gray.700' }}
+                  color="white"
+                  borderWidth={selectedCompanyId === c.shortName ? "2px" : "1px"}
+                  borderColor={selectedCompanyId === c.shortName ? (c.color || 'orange.400') : 'transparent'}
                   onClick={() => setSelectedCompanyId(c.shortName)}
                 >
                   {c.shortName}
                 </Button>
-              )})}
+              ))}
             </Flex>
           )}
         </Box>
