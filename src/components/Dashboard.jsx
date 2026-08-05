@@ -37,7 +37,7 @@ export default function Dashboard() {
     };
     
     // Log for Playwright debugging
-    console.error('MAGIC_LINK_DASHBOARD_STATE', JSON.stringify(dashboardState));
+    console.log('MAGIC_LINK_DASHBOARD_STATE', JSON.stringify(dashboardState));
 
     // Generate magic link with compressed state
     const compressedData = LZString.compressToEncodedURIComponent(JSON.stringify(shareInstance));
