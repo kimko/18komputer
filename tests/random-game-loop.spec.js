@@ -27,7 +27,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
     await gameButtons.nth(randomIdx).click();
   }
 
-  const numPlayers = Math.floor(Math.random() * 3) + 2; // Add 2-4 more players
+  const numPlayers = Math.floor(Math.random() * 6) + 2; // Add 2-7 more players (total 3-8)
   const playerNames = ['Player 1']; // Default player we know exists
   for (let i = 0; i < numPlayers; i++) {
     const pName = `TestPlayer${i + 1}`;
@@ -156,25 +156,64 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   }
   
   if (or1Btn) {
-      const orChoice = Math.floor(Math.random() * 2);
-      if (orChoice === 0) {
-          // Manual type '150'
-          await page.getByRole('button', { name: '1', exact: true }).click();
-          await page.getByRole('button', { name: '5', exact: true }).click();
-          await page.getByRole('button', { name: '0', exact: true }).click();
-      } else {
-          // Fetch from calculator by clicking the subtitle (which is the first button in the popup header)
-          const popupHeader = page.getByText('Set OR 1 revenue for').locator('..');
-          await popupHeader.locator('button').first().click();
-      }
+      // Force manual type '150' for OR 1 to guarantee a value
+      const numpad = page.getByText('Set OR 1 revenue for').locator('..').locator('..');
+      await numpad.getByRole('button', { name: '1', exact: true }).click();
+      await numpad.getByRole('button', { name: '5', exact: true }).click();
+      await numpad.getByRole('button', { name: '0', exact: true }).click();
+
       // Click Confirm (OK button)
       await page.getByRole('button', { name: 'OK', exact: true }).click();
+      await expect(page.getByText('Set OR 1 revenue for')).not.toBeVisible();
+      
+      // C. Set OR 2 using "Copy Prev"
+      const gridBtns = companyValuesHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'OR' });
+      if (await gridBtns.count() > 2) {
+          const or2Btn = gridBtns.nth(2);
+          await or2Btn.click();
+          await expect(page.getByText('Set OR 2 revenue for')).toBeVisible();
+          await page.getByRole('button', { name: 'Copy Prev', exact: true }).click();
+          await page.getByRole('button', { name: 'OK', exact: true }).click();
+          await expect(page.getByText('Set OR 2 revenue for')).not.toBeVisible();
+      }
   }
 
-
-  // C. Player Shares and Details Observe
+  // D. Player Shares and Details Observe
   await page.getByRole('button', { name: 'Details' }).click();
   await expect(page.getByRole('button', { name: 'Hide Details' })).toBeVisible();
+
+  // Assign random shares to a player
+  const playerHoldingsHeading = page.getByRole('heading', { name: 'Player Holdings & Net Worth' });
+  if (await playerHoldingsHeading.count() > 0 && hasCompanies) {
+      const holdingsGridBtns = playerHoldingsHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'Details' });
+      // 0th button = Player 1 Cash, 1st button = Player 1 Company 1 Shares
+      if (await holdingsGridBtns.count() > 1) {
+          await holdingsGridBtns.nth(1).click();
+          
+          const sharePopupText = page.getByText(/Set .* shares for/);
+          await sharePopupText.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {});
+          
+          if (await sharePopupText.count() > 0) {
+              const popupContent = sharePopupText.locator('..').locator('..');
+              const popupButtons = popupContent.locator('button').filter({ hasText: /^[0-9]+$/ });
+              const count = await popupButtons.count();
+              if (count > 0) {
+                  await popupButtons.nth(Math.floor(Math.random() * count)).click();
+              } else {
+                  await page.getByRole('button', { name: 'X', exact: true }).click();
+              }
+          } else {
+             // In case it wasn't the share popup
+             await page.getByRole('button', { name: 'X', exact: true }).click();
+          }
+      }
+  }
+  
+  // Store the state before sharing
+  let expectedOr1 = '';
+  if (hasCompanies && or1Btn) {
+      expectedOr1 = await or1Btn.textContent();
+  }
 
 
   // --- 6. MAGIC LINK SHARE ---
@@ -197,6 +236,16 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   // We should be redirected to the dashboard automatically
   await expect(page).toHaveURL(/.*\/dashboard/);
   await expect(page.getByText(playerNames[0], { exact: true })).toBeVisible();
+
+  // Assert that state persisted
+  if (hasCompanies && expectedOr1.trim() !== '') {
+      const restoredValuesHeading = page.getByRole('heading', { name: 'Company Values & Results' });
+      await expect(restoredValuesHeading).toBeVisible();
+      const gridButtons = restoredValuesHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'OR' });
+      const restoredOr1 = gridButtons.nth(1);
+      const text = await restoredOr1.textContent();
+      expect(text.trim()).toBe(expectedOr1.trim());
+  }
 
   // --- 8. DELETE THE GAME ---
   await page.getByRole('button', { name: 'Home' }).click();
