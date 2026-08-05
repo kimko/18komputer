@@ -131,22 +131,41 @@ export const getControllingInterestData = (dashboardState, activeCompanies, play
  */
 export const getBubbleChartData = (dashboardState, activeCompanies, players) => {
   const data = [];
-  players.forEach((p, index) => {
-    activeCompanies.forEach(c => {
+  players.forEach((p, pIndex) => {
+    activeCompanies.forEach((c, cIndex) => {
       const sharePrice = getShareValue(dashboardState, activeCompanies, c.shortName);
       const totalShares = c.totalShares || 10;
       const marketCap = sharePrice * (100 / (100 / totalShares));
       
       const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-      const ownedValue = (sharePct / 100) * marketCap;
+      const shareCount = sharePct / (100 / totalShares);
       
-      if (ownedValue > 0) {
+      // 1. Share Value
+      const shareValue = (sharePct / 100) * marketCap;
+      
+      // 2. Operating Income (last 3 ORs)
+      const history = dashboardState.companyHistory?.[c.shortName] || [];
+      const recentORs = history.filter(h => h.type === 'OR').slice(-3);
+      const totalRevenue = recentORs.reduce((sum, h) => sum + (h.revenue || 0), 0);
+      const opIncome = (sharePct / 100) * totalRevenue;
+
+      if (shareCount > 0) {
+        // Deterministic Jitter
+        const xBase = (pIndex + 1) * 10;
+        const xJitter = (cIndex - (activeCompanies.length / 2)) * 0.8;
+        const yBase = shareCount;
+        const yJitter = ((cIndex % 3) - 1) * 0.2; // -0.2, 0, or 0.2
+
         data.push({
           player: p,
           company: c.shortName,
-          value: ownedValue,
-          sharePct: sharePct,
-          fill: PLAYER_COLORS[index % PLAYER_COLORS.length]
+          x: xBase + xJitter,
+          y: yBase + yJitter,
+          trueShares: shareCount,
+          shareValue: shareValue,
+          opIncome: opIncome,
+          totalValue: shareValue + opIncome,
+          fill: c.color || '#8884d8'
         });
       }
     });

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Heading, SimpleGrid, Flex, Text } from '@chakra-ui/react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -7,6 +8,7 @@ import {
 import { PLAYER_COLORS } from '../../utils/chartDataSelectors.js';
 
 export default function PlayerCharts({ assetData, dividendData, radarData, bubbleData, players, activeCompanies }) {
+  const [bubbleMetric, setBubbleMetric] = useState('totalValue');
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
 
@@ -121,38 +123,61 @@ export default function PlayerCharts({ assetData, dividendData, radarData, bubbl
       <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
         <Flex justify="space-between" align="center" mb="2">
           <Heading size="md" color="teal.300">Market Power Grid</Heading>
-          <Text fontSize="sm" color="gray.500">Ownership value comparison</Text>
+          <Box 
+            as="select"
+            w="auto" 
+            value={bubbleMetric} 
+            onChange={(e) => setBubbleMetric(e.target.value)} 
+            bg="gray.800" 
+            borderColor="gray.600" 
+            color="white"
+            p={1}
+            borderRadius="md"
+            border="1px solid"
+          >
+            <option value="shareValue">Share Value</option>
+            <option value="opIncome">Operating Income</option>
+            <option value="totalValue">Total Value</option>
+          </Box>
         </Flex>
+        <Text fontSize="sm" color="gray.500" mb="4">Ownership value comparison</Text>
         <Box h="350px">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis dataKey="sharePct" type="number" domain={[0, 100]} tickFormatter={(t) => `${t}%`} stroke={textColor} name="Ownership" />
-              <YAxis dataKey="company" type="category" stroke={textColor} width={80} allowDuplicatedCategory={false} name="Company" />
-              <ZAxis dataKey="value" type="number" range={[50, 800]} name="Market Power" />
+              <XAxis 
+                dataKey="x" 
+                type="number" 
+                domain={[0, (players.length + 1) * 10]} 
+                ticks={players.map((_, i) => (i + 1) * 10)} 
+                tickFormatter={(val) => players[val / 10 - 1] || ''} 
+                stroke={textColor} 
+              />
+              <YAxis 
+                dataKey="y" 
+                type="number" 
+                domain={[0, 10]}
+                ticks={[2, 4, 6, 8, 10]}
+                stroke={textColor} 
+                width={40} 
+                name="Shares" 
+              />
+              <ZAxis dataKey={bubbleMetric} type="number" range={[50, 800]} name="Value" />
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }}
                 contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
                 itemStyle={{ color: 'white' }}
                 labelStyle={{ color: 'white' }}
-                formatter={(value, name) => {
-                  if (name === 'Market Power') return [`$${value}`, name];
-                  if (name === 'Ownership') return [`${value}%`, name];
+                formatter={(value, name, props) => {
+                  if (name === 'Value') return [`$${Math.round(value)}`, bubbleMetric === 'shareValue' ? 'Share Value' : bubbleMetric === 'opIncome' ? 'Op Income' : 'Total Value'];
+                  if (name === 'y') return [props.payload.trueShares, 'Shares'];
+                  if (name === 'x') return [props.payload.company, 'Company'];
                   return [value, name];
                 }}
               />
-              <Legend 
-                wrapperStyle={{ paddingTop: '10px' }}
-                payload={players.map((p, index) => ({
-                  id: p,
-                  type: 'circle',
-                  value: p,
-                  color: PLAYER_COLORS[index % PLAYER_COLORS.length]
-                }))}
-              />
               <Scatter data={bubbleData} name="Player">
                 {bubbleData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.7} />
+                  <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.8} />
                 ))}
               </Scatter>
             </ScatterChart>
