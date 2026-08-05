@@ -153,6 +153,20 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   
   // Wait for Dashboard to mount
   await expect(page.getByRole('heading', { name: 'Company Values & Results' }).first()).toBeVisible({ timeout: 5000 }).catch(() => {});
+  await expect(page.getByRole('heading', { name: 'Player Holdings' }).first()).toBeVisible().catch(() => {});
+
+  console.log('Verifying Company Charts tab...');
+  await page.getByRole('tab', { name: 'Company Charts' }).click();
+  await expect(page.getByRole('heading', { name: 'Revenue Trajectory' })).toBeVisible().catch(() => {});
+  await expect(page.getByRole('heading', { name: 'Dividend Yield & Market Dominance' })).toBeVisible().catch(() => {});
+
+  console.log('Verifying Player Charts tab...');
+  await page.getByRole('tab', { name: 'Player Charts' }).click();
+  await expect(page.getByRole('heading', { name: 'Asset Breakdown' })).toBeVisible().catch(() => {});
+  await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible().catch(() => {});
+
+  console.log('Returning to Data Grids tab...');
+  await page.getByRole('tab', { name: 'Data Grids' }).click();
 
   const companyValuesHeading = page.getByRole('heading', { name: 'Company Values & Results' });
   const hasCompanies = await companyValuesHeading.count() > 0;

@@ -155,6 +155,7 @@ export const getBubbleChartData = (dashboardState, activeCompanies, players) => 
         const xJitter = (cIndex - (activeCompanies.length / 2)) * 0.8;
         const yBase = shareCount;
         const yJitter = ((cIndex % 3) - 1) * 0.2; // -0.2, 0, or 0.2
+        const valJitter = ((cIndex % 3) - 1) * 15; // $15 jitter
 
         data.push({
           player: p,
@@ -163,8 +164,11 @@ export const getBubbleChartData = (dashboardState, activeCompanies, players) => 
           y: yBase + yJitter,
           trueShares: shareCount,
           shareValue: shareValue,
+          shareValueJitter: Math.max(0, shareValue + valJitter),
           opIncome: opIncome,
+          opIncomeJitter: Math.max(0, opIncome + valJitter),
           totalValue: shareValue + opIncome,
+          totalValueJitter: Math.max(0, shareValue + opIncome + valJitter),
           fill: c.color || '#8884d8'
         });
       }
