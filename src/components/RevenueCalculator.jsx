@@ -4,6 +4,7 @@ import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import TrainCard from './calculator/TrainCard.jsx';
 import GrandTotalCard from './calculator/GrandTotalCard.jsx';
+import { getContrastColor } from '../utils/colorUtils.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -65,11 +66,12 @@ export default function RevenueCalculator() {
               {activeCompanies.map(c => (
                 <Button
                   key={c.shortName}
-                  bg={selectedCompanyId === c.shortName ? 'gray.700' : 'gray.800'}
-                  _hover={{ bg: 'gray.700' }}
-                  color="white"
-                  borderWidth={selectedCompanyId === c.shortName ? "2px" : "1px"}
-                  borderColor={selectedCompanyId === c.shortName ? (c.color || 'orange.400') : 'transparent'}
+                  bg={c.color || 'gray.700'}
+                  color={getContrastColor(c.color || '#2d3748')}
+                  borderRadius="md"
+                  fontWeight="bold"
+                  opacity={selectedCompanyId === c.shortName ? 1 : 0.4}
+                  _hover={{ opacity: 1 }}
                   onClick={() => setSelectedCompanyId(c.shortName)}
                 >
                   {c.shortName}
