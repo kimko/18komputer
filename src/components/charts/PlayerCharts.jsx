@@ -98,7 +98,7 @@ export default function PlayerCharts({ assetData, dividendData, radarData, playe
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
                 itemStyle={{ color: 'white' }}
-                formatter={(value) => [`$${value}`, 'Market Power']}
+                formatter={(value, name) => [`$${value}`, name]}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
               {players.map((p, index) => (
