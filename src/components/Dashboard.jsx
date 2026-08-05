@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Box, Center, Spinner } from '@chakra-ui/react';
+import { useState, useCallback } from 'react';
+import { Box, Center, Spinner, Flex, Heading, Button, Text } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 
@@ -17,6 +17,44 @@ export default function Dashboard() {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [activePopup, setActivePopup] = useState(null);
+  const [shareMessage, setShareMessage] = useState(null);
+
+  const handleShare = useCallback(async () => {
+    if (!gameInstance) return;
+
+    // Build export payload
+    const exportData = {
+      id: gameInstance.id,
+      gameId: gameInstance.gameId,
+      players: gameInstance.players,
+      createdAt: gameInstance.createdAt,
+      version: gameInstance.version,
+      state: gameInstance.state,
+      exportedAt: new Date().toISOString(),
+    };
+
+    // Download JSON file
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${gameInstance.gameId}_${gameInstance.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Copy resume link to clipboard
+    const resumeLink = `${window.location.origin}/resume`;
+    try {
+      await navigator.clipboard.writeText(resumeLink);
+      setShareMessage('Exported! Resume link copied to clipboard.');
+    } catch {
+      setShareMessage('Exported! Could not copy link — use /resume to find your games.');
+    }
+
+    setTimeout(() => setShareMessage(null), 3000);
+  }, [gameInstance]);
 
   if (!match) return null;
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="teal.400" size="xl" /></Center>;
@@ -56,6 +94,24 @@ export default function Dashboard() {
 
   return (
     <Box p="2" pb="24" maxW="100%" overflowX="hidden">
+      <Flex justify="flex-end" align="center" mb="4" gap="3" wrap="wrap">
+        {shareMessage && (
+          <Text fontSize="sm" color="green.300" transition="opacity 0.3s">
+            {shareMessage}
+          </Text>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          color="white"
+          borderColor="whiteAlpha.400"
+          _hover={{ bg: 'whiteAlpha.200' }}
+          onClick={handleShare}
+        >
+          📤 Share
+        </Button>
+      </Flex>
+
       <CompanyValuesGrid 
         activeCompanies={activeCompanies}
         maxOr={maxOr}

@@ -165,6 +165,21 @@ export function updateGamePlayers(instanceId, players) {
   });
 }
 
+export function deleteGame(instanceId) {
+  if (!instanceId || typeof instanceId !== 'string') throw new Error('Invalid instanceId');
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+
+    if (!db[instanceId]) {
+      throw new Error('Game not found');
+    }
+
+    delete db[instanceId];
+    writeStorage(db);
+  });
+}
+
 export function getGamesList() {
   return enqueue(async () => {
     await delay();
