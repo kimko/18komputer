@@ -43,10 +43,10 @@ describe('CompanyValuesGrid', () => {
     expect(screen.getByText('PRR')).toBeInTheDocument();
     
     // Share Value
-    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(screen.getByText('$50')).toBeInTheDocument();
     
     // OR Total (100 + 120 = 220)
-    expect(screen.getByText('220')).toBeInTheDocument();
+    expect(screen.getByText('$220')).toBeInTheDocument();
   });
 
   it('calls updateMaxOr when clicking + OR / - OR', () => {
@@ -64,8 +64,8 @@ describe('CompanyValuesGrid', () => {
     const setActivePopup = vi.fn();
     renderComponent({ setActivePopup });
     
-    // We expect the button with text '100' to trigger the popup
-    fireEvent.click(screen.getByText('100'));
+    // We expect the button with text '$100' to trigger the popup
+    fireEvent.click(screen.getByText('$100'));
     expect(setActivePopup).toHaveBeenCalledWith({ type: 'or', companyId: 'PRR', orIndex: 1 });
   });
 });

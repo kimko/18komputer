@@ -54,8 +54,8 @@ describe('PlayerHoldingsGrid', () => {
   it('calculates player metrics correctly', () => {
     renderComponent();
     // Verify cash values are rendered
-    expect(screen.getByText('500')).toBeInTheDocument(); // Alice cash
-    expect(screen.getByText('300')).toBeInTheDocument(); // Bob cash
+    expect(screen.getByText('$500')).toBeInTheDocument(); // Alice cash
+    expect(screen.getByText('$300')).toBeInTheDocument(); // Bob cash
   });
 
   it('toggles details', () => {
@@ -98,7 +98,7 @@ describe('PlayerHoldingsGrid', () => {
     renderComponent({ setActivePopup });
     
     // Click Alice Cash (500)
-    fireEvent.click(screen.getByText('500'));
+    fireEvent.click(screen.getByText('$500'));
     expect(setActivePopup).toHaveBeenCalledWith({ type: 'cash', player: 'Alice' });
     
     // Click Alice PRR shares (20%)

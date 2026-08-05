@@ -1,3 +1,8 @@
+export const formatCurrency = (val) => {
+  if (val === undefined || val === null || isNaN(Number(val))) return '';
+  return `$${Number(val).toLocaleString()}`;
+};
+
 export const getShareValue = (dashboardState, activeCompanies, shortName) => {
   const val = dashboardState.shareValues[shortName];
   if (val !== undefined && val !== '') return Number(val);

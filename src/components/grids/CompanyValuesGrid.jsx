@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text } from '@chakra-ui/react';
-import { getShareValue, getCompanyOrTotal } from '../../utils/dashboardMath.js';
+import { getShareValue, getCompanyOrTotal, formatCurrency } from '../../utils/dashboardMath.js';
 import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function CompanyValuesGrid({ 
@@ -42,12 +42,12 @@ export default function CompanyValuesGrid({
               </GridItem>
               <GridItem>
                 <Button data-testid="share-price-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>
-                  {getShareValue(dashboardState, activeCompanies, c.shortName)}
+                  {formatCurrency(getShareValue(dashboardState, activeCompanies, c.shortName))}
                 </Button>
               </GridItem>
               <GridItem>
                 <Box w="100%" bg="gray.900" color="cyan.300" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
-                  {companyOrTotal > 0 ? companyOrTotal : ''}
+                  {companyOrTotal > 0 ? formatCurrency(companyOrTotal) : ''}
                 </Box>
               </GridItem>
               {Array.from({ length: maxOr }).map((_, i) => {
@@ -55,7 +55,7 @@ export default function CompanyValuesGrid({
                 return (
                   <GridItem key={i}>
                     <Button data-testid="or-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'or', companyId: c.shortName, orIndex: i + 1 })}>
-                      {val !== undefined && val !== '' ? val : ''}
+                      {val !== undefined && val !== '' ? formatCurrency(val) : ''}
                     </Button>
                   </GridItem>
                 );

@@ -7,8 +7,10 @@ import {
   getPlayerTotalShares, 
   getPlayerNetWorth,
   getShareValue,
-  getCompanyOrTotal
+  getCompanyOrTotal,
+  formatCurrency
 } from '../../utils/dashboardMath.js';
+import { getContrastColor } from '../../utils/colorUtils.js';
 
 export default function PlayerHoldingsGrid({
   players,
@@ -49,6 +51,8 @@ export default function PlayerHoldingsGrid({
       data.netWorths[p] = getPlayerNetWorth(dashboardState, activeCompanies, maxOr, p);
     });
 
+    data.maxNetWorth = players.length > 0 ? Math.max(...players.map(p => data.netWorths[p])) : 0;
+
     return data;
   }, [players, activeCompanies, maxOr, dashboardState]);
 
@@ -87,7 +91,7 @@ export default function PlayerHoldingsGrid({
             {players.map(p => (
               <GridItem key={p}>
                 <Button data-testid="cash-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'cash', player: p })}>
-                  {dashboardState.playerAssets[p]?.cash !== undefined && dashboardState.playerAssets[p]?.cash !== '' ? dashboardState.playerAssets[p]?.cash : ''}
+                  {dashboardState.playerAssets[p]?.cash !== undefined && dashboardState.playerAssets[p]?.cash !== '' ? formatCurrency(dashboardState.playerAssets[p]?.cash) : ''}
                 </Button>
               </GridItem>
             ))}
@@ -95,7 +99,11 @@ export default function PlayerHoldingsGrid({
 
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
-                <GridItem><Text color={c.color || "white"} fontSize="sm" fontWeight="bold">{c.shortName}</Text></GridItem>
+                <GridItem>
+                  <Box bg={c.color || 'gray.700'} color={getContrastColor(c.color || '#2d3748')} textAlign="center" py="2" borderRadius="md" fontWeight="bold">
+                    {c.shortName}
+                  </Box>
+                </GridItem>
                 {players.map(p => {
                   const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName];
                   return (
@@ -119,7 +127,7 @@ export default function PlayerHoldingsGrid({
                       const sv = totalShares > 0 ? (sharePct / (100 / totalShares)) * gridData.shareValues[c.shortName] : 0;
                       return (
                         <GridItem key={`sv-${p}`} textAlign="center">
-                          <Text color="gray.400" fontSize="sm">${sv}</Text>
+                          <Text color="gray.400" fontSize="sm">{formatCurrency(sv)}</Text>
                         </GridItem>
                       );
                     })}
@@ -132,7 +140,7 @@ export default function PlayerHoldingsGrid({
                       const income = totalShares > 0 ? (sharePct / 100) * gridData.opIncomes[c.shortName] : 0;
                       return (
                         <GridItem key={`inc-${p}`} textAlign="center">
-                          <Text color="cyan.600" fontSize="sm">${income}</Text>
+                          <Text color="cyan.600" fontSize="sm">{formatCurrency(income)}</Text>
                         </GridItem>
                       );
                     })}
@@ -143,35 +151,45 @@ export default function PlayerHoldingsGrid({
             ))}
 
             <GridItem><Text color="gray.400" fontSize="sm">Total Shares</Text></GridItem>
-            {players.map(p => (
-              <GridItem key={`ts-${p}`} textAlign="center">
-                <Text fontWeight="bold" color="purple.300">{gridData.totalShares[p]}</Text>
-              </GridItem>
-            ))}
+            {players.map(p => <GridItem key={`ts-${p}`} textAlign="center">
+                    <Text fontWeight="bold" color="purple.300">{gridData.totalShares[p]}</Text>
+                  </GridItem>
+            )}
             <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Share Value</Text></GridItem>
             {players.map(p => (
               <GridItem key={p} textAlign="center">
-                <Text fontWeight="bold" color="white">${gridData.totalShareValues[p]}</Text>
+                <Text fontWeight="bold" color="white">{formatCurrency(gridData.totalShareValues[p])}</Text>
               </GridItem>
             ))}
             <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Operating Income</Text></GridItem>
-            {players.map(p => (
-              <GridItem key={p} textAlign="center">
-                <Text fontWeight="bold" color="cyan.300">${gridData.totalOpIncomes[p]}</Text>
-              </GridItem>
-            ))}
+            {players.map(p => <GridItem key={`to-${p}`} textAlign="center">
+                    <Text fontWeight="bold" color="cyan.300">{formatCurrency(gridData.totalOpIncomes[p])}</Text>
+                  </GridItem>
+            )}
             <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
-            {players.map(p => (
-              <GridItem key={p} textAlign="center">
-                <Text fontWeight="bold" color="green.300">${gridData.netWorths[p]}</Text>
-              </GridItem>
-            ))}
+            {players.map(p => <GridItem key={`nw-${p}`} textAlign="center">
+                    <Text fontWeight="bold" color="green.300">{formatCurrency(gridData.netWorths[p])}</Text>
+                  </GridItem>
+            )}
+            <GridItem></GridItem>
+
+            <GridItem><Text color="gray.400" fontSize="sm">Diff %</Text></GridItem>
+            {players.map(p => {
+              const diffPct = gridData.maxNetWorth > 0 
+                ? Math.round((gridData.netWorths[p] / gridData.maxNetWorth) * 100)
+                : 0;
+              return (
+                <GridItem key={`diff-${p}`} textAlign="center">
+                  <Text fontWeight="bold" color="yellow.300">{diffPct}%</Text>
+                </GridItem>
+              );
+            })}
             <GridItem></GridItem>
           </Grid>
         </Box>
