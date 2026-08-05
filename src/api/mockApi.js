@@ -214,6 +214,11 @@ export function importGame(gameData) {
     await delay();
     const db = readStorage();
     
+    // Save imported players to the user roster
+    if (gameData.players && Array.isArray(gameData.players)) {
+      saveUsers(gameData.players.filter(p => !p.startsWith('Player ')));
+    }
+    
     // Simply overwrite or create using the imported game's ID
     db[gameData.id] = gameData;
     writeStorage(db);
