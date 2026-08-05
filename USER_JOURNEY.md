@@ -5,7 +5,7 @@ This document tracks the current capabilities and functional flows of the applic
 ## Current Capabilities
 
 ### 1. Game Data Provisioning
-While there is no user-facing UI built just yet, the application's underlying data layer currently supports **70 different 18xx titles**.
+The application's underlying data layer currently supports **70 different 18xx titles**.
 - **Data Extracted:** For each game, the system provides:
   - Game Name and BoardGameGeek ID (`bggId`)
   - Maximum Operating Rounds (`maxOr`)
@@ -34,13 +34,13 @@ An asynchronous API layer has been implemented to handle game state.
   - `importGame(gameData)`: Saves an imported JSON game payload directly to local storage.
   - `getGamesList()`: Retrieves a catalog of all saved instances, sorted by creation date (used by the 'Resume Game' menu).
 
-### 4. Raise Funds (Setup Phase)
+### 4. Activating Companies (Setup Phase)
 The initial game setup flow has been implemented.
 - **UI:** A scrollable list of all valid companies for the selected 18xx title, displaying their full names, short names, and dynamically applying their correct hex market colors as borders.
 - **Actions:**
   - Users can activate/deactivate companies dynamically.
-  - Upon activation, a native dropdown appears allowing the user to select the company's initial par/market value (restricted only to the values valid for that specific 18xx title).
-  - Completing setup merges these active companies into the game instance via the API state manager and routes the user to the dashboard.
+  - Upon activation, a row of inline buttons appears allowing the user to select the company's initial par value (restricted only to the values valid for that specific 18xx title).
+  - Toggling a company or selecting a par value immediately merges these updates into the game instance via the API state manager (autosaving to local storage).
 
 ### 5. Revenue Calculator
 The core utility for running Operating Rounds has been implemented.
@@ -51,7 +51,7 @@ The core utility for running Operating Rounds has been implemented.
   - **Interactive History:** Each train has an itemized string of tapped stops (e.g., `60 + 70 + 40`). Stops can be instantly deleted by tapping them.
   - **Dynamic Bonuses**: Fully supports 18xx-specific revenue bonuses (like Towns, Ports, or 1822 Pullmans), rendered distinctly without counting against stop limits.
   - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table dynamically generates the Revenue Per Share payout (from 10% to 100%).
-- **Data Flow:** The calculator currently acts as a pure visual aid. Users will reference the Grand Total and Payout tables to manually enter operating decisions into the final dashboard.
+- **Data Flow:** The calculator currently acts as a pure visual aid. Users can manually enter operating decisions into the final dashboard, or tap the company's subtitle inside the Dashboard's OR Numpad to automatically fetch the Grand Total from the calculator.
 
 ### 6. Company Values & Results (Dashboard)
 The final game summary dashboard is implemented and provides real-time mathematical aggregation.
