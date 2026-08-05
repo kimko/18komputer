@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npx playwright test --project=chromium",
+    "test:e2e:local": "TEST_ENV=local npx playwright test --project=chromium",
     "prepare": "husky"
   },
   "dependencies": {

@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-// Use production URL for E2E
-const APP_URL = 'https://kimko.github.io/18komputer/';
+// Use production URL or local URL based on TEST_ENV
+const APP_URL = process.env.TEST_ENV === 'local' 
+  ? 'http://localhost:5173/18komputer/' 
+  : 'https://kimko.github.io/18komputer/';
 
 test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   // We need clipboard permissions for the share test
