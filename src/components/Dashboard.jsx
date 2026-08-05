@@ -45,12 +45,12 @@ export default function Dashboard() {
     URL.revokeObjectURL(url);
 
     // Copy resume link to clipboard
-    const resumeLink = `${window.location.origin}/resume`;
+    const resumeLink = `${window.location.origin}/18komputer/resume`;
     try {
       await navigator.clipboard.writeText(resumeLink);
       setShareMessage('Exported! Resume link copied to clipboard.');
     } catch {
-      setShareMessage('Exported! Could not copy link — use /resume to find your games.');
+      setShareMessage('Exported! Could not copy link — use /18komputer/resume to find your games.');
     }
 
     setTimeout(() => setShareMessage(null), 3000);
