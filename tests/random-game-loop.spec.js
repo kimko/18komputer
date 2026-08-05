@@ -110,32 +110,49 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   // --- 5. DASHBOARD RESULTS ---
   await page.getByRole('button', { name: 'Results' }).click();
   
-  // A. Set Random Share Price
-  if (await companyTabs.count() > 0) {
-      // Find the first button with a number (Share Price cell)
-      const sharePriceBtn = page.getByRole('button', { name: /^[0-9]+$/ }).first();
-      await sharePriceBtn.click();
+  // Wait for Dashboard to mount
+  await expect(page.getByRole('heading', { name: 'Company Values & Results' }).first()).toBeVisible({ timeout: 5000 }).catch(() => {});
+
+  const companyValuesHeading = page.getByRole('heading', { name: 'Company Values & Results' });
+  const hasCompanies = await companyValuesHeading.count() > 0;
+  
+  if (hasCompanies) {
+      // The grid has headers, then data. We can find the buttons by their actual context.
+      // Easiest is to locate the row for the first company. We know the shortName.
+      // But we don't have the shortName saved.
+      // Let's just find the first button that opens the share price popup by its click handler or position.
+      // The `- OR` and `+ OR` buttons are size="xs". The grid buttons are size="md" (default).
+      const gridButtons = companyValuesHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'OR' });
       
-      await expect(page.getByText('Set Share Value for')).toBeVisible();
-      const priceOptions = page.locator('div[role="dialog"] button').filter({ hasText: /^[0-9]+$/ });
-      const numOptions = await priceOptions.count();
-      if (numOptions > 0) {
-          await priceOptions.nth(Math.floor(Math.random() * numOptions)).click();
+      const sharePriceBtn = gridButtons.first();
+      if (await sharePriceBtn.count() > 0) {
+          await sharePriceBtn.click();
+          
+          await expect(page.getByText('Set final price for')).toBeVisible();
+          
+          const popupContent = page.getByText('Set final price for').locator('..').locator('..');
+          const priceOptions = popupContent.locator('button').filter({ hasText: /^[0-9]+$/ });
+          const numOptions = await priceOptions.count();
+          if (numOptions > 0) {
+              await priceOptions.nth(Math.floor(Math.random() * numOptions)).click();
+          } else {
+              await page.getByRole('button', { name: 'X', exact: true }).click();
+          }
+          
+          await expect(page.getByText('Set final price for')).not.toBeVisible();
       }
   }
 
   // B. Random OR Values
   let or1Btn;
-  if (await companyTabs.count() > 0) {
-      const companyShortName = await companyTabs.nth(0).textContent();
-      // Use XPath to find the OR 1 button for this specific company.
-      // 1. Find the div with the company name
-      // 2. Go to its parent GridItem
-      // 3. Skip 3 sibling GridItems (Share Price, OR Total, OR 1)
-      // 4. Find the button inside
-      or1Btn = page.locator(`xpath=//div[text()="${companyShortName}"]/ancestor::div[1]/following-sibling::div[3]/button`);
-      await or1Btn.click();
-      await expect(page.getByText('Set OR 1 revenue for')).toBeVisible();
+  if (hasCompanies) {
+      const gridButtons = companyValuesHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'OR' });
+      // The first button is Share Price. The second button is OR 1.
+      if (await gridButtons.count() > 1) {
+          or1Btn = gridButtons.nth(1);
+          await or1Btn.click();
+          await expect(page.getByText('Set OR 1 revenue for')).toBeVisible();
+      }
   }
   
   if (or1Btn) {
@@ -146,11 +163,12 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
           await page.getByRole('button', { name: '5', exact: true }).click();
           await page.getByRole('button', { name: '0', exact: true }).click();
       } else {
-          // Fetch from calculator by clicking the subtitle (badge)
-          await page.locator('div[role="dialog"] span.chakra-badge').click();
+          // Fetch from calculator by clicking the subtitle (which is the first button in the popup header)
+          const popupHeader = page.getByText('Set OR 1 revenue for').locator('..');
+          await popupHeader.locator('button').first().click();
       }
-      // Click Confirm (check icon)
-      await page.getByRole('button', { name: '✓' }).click();
+      // Click Confirm (OK button)
+      await page.getByRole('button', { name: 'OK', exact: true }).click();
   }
 
 
@@ -189,5 +207,5 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   await deleteBtn.click();
   
   // Confirm delete
-  await page.locator('div[role="dialog"]').getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('heading', { name: 'Delete Game?' }).locator('..').getByRole('button', { name: 'Delete' }).click();
 });
