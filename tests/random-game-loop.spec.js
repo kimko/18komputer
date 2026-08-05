@@ -164,6 +164,12 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   const clipboardText = await page.evaluate("navigator.clipboard.readText()");
   expect(clipboardText).toContain('#import=');
 
+  // Output the magic link for manual inspection
+  console.log('\n\n======================================================');
+  console.log('✨ MAGIC LINK FOR TEST INSPECTION ✨');
+  console.log(clipboardText);
+  console.log('======================================================\n\n');
+
   // --- 7. OPEN SHARED GAME ---
   await page.goto('about:blank');
   await page.goto(clipboardText);
