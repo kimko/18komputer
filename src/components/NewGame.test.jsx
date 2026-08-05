@@ -74,7 +74,7 @@ describe('NewGame Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Start Game/i }));
 
     await waitFor(() => {
-      expect(mockApi.createGame).toHaveBeenCalledWith('1830', ['Player 1', 'Player 2', 'Player 3', 'Alice', 'Bob']);
+      expect(mockApi.createGame).toHaveBeenCalledWith('1830', ['Alice', 'Bob']);
       // Should navigate to the setup phase (Activate Company)
       expect(mockNavigate).toHaveBeenCalledWith('/game/inst_123/setup');
     });
@@ -85,13 +85,7 @@ describe('NewGame Component', () => {
     const input = screen.getByPlaceholderText(/New player name/i);
     const startBtn = screen.getByRole('button', { name: /Start Game/i });
     
-    // Clear initial players
-    const removeBtns = screen.getAllByRole('button', { name: /Remove/i });
-    fireEvent.click(removeBtns[2]);
-    fireEvent.click(removeBtns[1]);
-    fireEvent.click(removeBtns[0]);
-    
-    // Check start disabled for < 2 players
+    // Start button should be disabled with no players
     expect(startBtn).toBeDisabled();
     
     // Add Alice

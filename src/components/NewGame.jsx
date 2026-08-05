@@ -10,18 +10,7 @@ export default function NewGame() {
   const [searchQuery, setSearchQuery] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [roster, setRoster] = useState(() => getUsers());
-  const [players, setPlayers] = useState(() => {
-    const allUsers = getUsers();
-    if (allUsers.length > 0) {
-      const shuffled = [...allUsers].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 3);
-      while (selected.length < 3) {
-        selected.push(`Player ${selected.length + 1}`);
-      }
-      return selected;
-    }
-    return ['Player 1', 'Player 2', 'Player 3'];
-  });
+  const [players, setPlayers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggleUser = (name) => {

@@ -47,12 +47,12 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
 
   // Create a 3-6 player game
   console.log('Creating players...');
-  const playerNames = ['Player 1', 'Player 2', 'Player 3'];
+  const playerNames = [];
   const firstNames = ['Alexander', 'Isabella', 'Christopher', 'Valentina', 'Sebastian', 'Penelope'];
   const lastNames = ['Montgomery', 'Harrington', 'Fitzgerald', 'Kensington', 'Winchester', 'Carmichael'];
   
-  const numExtraPlayers = Math.floor(Math.random() * 4); // 0 to 3 extra players
-  for (let i = 0; i < numExtraPlayers; i++) {
+  const numPlayers = Math.floor(Math.random() * 4) + 3; // 3 to 6 players
+  for (let i = 0; i < numPlayers; i++) {
     const first = firstNames[Math.floor(Math.random() * firstNames.length)];
     const last = lastNames[Math.floor(Math.random() * lastNames.length)];
     const pName = `${first} ${last} ${i + 1}`;
