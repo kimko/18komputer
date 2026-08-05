@@ -41,7 +41,9 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   const gameButtons = page.getByRole('button').filter({ hasText: /^18/ });
   const gameCount = await gameButtons.count();
   if (gameCount > 0) {
+    console.log(`Selecting a random game from ${gameCount} available...`);
     const randomIdx = Math.floor(Math.random() * Math.min(gameCount, 20)); // limit to first 20 so they are visible/rendered
+    console.log(`Clicking game button index ${randomIdx}...`);
     await gameButtons.nth(randomIdx).click();
   }
 
@@ -55,7 +57,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
   for (let i = 0; i < numPlayers; i++) {
     const first = firstNames[Math.floor(Math.random() * firstNames.length)];
     const last = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const pName = `${first} ${last} ${i + 1}`;
+    const pName = `${first} ${last}`;
     playerNames.push(pName);
     await page.getByPlaceholder('New player name...').fill(pName);
     await page.getByRole('button', { name: '+ Add' }).click();
