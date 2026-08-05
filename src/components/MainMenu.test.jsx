@@ -26,7 +26,7 @@ describe('MainMenu Component', () => {
     // Check for primary buttons
     expect(screen.getByRole('button', { name: /NEW GAME/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /RESUME GAME/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /USER MANAGEMENT/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /MANAGE USERS/i })).toBeInTheDocument();
   });
 
   it('should navigate to the correct routes when buttons are clicked', () => {
@@ -41,7 +41,7 @@ describe('MainMenu Component', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/resume');
     
     // Click User Management
-    fireEvent.click(screen.getByRole('button', { name: /USER MANAGEMENT/i }));
+    fireEvent.click(screen.getByRole('button', { name: /MANAGE USERS/i }));
     expect(mockNavigate).toHaveBeenCalledWith('/users');
   });
 });

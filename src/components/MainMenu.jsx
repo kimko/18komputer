@@ -37,7 +37,7 @@ export default function MainMenu() {
 
             <Button
               size="lg"
-              colorPalette="yellow"
+              colorPalette="orange"
               variant="outline"
               w="100%"
               h="16"
@@ -45,16 +45,18 @@ export default function MainMenu() {
             >
               RESUME GAME
             </Button>
-          </VStack>
 
-          <Button
-            size="md"
-            variant="ghost"
-            colorPalette="gray"
-            onClick={() => navigate('/users')}
-          >
-            USER MANAGEMENT
-          </Button>
+            <Button
+              size="lg"
+              colorPalette="gray"
+              variant="outline"
+              w="100%"
+              h="16"
+              onClick={() => navigate('/users')}
+            >
+              MANAGE USERS
+            </Button>
+          </VStack>
         </VStack>
       </Box>
     </Center>

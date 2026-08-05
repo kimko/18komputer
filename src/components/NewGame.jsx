@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Input, Flex, IconButton } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
-import { createGame } from '../api/mockApi.js';
+import { createGame, getUsers, saveUsers } from '../api/mockApi.js';
 import gameIndex from '../data/gamesIndex.json';
 
 export default function NewGame() {
@@ -9,14 +9,36 @@ export default function NewGame() {
   const [selectedGame, setSelectedGame] = useState(gameIndex[0]?.id || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [playerName, setPlayerName] = useState('');
-  const [players, setPlayers] = useState(['Player 1', 'Player 2', 'Player 3']);
+  const [roster, setRoster] = useState(() => getUsers());
+  const [players, setPlayers] = useState(() => {
+    const allUsers = getUsers();
+    if (allUsers.length > 0) {
+      const shuffled = [...allUsers].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 3);
+      while (selected.length < 3) {
+        selected.push(`Player ${selected.length + 1}`);
+      }
+      return selected;
+    }
+    return ['Player 1', 'Player 2', 'Player 3'];
+  });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleToggleUser = (name) => {
+    if (players.includes(name)) {
+      setPlayers(players.filter(p => p !== name));
+    } else {
+      setPlayers([...players, name]);
+    }
+  };
 
   const handleAddPlayer = (e) => {
     e.preventDefault();
     const name = playerName.trim();
     if (name && !players.includes(name)) {
       setPlayers([...players, name]);
+      saveUsers([name]);
+      setRoster(getUsers());
       setPlayerName('');
     }
   };
@@ -108,26 +130,49 @@ export default function NewGame() {
           </Box>
 
           <Box>
-            <Text mb="2" fontWeight="bold">Players</Text>
+            <Text mb="3" fontWeight="bold">Players</Text>
+
+            {/* Known users chip picker */}
+            {roster.length > 0 && (
+              <Box mb="3">
+                <Text mb="2" fontSize="sm" color="gray.400">Select from roster:</Text>
+                <Flex wrap="wrap" gap="2">
+                  {roster.map(name => {
+                    const selected = players.includes(name);
+                    return (
+                      <Button
+                        key={name}
+                        size="sm"
+                        variant={selected ? 'solid' : 'outline'}
+                        colorPalette={selected ? 'orange' : 'gray'}
+                        onClick={() => handleToggleUser(name)}
+                      >
+                        {selected ? '✓ ' : ''}{name}
+                      </Button>
+                    );
+                  })}
+                </Flex>
+              </Box>
+            )}
+
+            {/* Quick-create new player */}
             <form onSubmit={handleAddPlayer}>
               <Flex gap="2">
                 <Input
-                  placeholder="Player Name"
+                  placeholder="New player name..."
                   aria-label="Player Name"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
                   bg="gray.700"
                   border="none"
                 />
-                <Button type="submit" colorPalette="orange">
-                  Add Player
-                </Button>
+                <Button type="submit" colorPalette="orange">+ Add</Button>
               </Flex>
             </form>
           </Box>
 
           {players.length > 0 && (
-            <VStack align="stretch" gap="2" mt="2" bg="gray.700" p="4" borderRadius="md">
+            <VStack align="stretch" gap="2" bg="gray.700" p="4" borderRadius="md">
               {players.map((p) => (
                 <Flex key={p} justify="space-between" align="center">
                   <Text>{p}</Text>

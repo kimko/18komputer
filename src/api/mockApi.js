@@ -1,4 +1,27 @@
 const STORAGE_KEY = '18komputer_games';
+const USERS_STORAGE_KEY = '18komputer_users';
+
+export const getUsers = () => {
+  const data = localStorage.getItem(USERS_STORAGE_KEY);
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+};
+
+export const saveUsers = (newUsers) => {
+  if (!newUsers || newUsers.length === 0) return;
+  const currentUsers = getUsers();
+  const merged = Array.from(new Set([...currentUsers, ...newUsers]));
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(merged));
+};
+
+export const deleteUser = (userToDelete) => {
+  const currentUsers = getUsers().filter(u => u !== userToDelete);
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(currentUsers));
+};
 
 // Helper to simulate network latency
 const delay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
@@ -92,6 +115,9 @@ export function createGame(gameId, players) {
   return enqueue(async () => {
     await delay();
     const db = readStorage();
+    
+    // Save custom players to the global user roster
+    saveUsers(players.filter(p => !p.startsWith('Player ')));
     
     // Generate a simple unique instance ID
     const id = `game_${Date.now()}_${Math.floor(Math.random() * 1000)}`;

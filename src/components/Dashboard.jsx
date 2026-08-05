@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Box, Center, Spinner, Flex, Heading, Button, Text } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
+import { updateGameState, saveUsers } from '../api/mockApi.js';
 import LZString from 'lz-string';
 import { useGameData } from '../hooks/useGameData.js';
 
@@ -77,6 +78,7 @@ export default function Dashboard() {
     const name = newPlayerName.trim();
     if (name && !players.includes(name)) {
       updatePlayers([...players, name]);
+      saveUsers([name]);
       setNewPlayerName('');
     }
   };

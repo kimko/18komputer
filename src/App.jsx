@@ -6,6 +6,7 @@ import GameLayout from './components/GameLayout.jsx';
 import RevenueCalculator from './components/RevenueCalculator.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import ResumeGame from './components/ResumeGame.jsx';
+import ManageUsers from './components/ManageUsers.jsx';
 
 const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -20,10 +21,7 @@ function App() {
       <Route path="/game/:id/dashboard" component={Dashboard} />
       <Route path="/game/:id/calculator" component={RevenueCalculator} />
       <Route path="/game/:id/setup" component={ActivateCompany} />
-      <Route path="/users">
-        {/* Placeholder for User Management */}
-        <div style={{ color: 'white', padding: '2rem' }}>User Management (Coming Soon)</div>
-      </Route>
+      <Route path="/users" component={ManageUsers} />
       <Route>
         <div style={{ color: 'white', padding: '2rem' }}>404 Not Found</div>
       </Route>

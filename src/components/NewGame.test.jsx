@@ -11,7 +11,9 @@ vi.mock('wouter', () => ({
 
 // Mock the API
 vi.mock('../api/mockApi.js', () => ({
-  createGame: vi.fn()
+  createGame: vi.fn(),
+  getUsers: vi.fn(() => []),
+  saveUsers: vi.fn()
 }));
 
 // Mock the JSON import
@@ -43,7 +45,7 @@ describe('NewGame Component', () => {
     expect(screen.getByText(/1817: Modern Trains/i)).toBeInTheDocument();
 
     // Check for player input
-    expect(screen.getByPlaceholderText(/Player Name/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/New player name/i)).toBeInTheDocument();
   });
 
   it('should allow adding multiple players and submitting the form', async () => {
@@ -56,13 +58,13 @@ describe('NewGame Component', () => {
     fireEvent.click(gameBtn);
 
     // Add first player
-    const input = screen.getByPlaceholderText(/Player Name/i);
+    const input = screen.getByPlaceholderText(/New player name/i);
     fireEvent.change(input, { target: { value: 'Alice' } });
-    fireEvent.click(screen.getByRole('button', { name: /Add Player/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add/i }));
 
     // Add second player
     fireEvent.change(input, { target: { value: 'Bob' } });
-    fireEvent.click(screen.getByRole('button', { name: /Add Player/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add/i }));
 
     // Verify players are listed
     expect(screen.getByText('Alice')).toBeInTheDocument();
@@ -80,7 +82,7 @@ describe('NewGame Component', () => {
 
   it('should enforce unique player names and minimum players', async () => {
     renderWithChakra(<NewGame />);
-    const input = screen.getByPlaceholderText(/Player Name/i);
+    const input = screen.getByPlaceholderText(/New player name/i);
     const startBtn = screen.getByRole('button', { name: /Start Game/i });
     
     // Clear initial players
@@ -94,11 +96,11 @@ describe('NewGame Component', () => {
     
     // Add Alice
     fireEvent.change(input, { target: { value: 'Alice' } });
-    fireEvent.click(screen.getByRole('button', { name: /Add Player/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add/i }));
     
     // Add Alice again (should be ignored)
     fireEvent.change(input, { target: { value: 'Alice' } });
-    fireEvent.click(screen.getByRole('button', { name: /Add Player/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add/i }));
     
     const aliceItems = screen.getAllByText('Alice');
     expect(aliceItems.length).toBe(1); // Only one Alice
@@ -107,7 +109,7 @@ describe('NewGame Component', () => {
     
     // Add Bob
     fireEvent.change(input, { target: { value: 'Bob' } });
-    fireEvent.click(screen.getByRole('button', { name: /Add Player/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add/i }));
     
     expect(startBtn).not.toBeDisabled();
   });
