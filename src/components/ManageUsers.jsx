@@ -81,7 +81,7 @@ export default function ManageUsers() {
                     justify="space-between"
                     align="center"
                   >
-                    <Text fontWeight="medium">{name}</Text>
+                    <Text fontWeight="medium" color="white">{name}</Text>
                     <IconButton
                       aria-label="Delete user"
                       size="sm"
