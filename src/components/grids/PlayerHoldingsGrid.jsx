@@ -38,11 +38,14 @@ export default function PlayerHoldingsGrid({
       netWorths: {}
     };
 
+    let grandTotalOpIncome = 0;
     activeCompanies.forEach(c => {
       data.bankShares[c.shortName] = getBankShares(dashboardState, players, c.shortName);
       data.shareValues[c.shortName] = getShareValue(dashboardState, activeCompanies, c.shortName);
       data.opIncomes[c.shortName] = getCompanyOrTotal(dashboardState, maxOr, c.shortName);
+      grandTotalOpIncome += data.opIncomes[c.shortName];
     });
+    data.grandTotalOpIncome = grandTotalOpIncome;
 
     players.forEach(p => {
       data.totalShares[p] = getPlayerTotalShares(dashboardState, activeCompanies, p);
@@ -170,7 +173,11 @@ export default function PlayerHoldingsGrid({
                     <Text fontWeight="bold" color="cyan.300">{formatCurrency(gridData.totalOpIncomes[p])}</Text>
                   </GridItem>
             )}
-            <GridItem></GridItem>
+            <GridItem textAlign="center">
+              <Text fontWeight="bold" color="gray.400" fontSize="sm" title="Total OR Payout">
+                {formatCurrency(gridData.grandTotalOpIncome)}
+              </Text>
+            </GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
             {players.map(p => <GridItem key={`nw-${p}`} textAlign="center">
