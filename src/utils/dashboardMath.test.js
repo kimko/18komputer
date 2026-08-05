@@ -56,4 +56,29 @@ describe('dashboardMath', () => {
     // Cash (1000) + Share Value (134) + Operating Income (90) = 1224
     expect(getPlayerNetWorth(state, companies, maxOr, player)).toBe(1224);
   });
+
+  it('getCalculatorGrandTotal correctly calculates train revenue', () => {
+    const mockGameInstance = {
+      state: {
+        calculatorState: {
+          BNO: {
+            trains: [
+              { stops: [10, 20, 30], bonusStops: [{ val: 10 }, { val: 20 }] },
+              { stops: [40, 50], isExcluded: true }, // Should be ignored
+              { stops: [10], bonusStops: [] }
+            ]
+          }
+        }
+      }
+    };
+    
+    // Train 1: 10+20+30 + 10+20 = 90
+    // Train 2: Excluded = 0
+    // Train 3: 10 = 10
+    // Total = 100
+    expect(getCalculatorGrandTotal(mockGameInstance, 'BNO')).toBe(100);
+    
+    // Test missing state
+    expect(getCalculatorGrandTotal({}, 'BNO')).toBe(0);
+  });
 });
