@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
-import { getGamesList, deleteGame } from '../api/mockApi.js';
+import { getGamesList, deleteGame, importGame } from '../api/mockApi.js';
 
 export default function ResumeGame() {
   const [, navigate] = useLocation();
@@ -9,7 +9,9 @@ export default function ResumeGame() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [importError, setImportError] = useState(null);
   const modalRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -83,6 +85,35 @@ export default function ResumeGame() {
     }
   };
 
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      await importGame(data);
+      
+      const list = await getGamesList();
+      setGames(list);
+      setImportError(null);
+    } catch (err) {
+      console.error('Failed to import game:', err);
+      setImportError('Failed to import file. Make sure it is a valid game export.');
+    } finally {
+      setLoading(false);
+      event.target.value = '';
+    }
+  };
+
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
 
   if (error) return (
@@ -99,10 +130,28 @@ export default function ResumeGame() {
           <Heading as="h2" size="xl" color="orange.400">
             Resume Game
           </Heading>
-          <Button variant="outline" color="white" borderColor="whiteAlpha.400" _hover={{ bg: 'whiteAlpha.200' }} onClick={() => navigate('/')}>
-            Back to Menu
-          </Button>
+          <Flex gap="3">
+            <input 
+              type="file" 
+              accept=".json" 
+              style={{ display: 'none' }} 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+            />
+            <Button variant="outline" color="white" borderColor="orange.400" _hover={{ bg: 'orange.900' }} onClick={handleImportClick}>
+              📥 Import Game
+            </Button>
+            <Button variant="outline" color="white" borderColor="whiteAlpha.400" _hover={{ bg: 'whiteAlpha.200' }} onClick={() => navigate('/')}>
+              Back to Menu
+            </Button>
+          </Flex>
         </Flex>
+
+        {importError && (
+          <Box mb="6" p="3" bg="red.900" color="white" borderRadius="md" border="1px solid" borderColor="red.500">
+            <Text>{importError}</Text>
+          </Box>
+        )}
 
         {games.length === 0 ? (
           <Center h="40vh" flexDirection="column" gap="4">

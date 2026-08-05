@@ -180,6 +180,22 @@ export function deleteGame(instanceId) {
   });
 }
 
+export function importGame(gameData) {
+  if (!gameData || typeof gameData !== 'object') throw new Error('Invalid game data');
+  if (!gameData.id || !gameData.gameId) throw new Error('Missing required game fields');
+
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    
+    // Simply overwrite or create using the imported game's ID
+    db[gameData.id] = gameData;
+    writeStorage(db);
+    
+    return gameData;
+  });
+}
+
 export function getGamesList() {
   return enqueue(async () => {
     await delay();
