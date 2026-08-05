@@ -127,19 +127,32 @@ export default function PlayerCharts({ assetData, dividendData, radarData, bubbl
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis dataKey="player" type="category" stroke={textColor} allowDuplicatedCategory={false} />
-              <YAxis dataKey="company" type="category" stroke={textColor} width={80} allowDuplicatedCategory={false} />
-              <ZAxis dataKey="value" type="number" range={[50, 800]} />
+              <XAxis dataKey="sharePct" type="number" domain={[0, 100]} tickFormatter={(t) => `${t}%`} stroke={textColor} name="Ownership" />
+              <YAxis dataKey="company" type="category" stroke={textColor} width={80} allowDuplicatedCategory={false} name="Company" />
+              <ZAxis dataKey="value" type="number" range={[50, 800]} name="Market Power" />
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }}
                 contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
                 itemStyle={{ color: 'white' }}
                 labelStyle={{ color: 'white' }}
-                formatter={(value, name) => [name === 'value' ? `$${value}` : value, name === 'value' ? 'Value' : name]}
+                formatter={(value, name) => {
+                  if (name === 'Market Power') return [`$${value}`, name];
+                  if (name === 'Ownership') return [`${value}%`, name];
+                  return [value, name];
+                }}
               />
-              <Scatter data={bubbleData}>
+              <Legend 
+                wrapperStyle={{ paddingTop: '10px' }}
+                payload={players.map((p, index) => ({
+                  id: p,
+                  type: 'circle',
+                  value: p,
+                  color: PLAYER_COLORS[index % PLAYER_COLORS.length]
+                }))}
+              />
+              <Scatter data={bubbleData} name="Player">
                 {bubbleData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                  <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.7} />
                 ))}
               </Scatter>
             </ScatterChart>

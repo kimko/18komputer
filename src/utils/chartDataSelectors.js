@@ -145,6 +145,7 @@ export const getBubbleChartData = (dashboardState, activeCompanies, players) => 
           player: p,
           company: c.shortName,
           value: ownedValue,
+          sharePct: sharePct,
           fill: PLAYER_COLORS[index % PLAYER_COLORS.length]
         });
       }
