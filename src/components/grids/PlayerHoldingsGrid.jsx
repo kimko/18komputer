@@ -196,12 +196,25 @@ export default function PlayerHoldingsGrid({
 
             <GridItem><Text color="gray.400" fontSize="sm">Diff %</Text></GridItem>
             {players.map(p => {
-              const diffPct = gridData.maxNetWorth > 0 
-                ? Math.round((gridData.netWorths[p] / gridData.maxNetWorth) * 100)
-                : 0;
+              if (gridData.maxNetWorth === 0) {
+                return <GridItem key={`diff-${p}`} textAlign="center"><Text fontWeight="bold" color="yellow.300">0%</Text></GridItem>;
+              }
+              const myNetWorth = gridData.netWorths[p];
+              const myRawPct = (myNetWorth / gridData.maxNetWorth) * 100;
+              const myRounded = Math.round(myRawPct);
+              
+              // Check if anyone else rounds to the same number but has a different net worth
+              const hasCollision = players.some(other => {
+                if (other === p) return false;
+                const otherRaw = (gridData.netWorths[other] / gridData.maxNetWorth) * 100;
+                return Math.round(otherRaw) === myRounded && gridData.netWorths[other] !== myNetWorth;
+              });
+              
+              const displayPct = hasCollision ? myRawPct.toFixed(1) : myRounded;
+              
               return (
                 <GridItem key={`diff-${p}`} textAlign="center">
-                  <Text fontWeight="bold" color="yellow.300">{diffPct}%</Text>
+                  <Text fontWeight="bold" color="yellow.300">{displayPct}%</Text>
                 </GridItem>
               );
             })}

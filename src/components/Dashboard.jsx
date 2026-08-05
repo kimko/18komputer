@@ -16,9 +16,6 @@ import PlayerCharts from './charts/PlayerCharts.jsx';
 import {
   getRevenueTrajectoryData,
   getCompanyYieldAndDominanceData,
-  getPlayerAssetBreakdownData,
-  getPlayerDividendDependencyData,
-  getControllingInterestData,
   getBubbleChartData
 } from '../utils/chartDataSelectors.js';
 
@@ -168,9 +165,6 @@ export default function Dashboard() {
 
         <Tabs.Content value="players">
           <PlayerCharts 
-            assetData={getPlayerAssetBreakdownData(dashboardState, activeCompanies, maxOr, players)}
-            dividendData={getPlayerDividendDependencyData(dashboardState, activeCompanies, maxOr, players)}
-            radarData={getControllingInterestData(dashboardState, activeCompanies, players)}
             bubbleData={getBubbleChartData(dashboardState, activeCompanies, players)}
             players={players}
             activeCompanies={activeCompanies}
