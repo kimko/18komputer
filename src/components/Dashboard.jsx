@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Box, Center, Spinner, Flex, Heading, Button, Text } from '@chakra-ui/react';
+import { Box, Center, Spinner, Flex, Heading, Button, Text, Tabs } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { updateGameState, saveUsers } from '../api/mockApi.js';
 import LZString from 'lz-string';
@@ -11,6 +11,9 @@ import ShareCountPopup from './popups/ShareCountPopup.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
 import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
 import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/dashboardMath.js';
+import CompanyCharts from './charts/CompanyCharts.jsx';
+import PlayerCharts from './charts/PlayerCharts.jsx';
+import { getCompanyChartData, getPlayerLeaderboardData, getPortfolioRadarData } from '../utils/chartDataSelectors.js';
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
@@ -117,27 +120,49 @@ export default function Dashboard() {
         </Button>
       </Flex>
 
-      <CompanyValuesGrid 
-        activeCompanies={activeCompanies}
-        maxOr={maxOr}
-        dashboardState={dashboardState}
-        updateMaxOr={updateMaxOr}
-        setActivePopup={setActivePopup}
-      />
+      <Tabs.Root defaultValue="grids" variant="enclosed" mt="4">
+        <Tabs.List bg="gray.800" borderRadius="md" p="1">
+          <Tabs.Trigger value="grids" _selected={{ bg: 'teal.500', color: 'white' }}>Data Grids</Tabs.Trigger>
+          <Tabs.Trigger value="companies" _selected={{ bg: 'teal.500', color: 'white' }}>Company Charts</Tabs.Trigger>
+          <Tabs.Trigger value="players" _selected={{ bg: 'teal.500', color: 'white' }}>Player Charts</Tabs.Trigger>
+        </Tabs.List>
 
-      <PlayerHoldingsGrid 
-        players={players}
-        activeCompanies={activeCompanies}
-        maxOr={maxOr}
-        dashboardState={dashboardState}
-        showDetails={showDetails}
-        setShowDetails={setShowDetails}
-        newPlayerName={newPlayerName}
-        setNewPlayerName={setNewPlayerName}
-        handleAddPlayer={handleAddPlayer}
-        handleRemovePlayer={handleRemovePlayer}
-        setActivePopup={setActivePopup}
-      />
+        <Tabs.Content value="grids">
+          <CompanyValuesGrid 
+            activeCompanies={activeCompanies}
+            maxOr={maxOr}
+            dashboardState={dashboardState}
+            updateMaxOr={updateMaxOr}
+            setActivePopup={setActivePopup}
+          />
+
+          <PlayerHoldingsGrid 
+            players={players}
+            activeCompanies={activeCompanies}
+            maxOr={maxOr}
+            dashboardState={dashboardState}
+            showDetails={showDetails}
+            setShowDetails={setShowDetails}
+            newPlayerName={newPlayerName}
+            setNewPlayerName={setNewPlayerName}
+            handleAddPlayer={handleAddPlayer}
+            handleRemovePlayer={handleRemovePlayer}
+            setActivePopup={setActivePopup}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="companies">
+          <CompanyCharts data={getCompanyChartData(dashboardState, activeCompanies, maxOr)} />
+        </Tabs.Content>
+
+        <Tabs.Content value="players">
+          <PlayerCharts 
+            leaderboardData={getPlayerLeaderboardData(dashboardState, activeCompanies, maxOr, players)}
+            radarData={getPortfolioRadarData(dashboardState, activeCompanies, players)}
+            players={players}
+          />
+        </Tabs.Content>
+      </Tabs.Root>
 
       {/* Popups */}
       {activePopup?.type === 'shareValue' && (
