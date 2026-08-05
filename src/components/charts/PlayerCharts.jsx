@@ -1,11 +1,12 @@
 import { Box, Heading, SimpleGrid, Flex, Text } from '@chakra-ui/react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
 import { PLAYER_COLORS } from '../../utils/chartDataSelectors.js';
 
-export default function PlayerCharts({ assetData, dividendData, radarData, players, activeCompanies }) {
+export default function PlayerCharts({ assetData, dividendData, radarData, bubbleData, players, activeCompanies }) {
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
 
@@ -112,6 +113,34 @@ export default function PlayerCharts({ assetData, dividendData, radarData, playe
                 />
               ))}
             </RadarChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+
+      {/* 4. Market Power (Bubble Chart) */}
+      <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
+        <Flex justify="space-between" align="center" mb="2">
+          <Heading size="md" color="teal.300">Market Power Grid</Heading>
+          <Text fontSize="sm" color="gray.500">Ownership value comparison</Text>
+        </Flex>
+        <Box h="350px">
+          <ResponsiveContainer width="100%" height="100%">
+            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="player" type="category" stroke={textColor} />
+              <YAxis dataKey="company" type="category" stroke={textColor} width={80} />
+              <ZAxis dataKey="value" type="number" range={[50, 800]} />
+              <Tooltip 
+                cursor={{ strokeDasharray: '3 3' }}
+                contentStyle={{ backgroundColor: '#1A202C', borderColor: '#4A5568', color: 'white' }}
+                formatter={(value, name) => [name === 'value' ? `$${value}` : value, name === 'value' ? 'Value' : name]}
+              />
+              <Scatter data={bubbleData}>
+                {bubbleData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Scatter>
+            </ScatterChart>
           </ResponsiveContainer>
         </Box>
       </Box>

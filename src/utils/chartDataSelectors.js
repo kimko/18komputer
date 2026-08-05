@@ -117,11 +117,38 @@ export const getControllingInterestData = (dashboardState, activeCompanies, play
     
     players.forEach(p => {
       const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-      // Weight the ownership by the market cap (value of shares held)
       const ownedValue = (sharePct / 100) * marketCap;
       dataPoint[p] = ownedValue;
     });
     
     return dataPoint;
   });
+};
+
+/**
+ * 4. Market Power Grid (Bubble Chart)
+ * Returns flat array of points for a Scatter Chart representing ownership value.
+ */
+export const getBubbleChartData = (dashboardState, activeCompanies, players) => {
+  const data = [];
+  players.forEach((p, index) => {
+    activeCompanies.forEach(c => {
+      const sharePrice = getShareValue(dashboardState, activeCompanies, c.shortName);
+      const totalShares = c.totalShares || 10;
+      const marketCap = sharePrice * (100 / (100 / totalShares));
+      
+      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
+      const ownedValue = (sharePct / 100) * marketCap;
+      
+      if (ownedValue > 0) {
+        data.push({
+          player: p,
+          company: c.shortName,
+          value: ownedValue,
+          fill: PLAYER_COLORS[index % PLAYER_COLORS.length]
+        });
+      }
+    });
+  });
+  return data;
 };

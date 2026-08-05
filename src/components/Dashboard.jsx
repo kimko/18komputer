@@ -18,7 +18,8 @@ import {
   getCompanyYieldAndDominanceData,
   getPlayerAssetBreakdownData,
   getPlayerDividendDependencyData,
-  getControllingInterestData
+  getControllingInterestData,
+  getBubbleChartData
 } from '../utils/chartDataSelectors.js';
 
 export default function Dashboard() {
@@ -170,6 +171,7 @@ export default function Dashboard() {
             assetData={getPlayerAssetBreakdownData(dashboardState, activeCompanies, maxOr, players)}
             dividendData={getPlayerDividendDependencyData(dashboardState, activeCompanies, maxOr, players)}
             radarData={getControllingInterestData(dashboardState, activeCompanies, players)}
+            bubbleData={getBubbleChartData(dashboardState, activeCompanies, players)}
             players={players}
             activeCompanies={activeCompanies}
           />
