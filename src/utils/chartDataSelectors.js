@@ -56,80 +56,13 @@ export const getCompanyYieldAndDominanceData = (dashboardState, activeCompanies,
   }).filter(c => c.marketCap > 0 || c.yieldPct > 0);
 };
 
-/**
- * 1. Asset Breakdown (Stacked Bar Chart)
- * Returns players sorted by net worth, broken down by Stock, Cash, and Op Income.
- */
-export const getPlayerAssetBreakdownData = (dashboardState, activeCompanies, maxOr, players) => {
-  return players.map(p => {
-    const cash = Number(dashboardState.playerAssets[p]?.cash || 0);
-    const stockValue = getPlayerShareValue(dashboardState, activeCompanies, p);
-    const opIncome = getPlayerOperatingIncome(dashboardState, activeCompanies, maxOr, p);
-    const netWorth = cash + stockValue + opIncome;
 
-    return {
-      name: p,
-      Cash: cash,
-      'Stock Value': stockValue,
-      'Op Income': opIncome,
-      netWorth
-    };
-  }).sort((a, b) => b.netWorth - a.netWorth);
-};
-
-/**
- * 2. Dividend Dependency (Stacked Bar Chart)
- * Returns total operating income for each player, broken down by paying company.
- */
-export const getPlayerDividendDependencyData = (dashboardState, activeCompanies, maxOr, players) => {
-  return players.map(p => {
-    const playerRecord = { name: p };
-    let totalIncome = 0;
-    
-    activeCompanies.forEach(c => {
-      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-      const totalShares = c.totalShares || 10;
-      const companyTotalIncome = getCompanyOrTotal(dashboardState, maxOr, c.shortName);
-      
-      const incomeFromCompany = totalShares > 0 ? (sharePct / 100) * companyTotalIncome : 0;
-      if (incomeFromCompany > 0) {
-        playerRecord[c.shortName] = incomeFromCompany;
-        totalIncome += incomeFromCompany;
-      }
-    });
-    
-    playerRecord.totalIncome = totalIncome;
-    return playerRecord;
-  }).sort((a, b) => b.totalIncome - a.totalIncome);
-};
-
-/**
- * 3. Controlling Interest (Radar Chart)
- * Returns radar data weighted by the market cap of the owned shares.
- */
-export const getControllingInterestData = (dashboardState, activeCompanies, players) => {
-  return activeCompanies.map(c => {
-    const sharePrice = getShareValue(dashboardState, activeCompanies, c.shortName);
-    const totalShares = c.totalShares || 10;
-    const marketCap = sharePrice * (100 / (100 / totalShares));
-    
-    const dataPoint = { company: c.shortName, marketCap };
-    
-    players.forEach(p => {
-      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-      const ownedValue = (sharePct / 100) * marketCap;
-      dataPoint[p] = ownedValue;
-    });
-    
-    return dataPoint;
-  });
-};
 
 /**
  * 4. Market Power Grid (Bubble Chart)
  * Returns flat array of points for a Scatter Chart representing ownership value.
  */
-export const getBubbleChartData = (dashboardState, activeCompanies, players) => {
+export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players) => {
   const data = [];
   players.forEach((p, pIndex) => {
     activeCompanies.forEach((c, cIndex) => {
@@ -143,11 +76,9 @@ export const getBubbleChartData = (dashboardState, activeCompanies, players) => 
       // 1. Share Value
       const shareValue = (sharePct / 100) * marketCap;
       
-      // 2. Operating Income (last 3 ORs)
-      const history = dashboardState.companyHistory?.[c.shortName] || [];
-      const recentORs = history.filter(h => h.type === 'OR').slice(-3);
-      const totalRevenue = recentORs.reduce((sum, h) => sum + (h.revenue || 0), 0);
-      const opIncome = (sharePct / 100) * totalRevenue;
+      // 2. Operating Income
+      const companyTotalIncome = getCompanyOrTotal(dashboardState, maxOr, c.shortName);
+      const opIncome = totalShares > 0 ? (sharePct / 100) * companyTotalIncome : 0;
 
       if (shareCount > 0) {
         // Deterministic Jitter
