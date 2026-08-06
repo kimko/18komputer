@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid, Input, VStack } from '@chakra-ui/react';
+import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid, Input, VStack, Textarea } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
 import LZString from 'lz-string';
 import { getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
@@ -14,7 +14,8 @@ export default function ResumeGame() {
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [importError, setImportError] = useState(null);
   const modalRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
+  const [importToken, setImportToken] = useState('');
 
   async function loadGames() {
     try {
@@ -127,32 +128,27 @@ export default function ResumeGame() {
     }
   };
 
-  const handleImportClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
+  const handleTokenImport = async () => {
+    if (!importToken.trim()) return;
+    
     try {
       setLoading(true);
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const jsonStr = LZString.decompressFromEncodedURIComponent(importToken.trim());
+      if (!jsonStr) throw new Error('Decompression failed');
       
+      const data = JSON.parse(jsonStr);
       await importGame(data);
       
       const list = await getGamesList();
       setGames(list);
       setImportError(null);
+      setImportModalOpen(false);
+      setImportToken('');
     } catch (err) {
-      console.error('Failed to import game:', err);
-      setImportError('Failed to import file. Make sure it is a valid game export.');
+      console.error('Failed to import token:', err);
+      setImportError('Failed to import token. Make sure it is a valid game export string.');
     } finally {
       setLoading(false);
-      event.target.value = '';
     }
   };
 
@@ -202,14 +198,7 @@ export default function ResumeGame() {
                 title="Import Legacy JSON"
               />
             </Box>
-            <input 
-              type="file" 
-              accept=".json" 
-              style={{ display: 'none' }} 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-            />
-            <Button variant="outline" color="white" borderColor="orange.400" _hover={{ bg: 'orange.900' }} onClick={handleImportClick}>
+            <Button variant="outline" color="white" borderColor="orange.400" _hover={{ bg: 'orange.900' }} onClick={() => setImportModalOpen(true)}>
               📥 Import Game
             </Button>
             <Button variant="outline" color="white" borderColor="whiteAlpha.400" _hover={{ bg: 'whiteAlpha.200' }} onClick={() => navigate('/')}>
@@ -342,6 +331,34 @@ export default function ResumeGame() {
               <Button flex="1" colorPalette="red" onClick={handleDeleteAll}>Delete All</Button>
             </Flex>
         </ModalBackdrop>
+      )}
+      {/* Import Token Modal */}
+      {isImportModalOpen && (
+        <Box position="fixed" top="0" left="0" w="100%" h="100%" bg="blackAlpha.700" zIndex={9999} display="flex" alignItems="center" justifyContent="center" onClick={() => setImportModalOpen(false)}>
+          <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="gray.600" w="90%" maxW="500px" onClick={e => e.stopPropagation()}>
+            <Heading as="h3" size="md" color="white" mb="4">Import Game Token</Heading>
+            <Text color="gray.300" mb="4" fontSize="sm">Paste your game export token below (usually a long string of letters and numbers).</Text>
+            <Textarea 
+              value={importToken} 
+              onChange={(e) => setImportToken(e.target.value)} 
+              placeholder="Paste token here..." 
+              bg="gray.900" 
+              color="white"
+              border="1px solid"
+              borderColor="gray.700"
+              minH="150px"
+              mb="6"
+            />
+            <Flex justify="flex-end" gap="4">
+              <Button variant="ghost" color="gray.300" _hover={{ bg: 'whiteAlpha.100' }} onClick={() => { setImportModalOpen(false); setImportToken(''); }}>
+                Cancel
+              </Button>
+              <Button colorPalette="orange" onClick={handleTokenImport} disabled={!importToken.trim()}>
+                Import
+              </Button>
+            </Flex>
+          </Box>
+        </Box>
       )}
     </Box>
   );
