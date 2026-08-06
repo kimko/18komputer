@@ -129,8 +129,8 @@ export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, playe
         opIncomeJitter: playerTotalOpIncome,
         totalValue: playerTotalValue,
         totalValueJitter: playerTotalValue,
-        fill: 'transparent',
-        stroke: PLAYER_COLORS[pIndex % PLAYER_COLORS.length] || '#FFF',
+        fill: '#A0AEC0',
+        stroke: 'none',
         isCumulative: true
       });
     }

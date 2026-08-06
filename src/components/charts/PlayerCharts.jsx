@@ -107,9 +107,9 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
                   <Cell 
                     key={`cell-${index}`} 
                     fill={entry.fill} 
-                    fillOpacity={entry.isCumulative ? 0.1 : 0.8}
+                    fillOpacity={entry.isCumulative ? 0.4 : 0.8}
                     stroke={entry.isCumulative ? entry.stroke : 'none'}
-                    strokeWidth={entry.isCumulative ? 2 : 0}
+                    strokeWidth={0}
                   />
                 ))}
               </Scatter>
@@ -123,6 +123,10 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
               <Text fontSize="sm" color="gray.400">{c.name || c.shortName}</Text>
             </Flex>
           ))}
+          <Flex align="center" gap={2}>
+            <Box w={3} h={3} borderRadius="50%" bg="#A0AEC0" opacity={0.4} />
+            <Text fontSize="sm" color="gray.400">Total Cumulative</Text>
+          </Flex>
         </Flex>
       </Box>
 
