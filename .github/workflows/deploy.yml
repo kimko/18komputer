@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -45,3 +47,11 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Run E2E Smoke Test against Production
         run: npm run test:e2e:prod
+      - name: Auto-Revert on Failure
+        if: failure()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git revert --no-commit HEAD
+          git commit -m "chore: auto-revert due to smoke test failure"
+          git push origin main
