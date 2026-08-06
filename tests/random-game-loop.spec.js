@@ -8,7 +8,7 @@ const APP_URL = process.env.TEST_ENV === 'local'
   ? 'http://localhost:4173/18komputer/'
   : 'https://kimko.github.io/18komputer/';
 
-test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
+test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   // Listen for browser console logs
   page.on('console', msg => {
     if (msg.text().includes('MAGIC_LINK') || msg.type() === 'error') {
@@ -105,7 +105,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
           const randomParIdx = Math.floor(Math.random() * parButtons.length);
           await parButtons[randomParIdx].click();
       }
-    } catch(e) {
+    } catch {
       // Game probably has no par values defined, skip
     }
   }
@@ -277,8 +277,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
       }
   }
   
-  // Store the state before sharing (just use a placeholder for now since we randomize everything)
-  let expectedOr1 = '';
+
 
 
   // --- 6. MAGIC LINK SHARE ---

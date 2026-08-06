@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
+import { Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
 import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 

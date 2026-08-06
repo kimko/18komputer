@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import ResumeGame from './ResumeGame.jsx';
 import * as mockApi from '../api/mockApi.js';
-import { useLocation } from 'wouter';
 
 const mockNavigate = vi.fn();
 

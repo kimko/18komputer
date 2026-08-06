@@ -1,9 +1,6 @@
 import {
   getShareValue,
   getCompanyOrTotal,
-  getPlayerNetWorth,
-  getPlayerShareValue,
-  getPlayerOperatingIncome
 } from './dashboardMath.js';
 import { getContrastColor } from './colorUtils.js';
 

@@ -8,7 +8,7 @@ const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 let gitHash = '';
 try {
   gitHash = execSync('git rev-parse --short HEAD').toString().trim();
-} catch (e) {
+} catch {
   // Fallback if git is not available (e.g. shallow clone without history)
 }
 const appVersion = gitHash ? `${packageJson.version}-${gitHash}` : packageJson.version;

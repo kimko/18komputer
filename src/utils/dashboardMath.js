@@ -44,11 +44,9 @@ export const getPlayerOperatingIncome = (dashboardState, activeCompanies, maxOr,
   const assets = dashboardState.playerAssets[player] || { shares: {} };
   let income = 0;
   activeCompanies.forEach(c => {
-    const totalShares = c.totalShares || 10;
+
     const sharePct = Number(assets.shares[c.shortName] || 0);
-    if (100 > 0) {
-      income += (sharePct / 100) * getCompanyOrTotal(dashboardState, maxOr, c.shortName);
-    }
+    income += (sharePct / 100) * getCompanyOrTotal(dashboardState, maxOr, c.shortName);
   });
   return income;
 };
@@ -66,7 +64,7 @@ export const getBankShares = (dashboardState, players, companyId) => {
     const pShares = Number(dashboardState.playerAssets[p]?.shares?.[companyId] || 0);
     totalPlayerShares += pShares;
   });
-  const cInfo = dashboardState.shareValues[companyId] !== undefined ? null : null; // activeCompanies not passed, but we can assume total is 100% or 10 shares
+  // activeCompanies not passed, but we can assume total is 100% or 10 shares
   return Math.max(0, 100 - totalPlayerShares);
 };
 

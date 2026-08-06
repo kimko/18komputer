@@ -1,14 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Box, Center, Spinner, Flex, Button, Text, Tabs } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import { saveUsers } from '../api/mockApi.js';
 import LZString from 'lz-string';
 import { useGameData } from '../hooks/useGameData.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
 import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
-import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/dashboardMath.js';
 import CompanyCharts from './charts/CompanyCharts.jsx';
 import PlayerCharts from './charts/PlayerCharts.jsx';
 import {
@@ -23,13 +21,13 @@ export default function Dashboard() {
   const [activePopup, setActivePopup] = useState(null);
   const [shareMessage, setShareMessage] = useState(null);
 
-  const dashboardState = gameInstance?.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} };
+  const dashboardState = useMemo(() => gameInstance?.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} }, [gameInstance?.state?.dashboardState]);
 
   const handleShare = useCallback(async () => {
     if (!gameInstance) return;
 
     // Omit staticConfig to prevent redundancy in the magic link
-    const { staticConfig, ...gameDataToShare } = gameInstance;
+    const { staticConfig: _, ...gameDataToShare } = gameInstance;
 
     // Create a copy of the game instance to share, injecting the freshest local dashboardState
     const shareInstance = { 

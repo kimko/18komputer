@@ -9,11 +9,7 @@ export default function CompanyCharts({ trajectoryData, yieldData, activeCompani
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
 
-  // Lookup color by shortName for the LineChart
-  const getCompanyColor = (shortName) => {
-    const comp = activeCompanies.find(c => c.shortName === shortName);
-    return comp?.color || '#8884d8';
-  };
+
 
   return (
     <SimpleGrid columns={[1, null, 2]} gap={8} w="100%" mt="6">

@@ -52,7 +52,7 @@ export default function ResumeGame() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [navigate]);
 
   // Focus trap for delete confirmation modal
   useEffect(() => {

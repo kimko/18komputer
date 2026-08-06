@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getShareValue, getPlayerShareValue, getPlayerTotalShares, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getBankShares, getCalculatorGrandTotal } from './dashboardMath';
+import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal } from './dashboardMath';
 
 describe('dashboardMath', () => {
   const mockDashboardState = {
