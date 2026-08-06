@@ -13,6 +13,7 @@
     "test:e2e": "npx playwright test --project=chromium",
     "test:e2e:local": "TEST_ENV=local npx playwright test --project=chromium",
     "test:e2e:ci": "TEST_ENV=ci npx playwright test --project=chromium",
+    "test:e2e:prod": "TEST_ENV=prod npx playwright test tests/version.spec.js --project=chromium",
     "prepare": "husky"
   },
   "dependencies": {

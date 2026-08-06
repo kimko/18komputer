@@ -34,8 +34,6 @@ jobs:
         run: npm run build
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
-      - name: Run E2E Tests against Local Prod Build
-        run: npm run test:e2e:ci
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
@@ -45,3 +43,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Run E2E Smoke Test against Production
+        run: npm run test:e2e:prod
