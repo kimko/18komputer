@@ -39,9 +39,9 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
     <Box w="100%" mt="6">
       
       <Box bg="gray.900" p="6" borderRadius="xl" border="1px solid" borderColor="gray.800" shadow="xl">
-        <Flex justify="space-between" align="center" mb="2">
+        <Flex direction={{ base: "column", lg: "row" }} justify="space-between" align={{ base: "flex-start", lg: "center" }} mb="2" gap="4">
           <Heading size="md" color="teal.300">Market Power Grid</Heading>
-          <Flex gap={2}>
+          <Flex wrap="wrap" gap={3} align="center">
             <Button size="sm" onClick={() => setYAxisMode(m => m === 'shares' ? 'value' : 'shares')} bg="gray.800" color="white" border="1px solid" borderColor="gray.600" _hover={{ bg: 'gray.700' }}>
               ⇄ Flip Axes
             </Button>
@@ -64,7 +64,6 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
             <Flex 
               align="center" 
               gap={2} 
-              ml={2} 
             >
               <input 
                 id="include-cash-checkbox"
@@ -78,7 +77,6 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
             <Flex 
               align="center" 
               gap={2} 
-              ml={2} 
             >
               <input 
                 id="include-total-checkbox"
