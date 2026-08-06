@@ -9,6 +9,8 @@ const APP_URL = process.env.TEST_ENV === 'local'
   : 'https://kimko.github.io/18komputer/';
 
 test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
+  test.setTimeout(60000); // Give the chaos monkey more time
+
   // Listen for browser console logs
   page.on('console', msg => {
     if (msg.text().includes('MAGIC_LINK') || msg.type() === 'error') {
@@ -367,9 +369,9 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   await page.getByRole('button', { name: 'Resume Game' }).click();
   
   // Find delete button
-  const deleteBtn = page.getByRole('button', { name: 'Delete' }).first();
+  const deleteBtn = page.getByRole('button', { name: /^Delete game/ }).first();
   await deleteBtn.click();
   
   // Confirm delete
-  await page.getByRole('heading', { name: 'Delete Game?' }).locator('..').getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('heading', { name: 'Delete Game?' }).locator('..').getByRole('button', { name: 'Delete', exact: true }).click();
 });

@@ -18,10 +18,10 @@ test('import and resume historical game', async ({ page }) => {
   await importInput.setInputFiles(filePath);
 
   // Wait for the imported games to appear in the list.
-  await expect(page.getByText('1846 042425').first()).toBeVisible();
+  await expect(page.getByText('1862 hot in the basement').first()).toBeVisible();
   
   // Click the first imported game to resume it
-  await page.getByText('1846 042425').first().click();
+  await page.getByText('1862 hot in the basement').first().click();
 
   // Wait for the dashboard to load (it should show 'Data Grids' or 'Dashboard' heading)
   await expect(page.getByRole('tab', { name: 'Data Grids' })).toBeVisible({ timeout: 10000 });
