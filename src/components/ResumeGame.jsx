@@ -180,7 +180,7 @@ export default function ResumeGame() {
       <Box maxW="4xl" mx="auto">
         <Flex justify="space-between" align="center" mb="6" wrap="wrap" gap="4">
           <Heading as="h2" size="xl" color="teal.300">Resume Game</Heading>
-          <Flex gap="4">
+          <Flex gap="4" wrap="wrap">
             <Button variant="outline" color="white" borderColor="red.400" _hover={{ bg: 'red.900' }} onClick={() => setShowDeleteAllConfirm(true)}>
               Delete All
             </Button>
