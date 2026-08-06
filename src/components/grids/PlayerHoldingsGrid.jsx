@@ -13,6 +13,20 @@ import {
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import { saveUsers } from '../../api/mockApi.js';
 
+function PlayerGridRow({ label, players, getValue, valueProps = {}, endNode = null }) {
+  return (
+    <>
+      <GridItem><Text color="gray.400" fontSize="sm">{label}</Text></GridItem>
+      {players.map(p => (
+        <GridItem key={`${label}-${p}`} textAlign="center">
+          <Text {...valueProps}>{getValue(p)}</Text>
+        </GridItem>
+      ))}
+      <GridItem textAlign="center">{endNode}</GridItem>
+    </>
+  );
+}
+
 export default function PlayerHoldingsGrid({
   players,
   activeCompanies,
@@ -48,7 +62,11 @@ export default function PlayerHoldingsGrid({
       totalShares: {},
       totalShareValues: {},
       totalOpIncomes: {},
-      netWorths: {}
+      netWorths: {},
+      playerShareValues: {},
+      playerOpIncomes: {},
+      stockWeights: {},
+      diffPcts: {}
     };
 
     let grandTotalOpIncome = 0;
@@ -67,12 +85,41 @@ export default function PlayerHoldingsGrid({
       data.totalShareValues[p] = getPlayerShareValue(dashboardState, activeCompanies, p);
       data.totalOpIncomes[p] = getPlayerOperatingIncome(dashboardState, activeCompanies, maxOr, p);
       data.netWorths[p] = getPlayerNetWorth(dashboardState, activeCompanies, maxOr, p);
+      
+      data.playerShareValues[p] = {};
+      data.playerOpIncomes[p] = {};
+      activeCompanies.forEach(c => {
+        const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
+        const totalShares = c.totalShares || 10;
+        data.playerShareValues[p][c.shortName] = totalShares > 0 ? (sharePct / (100 / totalShares)) * data.shareValues[c.shortName] : 0;
+        data.playerOpIncomes[p][c.shortName] = totalShares > 0 ? (sharePct / 100) * data.opIncomes[c.shortName] : 0;
+      });
     });
+    
     data.grandTotalCash = grandTotalCash;
     data.totalBankFundsUsed = grandTotalCash + grandTotalOpIncome;
-
     data.maxNetWorth = players.length > 0 ? Math.max(...players.map(p => data.netWorths[p])) : 0;
     data.totalNetWorth = players.length > 0 ? players.reduce((sum, p) => sum + data.netWorths[p], 0) : 0;
+
+    players.forEach(p => {
+      // Stock Weight
+      const equity = data.netWorths[p] > 0 ? (data.totalShareValues[p] / data.netWorths[p]) * 100 : 0;
+      data.stockWeights[p] = Math.round(equity) + '%';
+      
+      // Diff %
+      if (data.maxNetWorth === 0) {
+        data.diffPcts[p] = '0%';
+      } else {
+        const myRawPct = (data.netWorths[p] / data.maxNetWorth) * 100;
+        const myRounded = Math.round(myRawPct);
+        const hasCollision = players.some(other => {
+          if (other === p) return false;
+          const otherRaw = (data.netWorths[other] / data.maxNetWorth) * 100;
+          return Math.round(otherRaw) === myRounded && data.netWorths[other] !== data.netWorths[p];
+        });
+        data.diffPcts[p] = (hasCollision ? myRawPct.toFixed(1) : myRounded) + '%';
+      }
+    });
 
     return data;
   }, [players, activeCompanies, maxOr, dashboardState]);
@@ -161,105 +208,71 @@ export default function PlayerHoldingsGrid({
 
                 {showDetails && (
                   <>
-                    <GridItem><Text color="gray.500" fontSize="xs" pl="2">↳ Share Value</Text></GridItem>
-                    {players.map(p => {
-                      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-                      const totalShares = c.totalShares || 10;
-                      const sv = totalShares > 0 ? (sharePct / (100 / totalShares)) * gridData.shareValues[c.shortName] : 0;
-                      return (
-                        <GridItem key={`sv-${p}`} textAlign="center">
-                          <Text color="gray.400" fontSize="sm">{formatCurrency(sv)}</Text>
-                        </GridItem>
-                      );
-                    })}
-                    <GridItem></GridItem>
-
-                    <GridItem><Text color="gray.500" fontSize="xs" pl="2">↳ Op Income</Text></GridItem>
-                    {players.map(p => {
-                      const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-                      const totalShares = c.totalShares || 10;
-                      const income = totalShares > 0 ? (sharePct / 100) * gridData.opIncomes[c.shortName] : 0;
-                      return (
-                        <GridItem key={`inc-${p}`} textAlign="center">
-                          <Text color="cyan.600" fontSize="sm">{formatCurrency(income)}</Text>
-                        </GridItem>
-                      );
-                    })}
-                    <GridItem></GridItem>
+                    <PlayerGridRow 
+                      label="↳ Share Value" 
+                      labelProps={{ color: "gray.500", fontSize: "xs", pl: "2" }} 
+                      players={players} 
+                      getValue={(p) => formatCurrency(gridData.playerShareValues[p]?.[c.shortName] || 0)}
+                      valueProps={{ color: "gray.400", fontSize: "sm" }} 
+                    />
+                    <PlayerGridRow 
+                      label="↳ Op Income" 
+                      labelProps={{ color: "gray.500", fontSize: "xs", pl: "2" }} 
+                      players={players} 
+                      getValue={(p) => formatCurrency(gridData.playerOpIncomes[p]?.[c.shortName] || 0)}
+                      valueProps={{ color: "cyan.600", fontSize: "sm" }} 
+                    />
                   </>
                 )}
               </Fragment>
             ))}
 
-            <GridItem><Text color="gray.400" fontSize="sm">Total Shares</Text></GridItem>
-            {players.map(p => <GridItem key={`ts-${p}`} textAlign="center">
-                    <Text fontWeight="bold" color="purple.300">{gridData.totalShares[p]}</Text>
-                  </GridItem>
-            )}
-            <GridItem></GridItem>
+            <PlayerGridRow
+              label="Total Shares"
+              players={players}
+              getValue={(p) => gridData.totalShares[p]}
+              valueProps={{ fontWeight: "bold", color: "purple.300" }}
+            />
+            
+            <PlayerGridRow
+              label="Share Value"
+              players={players}
+              getValue={(p) => formatCurrency(gridData.totalShareValues[p])}
+              valueProps={{ fontWeight: "bold", color: "white" }}
+            />
 
-            <GridItem><Text color="gray.400" fontSize="sm">Share Value</Text></GridItem>
-            {players.map(p => (
-              <GridItem key={p} textAlign="center">
-                <Text fontWeight="bold" color="white">{formatCurrency(gridData.totalShareValues[p])}</Text>
-              </GridItem>
-            ))}
-            <GridItem></GridItem>
-
-            <GridItem><Text color="gray.400" fontSize="sm">Operating Income</Text></GridItem>
-            {players.map(p => <GridItem key={`to-${p}`} textAlign="center">
-                    <Text fontWeight="bold" color="cyan.300">{formatCurrency(gridData.totalOpIncomes[p])}</Text>
-                  </GridItem>
-            )}
-            <GridItem textAlign="center">
-              <Text fontWeight="bold" color="gray.400" fontSize="sm" title="Total OR Payout">
-                {formatCurrency(gridData.grandTotalOpIncome)}
-              </Text>
-            </GridItem>
-
-            <GridItem><Text color="gray.400" fontSize="sm">Net Worth</Text></GridItem>
-            {players.map(p => <GridItem key={`nw-${p}`} textAlign="center">
-                    <Text fontWeight="bold" color="green.300">{formatCurrency(gridData.netWorths[p])}</Text>
-                  </GridItem>
-            )}
-            <GridItem></GridItem>
-
-            <GridItem><Text color="gray.400" fontSize="sm">Stock Weight</Text></GridItem>
-            {players.map(p => {
-              const equity = gridData.netWorths[p] > 0 ? (gridData.totalShareValues[p] / gridData.netWorths[p]) * 100 : 0;
-              return (
-                <GridItem key={`eq-${p}`} textAlign="center">
-                  <Text fontWeight="bold" color="cyan.200">{Math.round(equity)}%</Text>
-                </GridItem>
-              );
-            })}
-            <GridItem></GridItem>
-
-            <GridItem><Text color="gray.400" fontSize="sm">Diff %</Text></GridItem>
-            {players.map(p => {
-              if (gridData.maxNetWorth === 0) {
-                return <GridItem key={`diff-${p}`} textAlign="center"><Text fontWeight="bold" color="yellow.300">0%</Text></GridItem>;
+            <PlayerGridRow
+              label="Operating Income"
+              players={players}
+              getValue={(p) => formatCurrency(gridData.totalOpIncomes[p])}
+              valueProps={{ fontWeight: "bold", color: "cyan.300" }}
+              endNode={
+                <Text fontWeight="bold" color="gray.400" fontSize="sm" title="Total OR Payout">
+                  {formatCurrency(gridData.grandTotalOpIncome)}
+                </Text>
               }
-              const myNetWorth = gridData.netWorths[p];
-              const myRawPct = (myNetWorth / gridData.maxNetWorth) * 100;
-              const myRounded = Math.round(myRawPct);
-              
-              // Check if anyone else rounds to the same number but has a different net worth
-              const hasCollision = players.some(other => {
-                if (other === p) return false;
-                const otherRaw = (gridData.netWorths[other] / gridData.maxNetWorth) * 100;
-                return Math.round(otherRaw) === myRounded && gridData.netWorths[other] !== myNetWorth;
-              });
-              
-              const displayPct = hasCollision ? myRawPct.toFixed(1) : myRounded;
-              
-              return (
-                <GridItem key={`diff-${p}`} textAlign="center">
-                  <Text fontWeight="bold" color="yellow.300">{displayPct}%</Text>
-                </GridItem>
-              );
-            })}
-            <GridItem></GridItem>
+            />
+
+            <PlayerGridRow
+              label="Net Worth"
+              players={players}
+              getValue={(p) => formatCurrency(gridData.netWorths[p])}
+              valueProps={{ fontWeight: "bold", color: "green.300" }}
+            />
+
+            <PlayerGridRow
+              label="Stock Weight"
+              players={players}
+              getValue={(p) => gridData.stockWeights[p]}
+              valueProps={{ fontWeight: "bold", color: "cyan.200" }}
+            />
+
+            <PlayerGridRow
+              label="Diff %"
+              players={players}
+              getValue={(p) => gridData.diffPcts[p]}
+              valueProps={{ fontWeight: "bold", color: "yellow.300" }}
+            />
 
             {showDetails && (
               <Fragment>
