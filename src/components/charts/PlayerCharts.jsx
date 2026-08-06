@@ -19,6 +19,10 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
     return comp?.color || '#A0AEC0';
   };
 
+  // Calculate max values for proportional scaling
+  const maxTotalValue = Math.max(...bubbleData.map(d => d.totalValue || 0), 1);
+  const maxShares = Math.max(...bubbleData.map(d => Math.ceil(d.trueShares || 0)), 1);
+
   return (
     <Box w="100%" mt="6">
       
@@ -63,8 +67,8 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
               <YAxis 
                 dataKey={yAxisMode === 'shares' ? 'y' : `${bubbleMetric}Jitter`} 
                 type="number" 
-                domain={yAxisMode === 'shares' ? [0, Math.max(2, ...bubbleData.map(d => Math.ceil(d.trueShares || 0))) + 1] : ['auto', 'auto']}
-                ticks={yAxisMode === 'shares' ? Array.from({ length: Math.max(2, ...bubbleData.map(d => Math.ceil(d.trueShares || 0))) }, (_, i) => i + 1).filter(v => Math.max(2, ...bubbleData.map(d => Math.ceil(d.trueShares || 0))) <= 5 || v % 2 === 0) : undefined}
+                domain={yAxisMode === 'shares' ? [0, Math.max(2, maxShares) + 1] : ['auto', 'auto']}
+                ticks={yAxisMode === 'shares' ? Array.from({ length: Math.max(2, maxShares) }, (_, i) => i + 1).filter(v => Math.max(2, maxShares) <= 5 || v % 2 === 0) : undefined}
                 stroke={textColor} 
                 width={50} 
                 name={yAxisMode === 'shares' ? 'Shares' : 'Value'} 
@@ -73,7 +77,8 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
               <ZAxis 
                 dataKey={yAxisMode === 'shares' ? bubbleMetric : 'trueShares'} 
                 type="number" 
-                range={yAxisMode === 'shares' ? [400, 2500] : [100, 600]} 
+                domain={yAxisMode === 'shares' ? [0, maxTotalValue] : [0, maxShares]}
+                range={yAxisMode === 'shares' ? [0, 3000] : [0, 1000]} 
                 name={yAxisMode === 'shares' ? 'Value' : 'Shares'} 
               />
               <Tooltip 
