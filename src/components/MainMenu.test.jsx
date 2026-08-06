@@ -44,4 +44,16 @@ describe('MainMenu Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /MANAGE USERS/i }));
     expect(mockNavigate).toHaveBeenCalledWith('/users');
   });
+
+  it('should display the application version from environment variables', () => {
+    // Mock the environment variable
+    vi.stubEnv('VITE_APP_VERSION', '9.9.9-test');
+    
+    renderWithChakra(<MainMenu />);
+    
+    expect(screen.getByText('v9.9.9-test')).toBeInTheDocument();
+    
+    // Clean up
+    vi.unstubAllEnvs();
+  });
 });
