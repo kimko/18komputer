@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Heading, SimpleGrid, Flex, Text, Button } from '@chakra-ui/react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -22,6 +22,15 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
   // Calculate max values for proportional scaling
   const maxTotalValue = Math.max(...bubbleData.map(d => d.totalValue || 0), 1);
   const maxShares = Math.max(...bubbleData.map(d => Math.ceil(d.trueShares || 0)), 1);
+
+  // Map active metrics to constant dataKeys for smooth animation interpolation
+  const animatedData = useMemo(() => {
+    return bubbleData.map(d => ({
+      ...d,
+      animatedY: yAxisMode === 'shares' ? d.y : d[`${bubbleMetric}Jitter`],
+      animatedZ: yAxisMode === 'shares' ? d[bubbleMetric] : d.trueShares
+    }));
+  }, [bubbleData, yAxisMode, bubbleMetric]);
 
   return (
     <Box w="100%" mt="6">
@@ -65,7 +74,7 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
                 stroke={textColor} 
               />
               <YAxis 
-                dataKey={yAxisMode === 'shares' ? 'y' : `${bubbleMetric}Jitter`} 
+                dataKey="animatedY" 
                 type="number" 
                 domain={yAxisMode === 'shares' ? [0, Math.max(2, maxShares) + 1] : ['auto', 'auto']}
                 ticks={yAxisMode === 'shares' ? Array.from({ length: Math.max(2, maxShares) }, (_, i) => i + 1).filter(v => Math.max(2, maxShares) <= 5 || v % 2 === 0) : undefined}
@@ -75,7 +84,7 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
                 tickFormatter={yAxisMode === 'value' ? (val) => `$${val}` : undefined}
               />
               <ZAxis 
-                dataKey={yAxisMode === 'shares' ? bubbleMetric : 'trueShares'} 
+                dataKey="animatedZ" 
                 type="number" 
                 domain={yAxisMode === 'shares' ? [0, maxTotalValue] : [0, maxShares]}
                 range={yAxisMode === 'shares' ? [0, 3000] : [0, 1000]} 
@@ -93,9 +102,15 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
                   return [value, name];
                 }}
               />
-              <Scatter data={bubbleData} name="Player">
-                {bubbleData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.8} />
+              <Scatter data={animatedData} name="Player" animationDuration={800} animationEasing="ease-out">
+                {animatedData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.fill} 
+                    fillOpacity={entry.isCumulative ? 0.1 : 0.8}
+                    stroke={entry.isCumulative ? entry.stroke : 'none'}
+                    strokeWidth={entry.isCumulative ? 2 : 0}
+                  />
                 ))}
               </Scatter>
             </ScatterChart>

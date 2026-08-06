@@ -65,6 +65,10 @@ export const getCompanyYieldAndDominanceData = (dashboardState, activeCompanies,
 export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players) => {
   const data = [];
   players.forEach((p, pIndex) => {
+    let playerTotalShares = 0;
+    let playerTotalShareValue = 0;
+    let playerTotalOpIncome = 0;
+
     activeCompanies.forEach((c, cIndex) => {
       const sharePrice = getShareValue(dashboardState, activeCompanies, c.shortName);
       const totalShares = c.totalShares || 10;
@@ -103,7 +107,33 @@ export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, playe
           fill: c.color || '#8884d8'
         });
       }
+
+      playerTotalShares += shareCount;
+      playerTotalShareValue += shareValue;
+      playerTotalOpIncome += opIncome;
     });
+
+    if (playerTotalShares > 0) {
+      const xBase = (pIndex + 1) * 10;
+      const playerTotalValue = playerTotalShareValue + playerTotalOpIncome;
+      
+      data.push({
+        player: p,
+        company: 'Cumulative Total',
+        x: xBase, // Perfectly centered, no jitter
+        y: playerTotalShares, // Exact total shares, no jitter
+        trueShares: playerTotalShares,
+        shareValue: playerTotalShareValue,
+        shareValueJitter: playerTotalShareValue, // Exact value, no jitter
+        opIncome: playerTotalOpIncome,
+        opIncomeJitter: playerTotalOpIncome,
+        totalValue: playerTotalValue,
+        totalValueJitter: playerTotalValue,
+        fill: 'transparent',
+        stroke: PLAYER_COLORS[pIndex % PLAYER_COLORS.length] || '#FFF',
+        isCumulative: true
+      });
+    }
   });
   return data;
 };
