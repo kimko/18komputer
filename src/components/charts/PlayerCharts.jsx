@@ -1,28 +1,24 @@
 import { useState, useMemo } from 'react';
-import { Box, Heading, SimpleGrid, Flex, Text, Button } from '@chakra-ui/react';
+import { Box, Heading, Flex, Text, Button } from '@chakra-ui/react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { PLAYER_COLORS, getBubbleChartData } from '../../utils/chartDataSelectors.js';
+import { getBubbleChartData } from '../../utils/chartDataSelectors.js';
 
 export default function PlayerCharts({ dashboardState, maxOr, players, activeCompanies }) {
   const [bubbleMetric, setBubbleMetric] = useState('totalValue');
-  const [yAxisMode, setYAxisMode] = useState('shares'); // 'shares' or 'value'
-  const [includeCash, setIncludeCash] = useState(false);
+  const [yAxisMode, setYAxisMode] = useState('value'); // 'shares' or 'value'
+  const [includeCash, setIncludeCash] = useState(true);
+  const [includeTotal, setIncludeTotal] = useState(false);
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
 
   const bubbleData = useMemo(() => {
-    return getBubbleChartData(dashboardState, activeCompanies, maxOr, players, includeCash);
-  }, [dashboardState, activeCompanies, maxOr, players, includeCash]);
+    return getBubbleChartData(dashboardState, activeCompanies, maxOr, players, includeCash, includeTotal);
+  }, [dashboardState, activeCompanies, maxOr, players, includeCash, includeTotal]);
 
-  // Lookup company color for the dividend dependency stacks
-  const getCompanyColor = (shortName) => {
-    const comp = activeCompanies.find(c => c.shortName === shortName);
-    return comp?.color || '#A0AEC0';
-  };
+
 
   // Calculate max values for proportional scaling
   const maxTotalValue = Math.max(...bubbleData.map(d => d.totalValue || 0), 1);
@@ -33,9 +29,11 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
     return bubbleData.map(d => ({
       ...d,
       animatedY: yAxisMode === 'shares' ? d.y : d[`${bubbleMetric}Jitter`],
-      animatedZ: yAxisMode === 'shares' ? d[bubbleMetric] : d.trueShares
+      animatedZ: yAxisMode === 'shares' 
+        ? d[bubbleMetric] 
+        : (d.company === 'Cash' ? Math.max(1, maxShares * 0.2) : d.trueShares)
     }));
-  }, [bubbleData, yAxisMode, bubbleMetric]);
+  }, [bubbleData, yAxisMode, bubbleMetric, maxShares]);
 
   return (
     <Box w="100%" mt="6">
@@ -64,19 +62,32 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
               <option value="totalValue">Total Value</option>
             </Box>
             <Flex 
-              as="label" 
               align="center" 
               gap={2} 
               ml={2} 
-              cursor="pointer"
             >
               <input 
+                id="include-cash-checkbox"
                 type="checkbox" 
                 checked={includeCash} 
                 onChange={(e) => setIncludeCash(e.target.checked)}
                 style={{ cursor: 'pointer' }}
               />
-              <Text fontSize="sm" color="white" userSelect="none">Include Cash</Text>
+              <Text as="label" htmlFor="include-cash-checkbox" fontSize="sm" color="white" userSelect="none" cursor="pointer">Include Cash</Text>
+            </Flex>
+            <Flex 
+              align="center" 
+              gap={2} 
+              ml={2} 
+            >
+              <input 
+                id="include-total-checkbox"
+                type="checkbox" 
+                checked={includeTotal} 
+                onChange={(e) => setIncludeTotal(e.target.checked)}
+                style={{ cursor: 'pointer' }}
+              />
+              <Text as="label" htmlFor="include-total-checkbox" fontSize="sm" color="white" userSelect="none" cursor="pointer">Include Total</Text>
             </Flex>
           </Flex>
         </Flex>
@@ -149,10 +160,12 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
               <Text fontSize="sm" color="gray.400">Cash</Text>
             </Flex>
           )}
-          <Flex align="center" gap={2}>
-            <Box w={3} h={3} borderRadius="50%" bg="#A0AEC0" opacity={0.4} />
-            <Text fontSize="sm" color="gray.400">Total Cumulative</Text>
-          </Flex>
+          {includeTotal && (
+            <Flex align="center" gap={2}>
+              <Box w={3} h={3} borderRadius="50%" bg="#A0AEC0" opacity={0.4} />
+              <Text fontSize="sm" color="gray.400">Total Cumulative</Text>
+            </Flex>
+          )}
         </Flex>
       </Box>
 

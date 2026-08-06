@@ -1,5 +1,6 @@
 import { Box, Flex, Text, Button, SimpleGrid, GridItem } from '@chakra-ui/react';
 import { getContrastColor } from '../../utils/colorUtils.js';
+import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 
 export default function NumpadPopup({ title, subtitle, badgeColor, value, onChange, onClose, onCopyLast, onSubtitleClick }) {
   const handleType = (num) => {
@@ -12,8 +13,7 @@ export default function NumpadPopup({ title, subtitle, badgeColor, value, onChan
   const handleClear = () => onChange('');
   
   return (
-    <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
-      <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
+    <ModalBackdrop onClose={onClose}>
         <Flex align="center" gap="2" mb="4">
           <Text fontWeight="bold" color="white">{title}</Text>
           {subtitle && (
@@ -55,7 +55,6 @@ export default function NumpadPopup({ title, subtitle, badgeColor, value, onChan
             </Flex>
           </GridItem>
         </SimpleGrid>
-      </Box>
-    </Box>
+    </ModalBackdrop>
   );
 }

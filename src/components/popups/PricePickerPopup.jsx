@@ -1,5 +1,6 @@
 import { Box, Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
-import { getContrastColor } from '../../utils/colorUtils.js';
+import ModalBackdrop from '../ui/ModalBackdrop.jsx';
+import CompanyBadge from '../ui/CompanyBadge.jsx';
 
 export default function PricePickerPopup({ company, value, options, onChange, onClose }) {
   const valNum = value === '' || value === undefined ? null : Number(value);
@@ -18,13 +19,10 @@ export default function PricePickerPopup({ company, value, options, onChange, on
   };
 
   return (
-    <Box position="fixed" top="0" left="0" w="100vw" h="100vh" bg="blackAlpha.700" zIndex="1000" display="flex" alignItems="center" justifyContent="center" onClick={onClose}>
-      <Box bg="gray.900" p="4" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%">
+    <ModalBackdrop onClose={onClose}>
         <Flex align="center" gap="2" mb="4">
           <Text fontWeight="bold" color="white">Set final price for</Text>
-          <Box bg={company.color || 'gray.700'} px="2" py="1" borderRadius="md">
-            <Text fontSize="sm" color={getContrastColor(company.color || '#2d3748')}>{company.shortName}</Text>
-          </Box>
+          <CompanyBadge company={company} px="2" py="1" fontSize="sm" />
         </Flex>
 
         <Flex gap="4">
@@ -56,7 +54,6 @@ export default function PricePickerPopup({ company, value, options, onChange, on
             <Button w="100%" h="50px" variant="outline" color="white" borderColor="gray.600" onClick={onClose}>X</Button>
           </Flex>
         </Flex>
-      </Box>
-    </Box>
+    </ModalBackdrop>
   );
 }

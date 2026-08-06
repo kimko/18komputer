@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, VStack, Text, Center, Flex, Spinner } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';

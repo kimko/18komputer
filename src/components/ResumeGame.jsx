@@ -3,6 +3,7 @@ import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@
 import { useLocation } from 'wouter';
 import LZString from 'lz-string';
 import { getGamesList, deleteGame, importGame } from '../api/mockApi.js';
+import ModalBackdrop from './ui/ModalBackdrop.jsx';
 
 export default function ResumeGame() {
   const [, navigate] = useLocation();
@@ -244,23 +245,16 @@ export default function ResumeGame() {
       </Box>
 
       {deleteTarget && (
-        <Box
+        <ModalBackdrop
           ref={modalRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-modal-title"
-          position="fixed"
           tabIndex="-1"
           onKeyDown={handleKeyDown}
-          top="0" left="0" w="100vw" h="100vh"
-          bg="blackAlpha.700"
-          zIndex="1000"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          onClick={() => setDeleteTarget(null)}
+          onClose={() => setDeleteTarget(null)}
+          textAlign="center"
         >
-          <Box bg="gray.900" p="6" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.300" onClick={e => e.stopPropagation()} maxW="sm" w="100%" textAlign="center">
             <Heading id="delete-modal-title" size="md" mb="2" color="white">Delete Game?</Heading>
             <Text color="gray.300" mb="2" fontSize="sm">
               This will permanently delete the <strong>{deleteTarget.gameId}</strong> game with {deleteTarget.players?.length || 0} players.
@@ -270,8 +264,7 @@ export default function ResumeGame() {
               <Button flex="1" variant="outline" color="white" onClick={() => setDeleteTarget(null)}>Cancel</Button>
               <Button flex="1" colorPalette="red" onClick={handleDelete}>Delete</Button>
             </Flex>
-          </Box>
-        </Box>
+        </ModalBackdrop>
       )}
     </Box>
   );

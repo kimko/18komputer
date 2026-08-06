@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text, IconButton, Input } from '@chakra-ui/react';
 import { 
   getBankShares, 
@@ -10,21 +10,34 @@ import {
   getCompanyOrTotal,
   formatCurrency
 } from '../../utils/dashboardMath.js';
-import { getContrastColor } from '../../utils/colorUtils.js';
+import CompanyBadge from '../ui/CompanyBadge.jsx';
+import { saveUsers } from '../../api/mockApi.js';
 
 export default function PlayerHoldingsGrid({
   players,
   activeCompanies,
   maxOr,
   dashboardState,
-  showDetails,
-  setShowDetails,
-  newPlayerName,
-  setNewPlayerName,
-  handleAddPlayer,
-  handleRemovePlayer,
+  updatePlayers,
   setActivePopup
 }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+
+  const handleAddPlayer = (e) => {
+    e.preventDefault();
+    const name = newPlayerName.trim();
+    if (name && !players.includes(name)) {
+      updatePlayers([...players, name]);
+      saveUsers([name]);
+      setNewPlayerName('');
+    }
+  };
+
+  const handleRemovePlayer = (playerToRemove) => {
+    updatePlayers(players.filter(p => p !== playerToRemove));
+  };
+
 
   // Memoize all calculations
   const gridData = useMemo(() => {
@@ -59,6 +72,7 @@ export default function PlayerHoldingsGrid({
     data.totalBankFundsUsed = grandTotalCash + grandTotalOpIncome;
 
     data.maxNetWorth = players.length > 0 ? Math.max(...players.map(p => data.netWorths[p])) : 0;
+    data.totalNetWorth = players.length > 0 ? players.reduce((sum, p) => sum + data.netWorths[p], 0) : 0;
 
     return data;
   }, [players, activeCompanies, maxOr, dashboardState]);
@@ -111,9 +125,7 @@ export default function PlayerHoldingsGrid({
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
                 <GridItem>
-                  <Box bg={c.color || 'gray.700'} color={getContrastColor(c.color || '#2d3748')} textAlign="center" py="2" borderRadius="md" fontWeight="bold">
-                    {c.shortName}
-                  </Box>
+                  <CompanyBadge company={c} />
                 </GridItem>
                 {players.map(p => {
                   const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName];
@@ -192,6 +204,17 @@ export default function PlayerHoldingsGrid({
                     <Text fontWeight="bold" color="green.300">{formatCurrency(gridData.netWorths[p])}</Text>
                   </GridItem>
             )}
+            <GridItem></GridItem>
+
+            <GridItem><Text color="gray.400" fontSize="sm">Equity %</Text></GridItem>
+            {players.map(p => {
+              const equity = gridData.totalNetWorth > 0 ? (gridData.netWorths[p] / gridData.totalNetWorth) * 100 : 0;
+              return (
+                <GridItem key={`eq-${p}`} textAlign="center">
+                  <Text fontWeight="bold" color="cyan.200">{Math.round(equity)}%</Text>
+                </GridItem>
+              );
+            })}
             <GridItem></GridItem>
 
             <GridItem><Text color="gray.400" fontSize="sm">Diff %</Text></GridItem>

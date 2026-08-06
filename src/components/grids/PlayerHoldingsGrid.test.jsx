@@ -30,12 +30,7 @@ const renderComponent = (props = {}) => {
         activeCompanies={mockActiveCompanies}
         maxOr={1}
         dashboardState={mockDashboardState}
-        showDetails={true}
-        setShowDetails={vi.fn()}
-        newPlayerName=""
-        setNewPlayerName={vi.fn()}
-        handleAddPlayer={vi.fn()}
-        handleRemovePlayer={vi.fn()}
+        updatePlayers={vi.fn()}
         setActivePopup={vi.fn()}
         {...props}
       />
@@ -59,38 +54,33 @@ describe('PlayerHoldingsGrid', () => {
   });
 
   it('toggles details', () => {
-    const setShowDetails = vi.fn();
-    renderComponent({ showDetails: false, setShowDetails });
+    renderComponent();
     
+    // Details are hidden initially. The toggle button text should be 'Details'
     const detailsBtn = screen.getByText('Details');
+    expect(screen.queryByText('↳ Share Value')).not.toBeInTheDocument();
+    
     fireEvent.click(detailsBtn);
-    expect(setShowDetails).toHaveBeenCalledWith(true);
+    expect(screen.getAllByText('↳ Share Value')[0]).toBeInTheDocument();
   });
 
   it('handles adding and removing players', () => {
-    const handleAddPlayer = vi.fn(e => e.preventDefault());
-    const handleRemovePlayer = vi.fn();
-    const setNewPlayerName = vi.fn();
+    const updatePlayers = vi.fn();
     
-    renderComponent({ 
-      handleAddPlayer, 
-      handleRemovePlayer, 
-      setNewPlayerName 
-    });
+    renderComponent({ updatePlayers });
     
     // Type in input
     const input = screen.getByPlaceholderText('New player...');
     fireEvent.change(input, { target: { value: 'Charlie' } });
-    expect(setNewPlayerName).toHaveBeenCalledWith('Charlie');
     
     // Add
     fireEvent.click(screen.getByText('Add'));
-    expect(handleAddPlayer).toHaveBeenCalled();
+    expect(updatePlayers).toHaveBeenCalledWith(['Alice', 'Bob', 'Charlie']);
     
     // Remove
     const removeBtns = screen.getAllByRole('button', { name: 'Remove' });
     fireEvent.click(removeBtns[0]);
-    expect(handleRemovePlayer).toHaveBeenCalledWith('Alice');
+    expect(updatePlayers).toHaveBeenCalledWith(['Bob']);
   });
 
   it('triggers popups for cash and shares', () => {

@@ -315,7 +315,43 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page, context }) => {
 
   console.log('Verifying Player Charts tab with populated data...');
   await page.getByRole('tab', { name: 'Player Charts' }).click();
-  await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible().catch(() => {});
+  await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible();
+
+  console.log('Permutating Player Chart UI controls...');
+  const metricSelect = page.locator('select');
+  const flipBtn = page.getByRole('button', { name: '⇄ Flip Axes' });
+
+  for (const withCash of [false, true]) {
+    for (const withTotal of [false, true]) {
+      if (withCash) {
+        await page.locator('#include-cash-checkbox').check({ force: true });
+      } else {
+        await page.locator('#include-cash-checkbox').uncheck({ force: true });
+      }
+
+      if (withTotal) {
+        await page.locator('#include-total-checkbox').check({ force: true });
+      } else {
+        await page.locator('#include-total-checkbox').uncheck({ force: true });
+      }
+
+      for (const axis of ['shares', 'value']) {
+      if (axis === 'value') {
+         await flipBtn.click();
+      }
+      for (const metric of ['shareValue', 'opIncome', 'totalValue']) {
+         await metricSelect.selectOption(metric);
+         // Let the animation render
+         await page.waitForTimeout(200);
+         // Verify app didn't crash
+         await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible();
+      }
+      if (axis === 'value') {
+         await flipBtn.click(); // Flip back for next iteration
+      }
+    }
+    }
+  }
 
   console.log('Returning to Data Grids tab before deleting...');
   await page.getByRole('tab', { name: 'Data Grids' }).click();

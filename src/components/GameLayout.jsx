@@ -1,6 +1,6 @@
-import { Box, Flex, Heading, Button, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button } from '@chakra-ui/react';
 import { Link, useRoute, useLocation } from 'wouter';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useGameData } from '../hooks/useGameData.js';
 
 export default function GameLayout({ children }) {

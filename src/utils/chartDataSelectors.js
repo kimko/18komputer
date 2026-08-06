@@ -7,10 +7,6 @@ import {
 } from './dashboardMath.js';
 import { getContrastColor } from './colorUtils.js';
 
-/**
- * Common color palette for players
- */
-export const PLAYER_COLORS = ['#3182CE', '#38A169', '#D69E2E', '#E53E3E', '#805AD5', '#D53F8C', '#319795', '#DD6B20'];
 
 /**
  * 1. Revenue Trajectory (Line Chart)
@@ -62,7 +58,7 @@ export const getCompanyYieldAndDominanceData = (dashboardState, activeCompanies,
  * 4. Market Power Grid (Bubble Chart)
  * Returns flat array of points for a Scatter Chart representing ownership value.
  */
-export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players, includeCash = false) => {
+export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players, includeCash, includeTotal) => {
   const data = [];
   players.forEach((p, pIndex) => {
     let playerTotalShares = 0;
@@ -138,25 +134,27 @@ export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, playe
       }
 
       // Cumulative Bubble
-      const cumulativeCash = includeCash ? cash : 0;
-      const playerTotalValue = playerTotalShareValue + playerTotalOpIncome + cumulativeCash;
-      
-      data.push({
-        player: p,
-        company: 'Cumulative Total',
-        x: xBase, // Perfectly centered, no jitter
-        y: playerTotalShares, // Exact total shares, no jitter
-        trueShares: playerTotalShares,
-        shareValue: playerTotalShareValue,
-        shareValueJitter: playerTotalShareValue, // Exact value, no jitter
-        opIncome: playerTotalOpIncome,
-        opIncomeJitter: playerTotalOpIncome,
-        totalValue: playerTotalValue,
-        totalValueJitter: playerTotalValue,
-        fill: '#A0AEC0',
-        stroke: 'none',
-        isCumulative: true
-      });
+      if (includeTotal) {
+        const cumulativeCash = includeCash ? cash : 0;
+        const playerTotalValue = playerTotalShareValue + playerTotalOpIncome + cumulativeCash;
+        
+        data.push({
+          player: p,
+          company: 'Cumulative Total',
+          x: xBase, // Perfectly centered, no jitter
+          y: playerTotalShares, // Exact total shares, no jitter
+          trueShares: playerTotalShares,
+          shareValue: playerTotalShareValue,
+          shareValueJitter: playerTotalShareValue, // Exact value, no jitter
+          opIncome: playerTotalOpIncome,
+          opIncomeJitter: playerTotalOpIncome,
+          totalValue: playerTotalValue,
+          totalValueJitter: playerTotalValue,
+          fill: '#A0AEC0',
+          stroke: 'none',
+          isCumulative: true
+        });
+      }
     }
   });
   return data;
