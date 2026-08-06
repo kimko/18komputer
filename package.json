@@ -1,7 +1,7 @@
 {
   "name": "18komputer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "npx playwright test --project=chromium",
     "test:e2e:local": "TEST_ENV=local npx playwright test --project=chromium",
+    "test:e2e:ci": "TEST_ENV=ci npx playwright test --project=chromium",
     "prepare": "husky"
   },
   "dependencies": {

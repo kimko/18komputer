@@ -25,7 +25,12 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
 
-  webServer: process.env.TEST_ENV === 'local' ? {
+  webServer: process.env.TEST_ENV === 'ci' ? {
+    command: 'npm run build && npm run preview',
+    port: 4173,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  } : process.env.TEST_ENV === 'local' ? {
     command: 'npm run dev',
     port: 5173,
     reuseExistingServer: !process.env.CI,

@@ -58,6 +58,9 @@ export default function MainMenu() {
               MANAGE USERS
             </Button>
           </VStack>
+          <Text textAlign="center" color="gray.500" fontSize="sm" mt="4">
+            v{import.meta.env.VITE_APP_VERSION || 'unknown'}
+          </Text>
         </VStack>
       </Box>
     </Center>

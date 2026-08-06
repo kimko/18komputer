@@ -28,11 +28,14 @@ export default function Dashboard() {
   const handleShare = useCallback(async () => {
     if (!gameInstance) return;
 
+    // Omit staticConfig to prevent redundancy in the magic link
+    const { staticConfig, ...gameDataToShare } = gameInstance;
+
     // Create a copy of the game instance to share, injecting the freshest local dashboardState
     const shareInstance = { 
-      ...gameInstance, 
+      ...gameDataToShare, 
       state: {
-        ...gameInstance.state,
+        ...gameDataToShare.state,
         dashboardState: dashboardState
       },
       exportedAt: new Date().toISOString() 
