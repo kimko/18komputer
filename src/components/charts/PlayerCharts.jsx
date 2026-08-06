@@ -5,13 +5,18 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { PLAYER_COLORS } from '../../utils/chartDataSelectors.js';
+import { PLAYER_COLORS, getBubbleChartData } from '../../utils/chartDataSelectors.js';
 
-export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
+export default function PlayerCharts({ dashboardState, maxOr, players, activeCompanies }) {
   const [bubbleMetric, setBubbleMetric] = useState('totalValue');
   const [yAxisMode, setYAxisMode] = useState('shares'); // 'shares' or 'value'
+  const [includeCash, setIncludeCash] = useState(false);
   const textColor = '#A0AEC0'; // gray.400
   const gridColor = '#2D3748'; // gray.700
+
+  const bubbleData = useMemo(() => {
+    return getBubbleChartData(dashboardState, activeCompanies, maxOr, players, includeCash);
+  }, [dashboardState, activeCompanies, maxOr, players, includeCash]);
 
   // Lookup company color for the dividend dependency stacks
   const getCompanyColor = (shortName) => {
@@ -58,6 +63,21 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
               <option value="opIncome">Operating Income</option>
               <option value="totalValue">Total Value</option>
             </Box>
+            <Flex 
+              as="label" 
+              align="center" 
+              gap={2} 
+              ml={2} 
+              cursor="pointer"
+            >
+              <input 
+                type="checkbox" 
+                checked={includeCash} 
+                onChange={(e) => setIncludeCash(e.target.checked)}
+                style={{ cursor: 'pointer' }}
+              />
+              <Text fontSize="sm" color="white" userSelect="none">Include Cash</Text>
+            </Flex>
           </Flex>
         </Flex>
         <Text fontSize="sm" color="gray.500" mb="4">Ownership value comparison</Text>
@@ -123,6 +143,12 @@ export default function PlayerCharts({ bubbleData, players, activeCompanies }) {
               <Text fontSize="sm" color="gray.400">{c.name || c.shortName}</Text>
             </Flex>
           ))}
+          {includeCash && (
+            <Flex align="center" gap={2}>
+              <Box w={3} h={3} borderRadius="50%" bg="#48BB78" />
+              <Text fontSize="sm" color="gray.400">Cash</Text>
+            </Flex>
+          )}
           <Flex align="center" gap={2}>
             <Box w={3} h={3} borderRadius="50%" bg="#A0AEC0" opacity={0.4} />
             <Text fontSize="sm" color="gray.400">Total Cumulative</Text>

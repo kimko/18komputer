@@ -165,7 +165,8 @@ export default function Dashboard() {
 
         <Tabs.Content value="players">
           <PlayerCharts 
-            bubbleData={getBubbleChartData(dashboardState, activeCompanies, maxOr, players)}
+            dashboardState={dashboardState}
+            maxOr={maxOr}
             players={players}
             activeCompanies={activeCompanies}
           />

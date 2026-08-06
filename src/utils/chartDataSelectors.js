@@ -62,7 +62,7 @@ export const getCompanyYieldAndDominanceData = (dashboardState, activeCompanies,
  * 4. Market Power Grid (Bubble Chart)
  * Returns flat array of points for a Scatter Chart representing ownership value.
  */
-export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players) => {
+export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, players, includeCash = false) => {
   const data = [];
   players.forEach((p, pIndex) => {
     let playerTotalShares = 0;
@@ -115,7 +115,31 @@ export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, playe
 
     if (playerTotalShares > 0) {
       const xBase = (pIndex + 1) * 10;
-      const playerTotalValue = playerTotalShareValue + playerTotalOpIncome;
+      const cash = Number(dashboardState.playerAssets[p]?.cash || 0);
+
+      // Separate Cash Bubble
+      if (includeCash && cash > 0) {
+        data.push({
+          player: p,
+          company: 'Cash',
+          x: xBase, // Perfectly centered
+          y: 0, // Cash has 0 shares
+          trueShares: 0,
+          shareValue: 0, // Cash isn't stock
+          shareValueJitter: 0,
+          opIncome: 0, // Cash isn't income
+          opIncomeJitter: 0,
+          totalValue: cash, // Cash ONLY counts toward Total Value
+          totalValueJitter: cash,
+          fill: '#48BB78', // Green for cash
+          stroke: 'none',
+          isCumulative: false
+        });
+      }
+
+      // Cumulative Bubble
+      const cumulativeCash = includeCash ? cash : 0;
+      const playerTotalValue = playerTotalShareValue + playerTotalOpIncome + cumulativeCash;
       
       data.push({
         player: p,
