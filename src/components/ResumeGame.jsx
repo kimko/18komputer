@@ -208,7 +208,7 @@ export default function ResumeGame() {
                   onClick={() => navigate(`/game/${game.id}/dashboard`)}
                 >
                   <Flex justify="space-between" align="center" mb="2">
-                    <Heading as="h3" size="lg" color="white">{game.gameId}</Heading>
+                    <Heading as="h3" size="lg" color="white">{game.gameName || game.gameId}</Heading>
                     <Box bg="whiteAlpha.200" px="2" py="1" borderRadius="md">
                       <Text fontSize="xs" color="gray.300">#{hash}</Text>
                     </Box>

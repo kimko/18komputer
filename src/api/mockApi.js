@@ -51,11 +51,14 @@ const runMigrations = (game) => {
     migrated = true;
   }
   
-  // Example for future migrations:
-  // if (game.version === 1) {
-  //   game.version = 2;
-  //   migrated = true;
-  // }
+  if (game.version === 1) {
+    if (!game.gameName) {
+      const d = game.createdAt ? new Date(game.createdAt) : new Date();
+      game.gameName = generateGameName(game.gameId, game.players?.length || 0, d);
+    }
+    game.version = 2;
+    migrated = true;
+  }
   
   return { game, migrated };
 };
@@ -109,6 +112,12 @@ function deepMerge(target, source) {
   return output;
 }
 
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function generateGameName(gameId, playerCount, date) {
+  return `${gameId} ${playerCount}p ${MONTH_NAMES[date.getMonth()]}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export function createGame(gameId, players) {
   if (!gameId || typeof gameId !== 'string') throw new Error('Invalid gameId');
   if (!Array.isArray(players) || players.length < 2) throw new Error('Invalid players array');
@@ -122,12 +131,16 @@ export function createGame(gameId, players) {
     // Generate a simple unique instance ID
     const id = `game_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     
+    const now = new Date();
+    const gameName = generateGameName(gameId, players.length, now);
+
     const newGame = {
       id,
       gameId,
+      gameName,
       players,
-      createdAt: new Date().toISOString(),
-      version: 1,
+      createdAt: now.toISOString(),
+      version: 2,
       state: {
         activeCompanies: [],
         playerAssets: {},
@@ -203,6 +216,19 @@ export function deleteGame(instanceId) {
 
     delete db[instanceId];
     writeStorage(db);
+  });
+}
+
+export function updateGameName(instanceId, gameName) {
+  if (!instanceId || typeof instanceId !== 'string') throw new Error('Invalid instanceId');
+  if (typeof gameName !== 'string') throw new Error('Invalid gameName');
+  return enqueue(async () => {
+    await delay();
+    const db = readStorage();
+    if (!db[instanceId]) throw new Error('Game not found');
+    db[instanceId].gameName = gameName;
+    writeStorage(db);
+    return db[instanceId];
   });
 }
 

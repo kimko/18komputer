@@ -1,6 +1,6 @@
-import { Box, Flex, Heading, Button } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button, Text, Input } from '@chakra-ui/react';
 import { Link, useRoute, useLocation } from 'wouter';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameData } from '../hooks/useGameData.js';
 
 export default function GameLayout({ children }) {
@@ -8,7 +8,9 @@ export default function GameLayout({ children }) {
   const [, navigate] = useLocation();
   const gameId = params?.id;
 
-  const { error } = useGameData(match ? gameId : null);
+  const { error, gameInstance, updateGameName } = useGameData(match ? gameId : null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     if (error) {
@@ -27,6 +29,14 @@ export default function GameLayout({ children }) {
     return <>{children}</>; // If not in a game route, just render children
   }
 
+  const handleSaveName = () => {
+    const trimmed = editName.trim();
+    if (trimmed && trimmed !== gameInstance?.gameName) {
+      updateGameName(trimmed);
+    }
+    setIsEditingName(false);
+  };
+
   return (
     <Box minH="100vh" bg="gray.900" color="white">
       {/* Top Navigation Bar (Desktop Only) */}
@@ -44,11 +54,40 @@ export default function GameLayout({ children }) {
         top="0"
         zIndex="10"
       >
-        <Heading as="h1" size="sm" color="orange.400">
-          <Link href="/">🚂</Link>
-        </Heading>
+        <Flex align="center" gap="2" minW="0" flex="1">
+          <Heading as="h1" size="sm" color="orange.400" flexShrink="0">
+            <Link href="/">🚂</Link>
+          </Heading>
+          {gameInstance?.gameName && (
+            isEditingName ? (
+              <Input
+                size="sm"
+                maxW="240px"
+                autoFocus
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                onBlur={handleSaveName}
+                onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+                bg="gray.700"
+                border="none"
+                color="white"
+              />
+            ) : (
+              <Text
+                fontSize="sm"
+                color="gray.300"
+                cursor="pointer"
+                onClick={() => { setEditName(gameInstance.gameName); setIsEditingName(true); }}
+                _hover={{ color: 'white' }}
+                truncate
+              >
+                {gameInstance.gameName}
+              </Text>
+            )
+          )}
+        </Flex>
         
-        <Flex gap="1" flexWrap="wrap" justify="flex-end">
+        <Flex gap="1" flexWrap="wrap" justify="flex-end" flexShrink="0">
           <Link href="/">
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
               Home
@@ -71,6 +110,13 @@ export default function GameLayout({ children }) {
           </Link>
         </Flex>
       </Flex>
+
+      {/* Mobile Game Name Header */}
+      {gameInstance?.gameName && (
+        <Box display={{ base: "block", md: "none" }} px="4" pt="2" pb="1">
+          <Text fontSize="sm" color="gray.400" textAlign="center">{gameInstance.gameName}</Text>
+        </Box>
+      )}
       
       {/* Main Content Area */}
       <Box p="4" pb={{ base: "24", md: "4" }}>

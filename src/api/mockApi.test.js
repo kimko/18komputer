@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createGame, getGame, updateGameState, getGamesList } from './mockApi.js';
+import { createGame, getGame, updateGameState, getGamesList, updateGameName } from './mockApi.js';
 
 describe('Mock API (LocalStorage)', () => {
   beforeEach(() => {
@@ -22,6 +22,13 @@ describe('Mock API (LocalStorage)', () => {
     const saved = JSON.parse(localStorage.getItem('18komputer_games'));
     expect(saved[game.id]).toBeDefined();
     expect(saved[game.id].gameId).toBe('1830');
+  });
+
+  it('should auto-generate a gameName on creation in the format "{title} {n}p {Mon-dd}"', async () => {
+    const game = await createGame('1830', ['Alice', 'Bob', 'Charlie']);
+    expect(game.gameName).toBeDefined();
+    // Should match pattern: "1830 3p Mon-dd"
+    expect(game.gameName).toMatch(/^1830 3p [A-Z][a-z]{2}-\d{2}$/);
   });
 
   it('should fetch an existing game by instance ID', async () => {
@@ -58,6 +65,16 @@ describe('Mock API (LocalStorage)', () => {
     expect(list[0].gameId).toBeDefined();
   });
 
+  it('should update the gameName via updateGameName', async () => {
+    const game = await createGame('1830', ['Alice', 'Bob']);
+    const updated = await updateGameName(game.id, 'My Custom Name');
+    expect(updated.gameName).toBe('My Custom Name');
+
+    // Verify persistence
+    const fetched = await getGame(game.id);
+    expect(fetched.gameName).toBe('My Custom Name');
+  });
+
   it('should run schema migrations on legacy data', async () => {
     // Write a game without a version
     const legacyGame = {
@@ -73,10 +90,26 @@ describe('Mock API (LocalStorage)', () => {
     localStorage.setItem('18komputer_games', JSON.stringify({ 'legacy-game': legacyGame }));
 
     const fetched = await getGame('legacy-game');
-    expect(fetched.version).toBe(1);
+    expect(fetched.version).toBe(2);
     
     // Test that the storage was updated
     const saved = JSON.parse(localStorage.getItem('18komputer_games'));
-    expect(saved['legacy-game'].version).toBe(1);
+    expect(saved['legacy-game'].version).toBe(2);
+  });
+
+  it('should migrate legacy v1 games to add gameName', async () => {
+    const legacyGame = {
+      id: 'legacy-v1',
+      gameId: '1889',
+      players: ['Alice', 'Bob', 'Charlie'],
+      version: 1,
+      createdAt: '2026-03-15T12:00:00Z',
+      state: { activeCompanies: [], playerAssets: {}, companyORs: [] }
+    };
+    localStorage.setItem('18komputer_games', JSON.stringify({ 'legacy-v1': legacyGame }));
+
+    const fetched = await getGame('legacy-v1');
+    expect(fetched.version).toBe(2);
+    expect(fetched.gameName).toBe('1889 3p Mar-15');
   });
 });

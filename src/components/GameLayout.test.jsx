@@ -59,4 +59,18 @@ describe('GameLayout', () => {
     
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
+
+  it('displays the game name in the navigation bar when a game is loaded', () => {
+    useRoute.mockReturnValue([true, { id: 'test-game' }]);
+    useGameData.mockReturnValue({
+      error: null,
+      loading: false,
+      gameInstance: { gameName: '1830 4p Aug-06' },
+      updateGameName: vi.fn(),
+    });
+
+    renderWithChakra(<GameLayout><div>Child Content</div></GameLayout>);
+
+    expect(screen.getAllByText('1830 4p Aug-06').length).toBeGreaterThan(0);
+  });
 });

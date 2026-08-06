@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getGame, updateGameState, updateGamePlayers } from '../api/mockApi.js';
+import { getGame, updateGameState, updateGamePlayers, updateGameName as apiUpdateGameName } from '../api/mockApi.js';
 
 export function useGameData(instanceId) {
   const [loading, setLoading] = useState(true);
@@ -96,11 +96,24 @@ export function useGameData(instanceId) {
     }
   }, [instanceId, gameInstance]);
 
+  const updateName = useCallback(async (newName) => {
+    if (!gameInstance) return;
+    const previousName = gameInstance.gameName;
+    setGameInstance(prev => ({ ...prev, gameName: newName }));
+    try {
+      await apiUpdateGameName(instanceId, newName);
+    } catch (err) {
+      console.error('Failed to update game name, rolling back:', err);
+      setGameInstance(prev => ({ ...prev, gameName: previousName }));
+    }
+  }, [instanceId, gameInstance]);
+
   return {
     loading,
     error,
     gameInstance,
     updateGameStateDebounced,
-    updatePlayers
+    updatePlayers,
+    updateGameName: updateName,
   };
 }
