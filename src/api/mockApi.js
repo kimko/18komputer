@@ -219,6 +219,13 @@ export function deleteGame(instanceId) {
   });
 }
 
+export function deleteAllGames() {
+  return enqueue(async () => {
+    await delay();
+    writeStorage({});
+  });
+}
+
 export function updateGameName(instanceId, gameName) {
   if (!instanceId || typeof instanceId !== 'string') throw new Error('Invalid instanceId');
   if (typeof gameName !== 'string') throw new Error('Invalid gameName');
@@ -233,8 +240,15 @@ export function updateGameName(instanceId, gameName) {
 }
 
 export function importGame(gameData) {
-  if (!gameData || typeof gameData !== 'object') throw new Error('Invalid game data');
-  if (!gameData.id || !gameData.gameId) throw new Error('Missing required game fields');
+  if (!gameData || !gameData.id || !gameData.state) {
+    throw new Error('Invalid game data format');
+  }
+  
+  if (!gameData.state.dashboardState || !gameData.state.dashboardState.playerAssets) {
+    throw new Error('Invalid game data format: missing dashboardState.playerAssets');
+  }
+
+  if (!gameData.gameId) throw new Error('Missing required game fields');
 
   return enqueue(async () => {
     await delay();

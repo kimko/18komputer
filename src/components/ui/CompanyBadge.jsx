@@ -10,9 +10,13 @@ export default function CompanyBadge({ company, ...props }) {
       bg={bg} 
       color={color} 
       textAlign="center" 
-      py="2" 
+      py="2"
+      px="1" 
       borderRadius="md" 
       fontWeight="bold"
+      whiteSpace="nowrap"
+      overflow="hidden"
+      textOverflow="ellipsis"
       {...props}
     >
       {company?.shortName}

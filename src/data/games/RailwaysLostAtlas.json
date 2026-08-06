@@ -82,13 +82,13 @@
       "color": "#f4a5b8"
     },
     {
-      "name": "Resourceful Company",
-      "shortName": "Resourceful",
+      "name": "Resourcefull Company",
+      "shortName": "Resourcefull",
       "color": "#8b4557"
     },
     {
-      "name": "Agricultural Company",
-      "shortName": "Agricultural",
+      "name": "Agriculture Company",
+      "shortName": "Agriculture",
       "color": "#6b8e23"
     },
     {
@@ -125,6 +125,36 @@
       "name": "Experiment",
       "shortName": "Experiment",
       "color": "#c24d4d"
+    },
+    {
+      "name": "Blue Company",
+      "shortName": "Blue",
+      "color": "#4a6fa5"
+    },
+    {
+      "name": "Red Company",
+      "shortName": "Red",
+      "color": "#c24d4d"
+    },
+    {
+      "name": "Green Company",
+      "shortName": "Green",
+      "color": "#4a7c59"
+    },
+    {
+      "name": "Yellow Company",
+      "shortName": "Yellow",
+      "color": "#e8c547"
+    },
+    {
+      "name": "Purple Company",
+      "shortName": "Purple",
+      "color": "#8b5e83"
+    },
+    {
+      "name": "Orange Company",
+      "shortName": "Orange",
+      "color": "#e8998d"
     }
   ],
   "id": "RailwaysLostAtlas",

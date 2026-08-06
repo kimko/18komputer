@@ -38,6 +38,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "@vitest/coverage-v8": "^4.1.10",
+    "csv-parse": "^7.0.2",
     "eslint": "^9.39.5",
     "eslint-plugin-oxlint": "^1.77.0",
     "eslint-plugin-react": "^7.37.5",

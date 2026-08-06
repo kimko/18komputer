@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createGame, getGame, updateGameState, getGamesList, updateGameName } from './mockApi.js';
+import { createGame, getGame, updateGameState, getGamesList, updateGameName, importGame, deleteAllGames } from './mockApi.js';
 
 describe('Mock API (LocalStorage)', () => {
   beforeEach(() => {
@@ -111,5 +111,68 @@ describe('Mock API (LocalStorage)', () => {
     const fetched = await getGame('legacy-v1');
     expect(fetched.version).toBe(2);
     expect(fetched.gameName).toBe('1889 3p Mar-15');
+  });
+
+  describe('importGame', () => {
+    it('should successfully import a valid game object', async () => {
+      const validGame = {
+        id: 'valid-import-1',
+        gameId: '1830',
+        players: ['Alice', 'Bob'],
+        state: {
+          dashboardState: {
+            playerAssets: {
+              'Alice': { cash: 100, shares: {} },
+              'Bob': { cash: 100, shares: {} }
+            }
+          }
+        }
+      };
+
+      const imported = await importGame(validGame);
+      expect(imported.id).toBe('valid-import-1');
+
+      const saved = JSON.parse(localStorage.getItem('18komputer_games'));
+      expect(saved['valid-import-1']).toBeDefined();
+      expect(saved['valid-import-1'].state.dashboardState.playerAssets).toBeDefined();
+    });
+
+    it('should reject an import missing state', () => {
+      const invalidGame = {
+        id: 'invalid-1',
+        gameId: '1830',
+        players: ['Alice']
+      };
+      
+      expect(() => importGame(invalidGame)).toThrow('Invalid game data format');
+    });
+
+    it('should reject an import missing dashboardState.playerAssets', () => {
+      const invalidGame = {
+        id: 'invalid-2',
+        gameId: '1830',
+        players: ['Alice'],
+        state: {
+          playerAssets: {} // Wrong location
+        }
+      };
+      
+      expect(() => importGame(invalidGame)).toThrow('Invalid game data format: missing dashboardState.playerAssets');
+    });
+  });
+
+  describe('deleteAllGames', () => {
+    it('should delete all games', async () => {
+      await createGame('1830', ['Alice', 'Bob']);
+      await createGame('1889', ['Charlie', 'Dave']);
+      
+      let list = await getGamesList();
+      expect(list.length).toBe(2);
+      
+      await deleteAllGames();
+      
+      list = await getGamesList();
+      expect(list.length).toBe(0);
+    });
   });
 });

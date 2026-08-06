@@ -95,13 +95,31 @@ export default function PlayerHoldingsGrid({
       </Flex>
       
       {players.length > 0 && (
-        <Box overflowX="auto">
-          <Grid templateColumns={`100px repeat(${players.length}, 100px) 100px`} gap="2" alignItems="center" w="max-content" mx="auto">
+        <Box overflowX="auto" py="2" px="1">
+          <Grid templateColumns={`100px repeat(${players.length}, 100px) 100px`} gap="2" alignItems="center" w="max-content" mx="auto" position="relative">
+            {players.length > 0 && gridData.maxNetWorth > 0 && players.map((p, winningIndex) => {
+              if (gridData.netWorths[p] !== gridData.maxNetWorth) return null;
+              return (
+                <Box
+                  key={`winner-${p}`}
+                  position="absolute"
+                  top="-2"
+                  bottom="-2"
+                  left={`calc(100px + 0.5rem + ${winningIndex} * (100px + 0.5rem))`}
+                  width="100px"
+                  border="2px solid"
+                  borderColor="red.500"
+                  borderRadius="md"
+                  pointerEvents="none"
+                  zIndex={1}
+                />
+              );
+            })}
             <GridItem></GridItem>
             {players.map(p => (
               <GridItem key={p} textAlign="center">
                 <Flex align="center" justify="center" gap="1">
-                  <Text fontWeight="bold" color="white" isTruncated>{p}</Text>
+                  <Text fontWeight="bold" color="white" isTruncated maxWidth="70px">{p}</Text>
                   <IconButton size="2xs" variant="ghost" colorPalette="red" aria-label="Remove" onClick={() => handleRemovePlayer(p)}>✕</IconButton>
                 </Flex>
               </GridItem>
@@ -206,9 +224,9 @@ export default function PlayerHoldingsGrid({
             )}
             <GridItem></GridItem>
 
-            <GridItem><Text color="gray.400" fontSize="sm">Equity %</Text></GridItem>
+            <GridItem><Text color="gray.400" fontSize="sm">Stock Weight</Text></GridItem>
             {players.map(p => {
-              const equity = gridData.totalNetWorth > 0 ? (gridData.netWorths[p] / gridData.totalNetWorth) * 100 : 0;
+              const equity = gridData.netWorths[p] > 0 ? (gridData.totalShareValues[p] / gridData.netWorths[p]) * 100 : 0;
               return (
                 <GridItem key={`eq-${p}`} textAlign="center">
                   <Text fontWeight="bold" color="cyan.200">{Math.round(equity)}%</Text>

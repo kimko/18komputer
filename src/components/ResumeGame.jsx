@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid } from '@chakra-ui/react';
+import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid, Input, VStack } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
 import LZString from 'lz-string';
-import { getGamesList, deleteGame, importGame } from '../api/mockApi.js';
+import { getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
 import ModalBackdrop from './ui/ModalBackdrop.jsx';
 
 export default function ResumeGame() {
@@ -11,24 +11,25 @@ export default function ResumeGame() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [importError, setImportError] = useState(null);
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadData() {
-      try {
-        const list = await getGamesList();
-        if (isMounted) setGames(list);
-      } catch (err) {
-        console.error('Error fetching games list:', err);
-        if (isMounted) setError('Failed to load games data. Storage might be corrupted.');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+  async function loadGames() {
+    try {
+      const list = await getGamesList();
+      setGames(list);
+    } catch (err) {
+      console.error('Error fetching games list:', err);
+      setError('Failed to load games data. Storage might be corrupted.');
+    } finally {
+      setLoading(false);
     }
-    loadData();
+  }
+
+  useEffect(() => {
+    loadGames();
 
     // Check for Magic Link import
     const hash = window.location.hash;
@@ -48,11 +49,30 @@ export default function ResumeGame() {
         setImportError('Invalid or corrupted share link.');
       }
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [navigate]);
+
+  const handleImportJson = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const importedGames = JSON.parse(e.target.result);
+        if (Array.isArray(importedGames)) {
+          for (const gameData of importedGames) {
+            await importGame(gameData);
+          }
+          await loadGames();
+        }
+      } catch (err) {
+        console.error('Failed to import games:', err);
+        alert('Invalid JSON file format.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset input
+  };
 
   // Focus trap for delete confirmation modal
   useEffect(() => {
@@ -136,6 +156,20 @@ export default function ResumeGame() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    try {
+      setLoading(true);
+      await deleteAllGames();
+      await loadGames();
+    } catch (err) {
+      console.error('Failed to delete all games:', err);
+      setError('Failed to clear games data.');
+    } finally {
+      setShowDeleteAllConfirm(false);
+      setLoading(false);
+    }
+  };
+
   if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
 
   if (error) return (
@@ -148,11 +182,26 @@ export default function ResumeGame() {
   return (
     <Box minH="100vh" bg="gray.900" color="white" p="8">
       <Box maxW="4xl" mx="auto">
-        <Flex justify="space-between" align="center" mb="8" wrap="wrap" gap="4">
-          <Heading as="h2" size="xl" color="orange.400">
-            Resume Game
-          </Heading>
-          <Flex gap="3">
+        <Flex justify="space-between" align="center" mb="6" wrap="wrap" gap="4">
+          <Heading as="h2" size="xl" color="teal.300">Resume Game</Heading>
+          <Flex gap="4">
+            <Button variant="outline" color="white" borderColor="red.400" _hover={{ bg: 'red.900' }} onClick={() => setShowDeleteAllConfirm(true)}>
+              Delete All
+            </Button>
+            <Box position="relative">
+              <Button variant="outline" color="teal.400" borderColor="teal.600" _hover={{ bg: 'teal.900' }}>
+                Import Legacy JSON
+              </Button>
+              <Input
+                type="file"
+                accept=".json"
+                onChange={handleImportJson}
+                position="absolute"
+                top="0" left="0" w="100%" h="100%"
+                opacity="0" cursor="pointer"
+                title="Import Legacy JSON"
+              />
+            </Box>
             <input 
               type="file" 
               accept=".json" 
@@ -176,12 +225,16 @@ export default function ResumeGame() {
         )}
 
         {games.length === 0 ? (
-          <Center h="40vh" flexDirection="column" gap="4">
+          <VStack h="40vh" justifyContent="center" gap="4">
             <Text color="gray.400" fontSize="lg">No active games found.</Text>
             <Button colorPalette="orange" onClick={() => navigate('/new')}>Start a New Game</Button>
-          </Center>
+          </VStack>
         ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="4">
+          <Box mb="6">
+            <Flex justify="space-between" align="center" mb="4">
+              <Text color="gray.400">Select a game to resume:</Text>
+            </Flex>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="4">
             {games.map(game => {
               const hash = game.id.split('_').pop();
               const date = game.createdAt 
@@ -241,6 +294,7 @@ export default function ResumeGame() {
               );
             })}
           </SimpleGrid>
+          </Box>
         )}
       </Box>
 
@@ -263,6 +317,29 @@ export default function ResumeGame() {
             <Flex gap="4">
               <Button flex="1" variant="outline" color="white" onClick={() => setDeleteTarget(null)}>Cancel</Button>
               <Button flex="1" colorPalette="red" onClick={handleDelete}>Delete</Button>
+            </Flex>
+        </ModalBackdrop>
+      )}
+
+      {showDeleteAllConfirm && (
+        <ModalBackdrop
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-all-modal-title"
+          tabIndex="-1"
+          onKeyDown={handleKeyDown}
+          onClose={() => setShowDeleteAllConfirm(false)}
+          textAlign="center"
+        >
+            <Heading id="delete-all-modal-title" size="md" mb="2" color="red.400">Delete All Games?</Heading>
+            <Text color="gray.300" mb="2" fontSize="sm">
+              This will permanently delete <strong>all games</strong> and clear your storage.
+            </Text>
+            <Text color="gray.500" mb="6" fontSize="xs">This action cannot be undone.</Text>
+            <Flex gap="4">
+              <Button flex="1" variant="outline" color="white" onClick={() => setShowDeleteAllConfirm(false)}>Cancel</Button>
+              <Button flex="1" colorPalette="red" onClick={handleDeleteAll}>Delete All</Button>
             </Flex>
         </ModalBackdrop>
       )}
