@@ -42,8 +42,13 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
     if (!characteristic) return;
     setIsPrinting(true);
     try {
-      const payload = await generateTestPayload();
-      await streamToDevice(characteristic, payload);
+      const payloads = await generateTestPayload();
+      // Test payload now returns an array of payloads for consecutive printing
+      for (const payload of payloads) {
+        await streamToDevice(characteristic, payload);
+        // Wait 500ms between labels to allow hardware to advance
+        await new Promise(r => setTimeout(r, 500));
+      }
     } catch (err) {
       console.error("Test print failed:", err);
     } finally {

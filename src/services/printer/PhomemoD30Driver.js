@@ -144,54 +144,80 @@ export const generatePhomemoPayload = async (receiptData) => {
  * 0.47 inches at 203 DPI = ~96 pixels.
  */
 export const generateTestPayload = async () => {
-  const tempCanvas = document.createElement("canvas");
-  const tempCtx = tempCanvas.getContext("2d");
-  tempCtx.font = "bold 24px sans-serif";
-  const str1 = "abcdefghabcdefg2abcdefg3abcdefg4";
-  const str2 = "012345678911234567892123456789";
-  const maxW = Math.max(tempCtx.measureText(str1).width, tempCtx.measureText(str2).width);
-
   const LABEL_WIDTH_PX = 96;
-  const LABEL_LENGTH_PX = Math.ceil(maxW) + 40; 
+  const LABEL_LENGTH_PX = 318; 
+  const payloads = [];
+
+  const createPayloadFromCanvas = (drawCanvas) => {
+    const phomemoCanvas = document.createElement("canvas");
+    phomemoCanvas.width = LABEL_WIDTH_PX;
+    phomemoCanvas.height = LABEL_LENGTH_PX;
+    const pCtx = phomemoCanvas.getContext("2d");
+    
+    pCtx.translate(phomemoCanvas.width / 2, phomemoCanvas.height / 2);
+    pCtx.rotate(Math.PI / 2);
+    pCtx.drawImage(drawCanvas, -drawCanvas.width / 2, -drawCanvas.height / 2);
   
-  const drawCanvas = document.createElement("canvas");
-  drawCanvas.width = LABEL_LENGTH_PX;
-  drawCanvas.height = LABEL_WIDTH_PX;
-  const drawCtx = drawCanvas.getContext("2d");
-
-  // Fill background with white
-  drawCtx.fillStyle = "#fff";
-  drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
-
-  // Set font settings
-  drawCtx.fillStyle = "#000";
+    const bitmapData = getPrintData(phomemoCanvas);
+    const header = HEADER_DATA(phomemoCanvas.width / 8, bitmapData.length / (phomemoCanvas.width / 8));
+    
+    const finalPayload = new Uint8Array(header.length + bitmapData.length + END_DATA.length);
+    finalPayload.set(header, 0);
+    finalPayload.set(bitmapData, header.length);
+    finalPayload.set(END_DATA, header.length + bitmapData.length);
   
-  // Draw Line 1 (Top half)
-  drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText(str1, 10, 40);
+    return finalPayload;
+  };
 
-  // Draw Line 2 (Bottom half)
-  drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText(str2, 10, 80);
+  const createBaseCanvas = () => {
+    const c = document.createElement("canvas");
+    c.width = LABEL_LENGTH_PX;
+    c.height = LABEL_WIDTH_PX;
+    const ctx = c.getContext("2d");
+    
+    // Fill background with white
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    
+    // Draw 2px border around absolute edge
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, c.width - 2, c.height - 2);
+    
+    ctx.fillStyle = "#000";
+    return { c, ctx };
+  };
 
-  // Rotate canvas for printer
-  const phomemoCanvas = document.createElement("canvas");
-  phomemoCanvas.width = LABEL_WIDTH_PX;
-  phomemoCanvas.height = LABEL_LENGTH_PX;
-  const pCtx = phomemoCanvas.getContext("2d");
-  
-  pCtx.translate(phomemoCanvas.width / 2, phomemoCanvas.height / 2);
-  pCtx.rotate(Math.PI / 2);
-  pCtx.drawImage(drawCanvas, -drawCanvas.width / 2, -drawCanvas.height / 2);
+  // Label 1: The X-Axis Ruler & Font Weight Test
+  {
+    const { c, ctx } = createBaseCanvas();
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText("12345|7890|2345|7890|2345|7890|2345|7890", 10, 30);
+    ctx.fillText("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 10, 60);
+    ctx.fillText("BBG T1 $150 10+20+30+40+50", 10, 90);
+    payloads.push(createPayloadFromCanvas(c));
+  }
 
-  // Encode
-  const bitmapData = getPrintData(phomemoCanvas);
-  const header = HEADER_DATA(phomemoCanvas.width / 8, bitmapData.length / (phomemoCanvas.width / 8));
-  
-  const finalPayload = new Uint8Array(header.length + bitmapData.length + END_DATA.length);
-  finalPayload.set(header, 0);
-  finalPayload.set(bitmapData, header.length);
-  finalPayload.set(END_DATA, header.length + bitmapData.length);
+  // Label 2: The Y-Axis Boundary Test
+  {
+    const { c, ctx } = createBaseCanvas();
+    ctx.font = "20px sans-serif";
+    ctx.fillText("Row 1: Top Edge Test (Y=20)", 10, 20);
+    ctx.fillText("Row 2: Mid-Top (Y=45)", 10, 45);
+    ctx.fillText("Row 3: Mid-Bottom (Y=70)", 10, 70);
+    ctx.fillText("Row 4: Bottom Edge Test (Y=95)", 10, 95);
+    payloads.push(createPayloadFromCanvas(c));
+  }
 
-  return finalPayload;
+  // Label 3: The Monospace Test
+  {
+    const { c, ctx } = createBaseCanvas();
+    ctx.font = "bold 20px monospace";
+    ctx.fillText("BBG T1 $150 10+20+30+40", 10, 30);
+    ctx.fillText("T2 $40 10+30", 10, 60);
+    ctx.fillText("T3 $50 20+30", 10, 90);
+    payloads.push(createPayloadFromCanvas(c));
+  }
+
+  return payloads;
 };
