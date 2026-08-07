@@ -1,2 +1,5 @@
 npx lint-staged
 npm run test:e2e:local
+
+npm version patch --no-git-tag-version
+git add package.json package-lock.json
