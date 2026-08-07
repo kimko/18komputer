@@ -54,25 +54,35 @@ const getPrintData = (canvas) => {
 export const generatePhomemoPayload = async (receiptData) => {
   console.log(`[Phomemo Driver] Generating payload for company: ${receiptData.company || "Company"}`);
   
-  // Prepare the text strings
   const companyStr = receiptData.company || "Company";
-  const revenues = (receiptData.trains || []).map(t => t.revenue);
-  const mathString = revenues.length > 0 
-    ? `${revenues.join("+")}=${receiptData.totalRevenue}` 
-    : `$${receiptData.totalRevenue}`;
+  const trains = receiptData.trains || [];
+  
+  // Format each line
+  const lines = [];
+  if (trains.length === 0) {
+    lines.push(`${companyStr} $${receiptData.totalRevenue || 0}`);
+  } else {
+    trains.forEach((t, i) => {
+      // First line gets the company name prefix
+      const prefix = i === 0 ? `${companyStr} ` : "";
+      const routeStr = (t.route || "").replace(/\s+/g, ""); // remove spaces around +
+      lines.push(`${prefix}T${i+1} $${t.revenue} ${routeStr}`);
+    });
+  }
 
-  const fullText = `${companyStr} ${mathString}`;
-
-  // Create a temporary canvas to measure text
+  // Measure text to dynamically size the canvas length
   const tempCanvas = document.createElement("canvas");
   const tempCtx = tempCanvas.getContext("2d");
   tempCtx.font = "bold 24px sans-serif";
-  const textWidth = tempCtx.measureText(fullText).width;
+  
+  let maxTextWidth = 0;
+  lines.forEach(line => {
+    const w = tempCtx.measureText(line).width;
+    if (w > maxTextWidth) maxTextWidth = w;
+  });
 
-  // We use a canvas where width is the length of the receipt and height is the 12mm width of the label (96 pixels)
-  // This allows us to draw normally left-to-right.
   const LABEL_WIDTH_PX = 96;
-  const LABEL_LENGTH_PX = Math.max(150, Math.ceil(textWidth) + 40); 
+  const LABEL_LENGTH_PX = Math.max(150, Math.ceil(maxTextWidth) + 40); 
   
   const drawCanvas = document.createElement("canvas");
   drawCanvas.width = LABEL_LENGTH_PX;
@@ -85,10 +95,20 @@ export const generatePhomemoPayload = async (receiptData) => {
 
   // Set font settings
   drawCtx.fillStyle = "#000";
-  
-  // Draw Single Line Text
   drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText(fullText, 10, 45);
+  
+  // Draw each line. Max 2-3 lines can fit in 96px comfortably at 24px font.
+  // 1 line: y=55
+  // 2 lines: y=35, y=75
+  // 3 lines: y=25, y=55, y=85
+  // We can just space them out evenly.
+  const lineSpacing = LABEL_WIDTH_PX / (lines.length + 1);
+  
+  lines.forEach((line, index) => {
+    // Add a slight offset to center the font baseline
+    const yPos = lineSpacing * (index + 1) + 8;
+    drawCtx.fillText(line, 10, yPos);
+  });
 
   // Now, create the actual Phomemo canvas (96 width, varying height)
   // We rotate the drawCanvas by 90 degrees clockwise so it prints correctly along the label strip
@@ -124,8 +144,15 @@ export const generatePhomemoPayload = async (receiptData) => {
  * 0.47 inches at 203 DPI = ~96 pixels.
  */
 export const generateTestPayload = async () => {
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCtx.font = "bold 24px sans-serif";
+  const str1 = "abcdefghabcdefg2abcdefg3abcdefg4";
+  const str2 = "012345678911234567892123456789";
+  const maxW = Math.max(tempCtx.measureText(str1).width, tempCtx.measureText(str2).width);
+
   const LABEL_WIDTH_PX = 96;
-  const LABEL_LENGTH_PX = 318; 
+  const LABEL_LENGTH_PX = Math.ceil(maxW) + 40; 
   
   const drawCanvas = document.createElement("canvas");
   drawCanvas.width = LABEL_LENGTH_PX;
@@ -141,11 +168,11 @@ export const generateTestPayload = async () => {
   
   // Draw Line 1 (Top half)
   drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText("abcdefg", 10, 40);
+  drawCtx.fillText(str1, 10, 40);
 
   // Draw Line 2 (Bottom half)
   drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText("1234567", 10, 80);
+  drawCtx.fillText(str2, 10, 80);
 
   // Rotate canvas for printer
   const phomemoCanvas = document.createElement("canvas");
