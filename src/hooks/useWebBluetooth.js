@@ -83,7 +83,18 @@ export function useWebBluetooth() {
       });
 
       console.log(`[WebBLE] [${new Date().toISOString()}] Connecting to GATT server... (this step may take a few seconds)`);
-      const server = await device.gatt.connect();
+      
+      const connectWithTimeout = (gatt, ms) => {
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error("GATT connect timeout (15s). Please restart your printer and toggle Mac Bluetooth OFF/ON.")), ms);
+          gatt.connect().then(
+            res => { clearTimeout(timer); resolve(res); },
+            err => { clearTimeout(timer); reject(err); }
+          );
+        });
+      };
+
+      const server = await connectWithTimeout(device.gatt, 15000);
       
       console.log(`[WebBLE] [${new Date().toISOString()}] GATT server connected! Fetching primary service ${options.optionalServices[0]}...`);
       const service = await server.getPrimaryService(options.optionalServices[0]);
