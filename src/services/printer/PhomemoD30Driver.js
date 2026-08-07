@@ -10,10 +10,17 @@ const HEADER_DATA = (mmWidth, bytes) =>
 const END_DATA = new Uint8Array([0x1b, 0x64, 0x00]);
 
 const getWhitePixel = (canvas, imageData, x, y) => {
-  const red = imageData[(canvas.width * y + x) * 4];
-  const green = imageData[(canvas.width * y + x) * 4 + 1];
-  const blue = imageData[(canvas.width * y + x) * 4 + 2];
-  return red + green + blue > 0 ? 0 : 1;
+  const idx = (canvas.width * y + x) * 4;
+  const red = imageData[idx];
+  const green = imageData[idx + 1];
+  const blue = imageData[idx + 2];
+  const alpha = imageData[idx + 3];
+  
+  // If transparent, treat as white (don't burn)
+  if (alpha < 128) return 0;
+  
+  // If pixel is darker than 50% gray (128*3 = 384), burn it (return 1)
+  return (red + green + blue) < 384 ? 1 : 0;
 };
 
 const getPrintData = (canvas) => {
@@ -47,10 +54,25 @@ const getPrintData = (canvas) => {
 export const generatePhomemoPayload = async (receiptData) => {
   console.log(`[Phomemo Driver] Generating payload for company: ${receiptData.company || "Company"}`);
   
+  // Prepare the text strings
+  const companyStr = receiptData.company || "Company";
+  const revenues = (receiptData.trains || []).map(t => t.revenue);
+  const mathString = revenues.length > 0 
+    ? `${revenues.join(" + ")} = ${receiptData.totalRevenue}` 
+    : `$${receiptData.totalRevenue}`;
+
+  // Create a temporary canvas to measure text
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCtx.font = "bold 28px monospace";
+  const textWidthMath = tempCtx.measureText(mathString).width;
+  tempCtx.font = "bold 32px sans-serif";
+  const textWidthCompany = tempCtx.measureText(companyStr).width;
+
   // We use a canvas where width is the length of the receipt and height is the 12mm width of the label (96 pixels)
   // This allows us to draw normally left-to-right.
   const LABEL_WIDTH_PX = 96;
-  const LABEL_LENGTH_PX = Math.max(320, 150 + receiptData.trains.length * 50); 
+  const LABEL_LENGTH_PX = Math.max(150, Math.ceil(Math.max(textWidthMath, textWidthCompany)) + 40); 
   
   const drawCanvas = document.createElement("canvas");
   drawCanvas.width = LABEL_LENGTH_PX;
@@ -65,39 +87,12 @@ export const generatePhomemoPayload = async (receiptData) => {
   drawCtx.fillStyle = "#000";
   
   // Draw Company Name
-  drawCtx.font = "bold 24px sans-serif";
-  drawCtx.fillText(receiptData.company || "Company", 10, 30);
+  drawCtx.font = "bold 32px sans-serif";
+  drawCtx.fillText(companyStr, 10, 40);
   
-  // Draw Title
-  drawCtx.font = "16px sans-serif";
-  drawCtx.fillText("Operating Round", 10, 50);
-  
-  // Draw Line
-  drawCtx.fillRect(10, 58, drawCanvas.width - 20, 2);
-
-  // Draw Trains
-  drawCtx.font = "14px monospace";
-  let currentY = 75;
-  
-  if (receiptData.trains && receiptData.trains.length > 0) {
-    receiptData.trains.forEach((train, index) => {
-      drawCtx.fillText(`T${index + 1}: ${train.route}`, 10, currentY);
-      drawCtx.fillText(`$${train.revenue}`, 200, currentY); // Aligned right-ish
-      currentY += 20;
-    });
-  } else {
-    drawCtx.fillText("No active trains.", 10, currentY);
-    currentY += 20;
-  }
-
-  // Draw Line
-  drawCtx.fillRect(10, currentY - 5, drawCanvas.width - 20, 2);
-  currentY += 15;
-
-  // Draw Total
-  drawCtx.font = "bold 18px sans-serif";
-  drawCtx.fillText("Total OR:", 10, currentY);
-  drawCtx.fillText(`$${receiptData.totalRevenue}`, 200, currentY);
+  // Draw Math Equation
+  drawCtx.font = "bold 28px monospace";
+  drawCtx.fillText(mathString, 10, 80);
 
   // Now, create the actual Phomemo canvas (96 width, varying height)
   // We rotate the drawCanvas by 90 degrees clockwise so it prints correctly along the label strip
