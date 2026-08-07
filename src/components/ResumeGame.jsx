@@ -178,14 +178,14 @@ export default function ResumeGame() {
   return (
     <Box minH="100vh" bg="gray.900" color="white" p="8">
       <Box maxW="4xl" mx="auto">
-        <Flex justify="space-between" align="center" mb="6" wrap="wrap" gap="4">
-          <Heading as="h2" size="xl" color="teal.300">Resume Game</Heading>
-          <Flex gap="4" wrap="wrap">
-            <Button variant="outline" color="white" borderColor="red.400" _hover={{ bg: 'red.900' }} onClick={() => setShowDeleteAllConfirm(true)}>
+        <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'stretch', md: 'center' }} mb="6" gap="4">
+          <Heading as="h2" size="xl" color="teal.300" textAlign={{ base: 'center', md: 'left' }}>Resume Game</Heading>
+          <Flex direction={{ base: 'column', sm: 'row' }} gap="3" wrap="wrap" w={{ base: '100%', md: 'auto' }}>
+            <Button w={{ base: '100%', sm: 'auto' }} variant="outline" color="white" borderColor="red.400" _hover={{ bg: 'red.900' }} onClick={() => setShowDeleteAllConfirm(true)}>
               Delete All
             </Button>
-            <Box position="relative">
-              <Button variant="outline" color="teal.400" borderColor="teal.600" _hover={{ bg: 'teal.900' }}>
+            <Box position="relative" w={{ base: '100%', sm: 'auto' }}>
+              <Button w="100%" variant="outline" color="teal.400" borderColor="teal.600" _hover={{ bg: 'teal.900' }}>
                 Import Legacy JSON
               </Button>
               <Input
@@ -198,10 +198,10 @@ export default function ResumeGame() {
                 title="Import Legacy JSON"
               />
             </Box>
-            <Button variant="outline" color="white" borderColor="orange.400" _hover={{ bg: 'orange.900' }} onClick={() => setImportModalOpen(true)}>
+            <Button w={{ base: '100%', sm: 'auto' }} variant="outline" color="white" borderColor="orange.400" _hover={{ bg: 'orange.900' }} onClick={() => setImportModalOpen(true)}>
               📥 Import Game
             </Button>
-            <Button variant="outline" color="white" borderColor="whiteAlpha.400" _hover={{ bg: 'whiteAlpha.200' }} onClick={() => navigate('/')}>
+            <Button w={{ base: '100%', sm: 'auto' }} variant="outline" color="white" borderColor="whiteAlpha.400" _hover={{ bg: 'whiteAlpha.200' }} onClick={() => navigate('/')}>
               Back to Menu
             </Button>
           </Flex>
@@ -334,8 +334,7 @@ export default function ResumeGame() {
       )}
       {/* Import Token Modal */}
       {isImportModalOpen && (
-        <Box position="fixed" top="0" left="0" w="100%" h="100%" bg="blackAlpha.700" zIndex={9999} display="flex" alignItems="center" justifyContent="center" onClick={() => setImportModalOpen(false)}>
-          <Box bg="gray.800" p="6" borderRadius="md" border="1px solid" borderColor="gray.600" w="90%" maxW="500px" onClick={e => e.stopPropagation()}>
+        <ModalBackdrop onClose={() => setImportModalOpen(false)}>
             <Heading as="h3" size="md" color="white" mb="4">Import Game Token</Heading>
             <Text color="gray.300" mb="4" fontSize="sm">Paste your game export token below (usually a long string of letters and numbers).</Text>
             <Textarea 
@@ -357,8 +356,7 @@ export default function ResumeGame() {
                 Import
               </Button>
             </Flex>
-          </Box>
-        </Box>
+        </ModalBackdrop>
       )}
     </Box>
   );
