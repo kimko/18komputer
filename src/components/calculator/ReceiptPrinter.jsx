@@ -9,8 +9,12 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
   const [isPrinting, setIsPrinting] = useState(false);
 
   const handleConnect = () => {
-    // Phomemo D30 UUIDs
-    connect("0000ff00-0000-1000-8000-00805f9b34fb", "0000ff02-0000-1000-8000-00805f9b34fb");
+    // Phomemo D30 UUIDs and Filters
+    connect(
+      [{ namePrefix: "D30" }], 
+      [0xff00], 
+      0xff02
+    );
   };
 
   const handlePrint = async () => {

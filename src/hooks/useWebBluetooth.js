@@ -35,8 +35,8 @@ export function useWebBluetooth() {
           const server = await device.gatt.connect();
           console.log("[WebBLE] GATT Server connected. Fetching primary service...");
           
-          const serviceUuid = "0000ff00-0000-1000-8000-00805f9b34fb";
-          const charUuid = "0000ff02-0000-1000-8000-00805f9b34fb";
+          const serviceUuid = 0xff00;
+          const charUuid = 0xff02;
           
           const service = await server.getPrimaryService(serviceUuid);
           console.log("[WebBLE] Primary service found. Fetching characteristic...");
@@ -60,9 +60,9 @@ export function useWebBluetooth() {
     autoConnect();
   }, []);
 
-  const connect = useCallback(async (serviceUuid, characteristicUuid) => {
+  const connect = useCallback(async (filters, optionalServices, characteristicUuid) => {
     try {
-      console.log(`[WebBLE] Initiating manual pairing for service ${serviceUuid}...`);
+      console.log(`[WebBLE] Initiating manual pairing for service ${optionalServices[0]}...`);
       setIsConnecting(true);
       setError(null);
       
@@ -72,8 +72,8 @@ export function useWebBluetooth() {
 
       console.log("[WebBLE] Requesting device picker...");
       const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: [serviceUuid],
+        filters,
+        optionalServices,
       });
       
       console.log(`[WebBLE] User selected device: ${device.name || "Unknown Device"}`);
@@ -89,7 +89,7 @@ export function useWebBluetooth() {
       const server = await device.gatt.connect();
       
       console.log("[WebBLE] Fetching primary service...");
-      const service = await server.getPrimaryService(serviceUuid);
+      const service = await server.getPrimaryService(optionalServices[0]);
       
       console.log("[WebBLE] Fetching characteristic...");
       const char = await service.getCharacteristic(characteristicUuid);
