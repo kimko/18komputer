@@ -21,7 +21,7 @@ export default function CompanyCharts({ trajectoryData, yieldData, activeCompani
           <Text fontSize="sm" color="gray.500">Acceleration of operating income across rounds</Text>
         </Flex>
         <Box h="300px">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <LineChart data={trajectoryData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis dataKey="name" stroke={textColor} />
@@ -55,7 +55,7 @@ export default function CompanyCharts({ trajectoryData, yieldData, activeCompani
           <Text fontSize="sm" color="gray.500">Total OR Income / Market Cap</Text>
         </Flex>
         <Box h="300px">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <BarChart data={yieldData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="name" stroke={textColor} />
@@ -83,7 +83,7 @@ export default function CompanyCharts({ trajectoryData, yieldData, activeCompani
           <Text fontSize="sm" color="gray.500">Share of total economy</Text>
         </Flex>
         <Box h="300px">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <PieChart>
               <Pie
                 data={yieldData}

@@ -91,7 +91,7 @@ export default function PlayerCharts({ dashboardState, maxOr, players, activeCom
         </Flex>
         <Text fontSize="sm" color="gray.500" mb="4">Ownership value comparison</Text>
         <Box h="350px">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis 
