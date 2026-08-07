@@ -9,6 +9,7 @@ const APP_URL = process.env.TEST_ENV === 'local'
   : 'https://kimko.github.io/18komputer/';
 
 test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
+  test.setTimeout(120000); // This test is very long
   // Listen for browser console logs
   page.on('console', msg => {
     if (msg.text().includes('MAGIC_LINK') || msg.type() === 'error') {

@@ -117,3 +117,54 @@ export const generatePhomemoPayload = async (receiptData) => {
 
   return finalPayload;
 };
+
+/**
+ * Generates a test payload to calibrate two-line printing on 1.57" x 0.47" (40mm x 12mm) die-cut labels.
+ * 1.57 inches at 203 DPI = ~318 pixels.
+ * 0.47 inches at 203 DPI = ~96 pixels.
+ */
+export const generateTestPayload = async () => {
+  const LABEL_WIDTH_PX = 96;
+  const LABEL_LENGTH_PX = 318; 
+  
+  const drawCanvas = document.createElement("canvas");
+  drawCanvas.width = LABEL_LENGTH_PX;
+  drawCanvas.height = LABEL_WIDTH_PX;
+  const drawCtx = drawCanvas.getContext("2d");
+
+  // Fill background with white
+  drawCtx.fillStyle = "#fff";
+  drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+  // Set font settings
+  drawCtx.fillStyle = "#000";
+  
+  // Draw Line 1 (Top half)
+  drawCtx.font = "bold 24px sans-serif";
+  drawCtx.fillText("abcdefg", 10, 40);
+
+  // Draw Line 2 (Bottom half)
+  drawCtx.font = "bold 24px sans-serif";
+  drawCtx.fillText("1234567", 10, 80);
+
+  // Rotate canvas for printer
+  const phomemoCanvas = document.createElement("canvas");
+  phomemoCanvas.width = LABEL_WIDTH_PX;
+  phomemoCanvas.height = LABEL_LENGTH_PX;
+  const pCtx = phomemoCanvas.getContext("2d");
+  
+  pCtx.translate(phomemoCanvas.width / 2, phomemoCanvas.height / 2);
+  pCtx.rotate(Math.PI / 2);
+  pCtx.drawImage(drawCanvas, -drawCanvas.width / 2, -drawCanvas.height / 2);
+
+  // Encode
+  const bitmapData = getPrintData(phomemoCanvas);
+  const header = HEADER_DATA(phomemoCanvas.width / 8, bitmapData.length / (phomemoCanvas.width / 8));
+  
+  const finalPayload = new Uint8Array(header.length + bitmapData.length + END_DATA.length);
+  finalPayload.set(header, 0);
+  finalPayload.set(bitmapData, header.length);
+  finalPayload.set(END_DATA, header.length + bitmapData.length);
+
+  return finalPayload;
+};
