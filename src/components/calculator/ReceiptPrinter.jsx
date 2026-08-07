@@ -29,8 +29,12 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
         totalRevenue
       };
       
-      const payload = await generatePhomemoPayload(receiptData);
-      await streamToDevice(characteristic, payload);
+      const payloads = await generatePhomemoPayload(receiptData);
+      for (const payload of payloads) {
+        await streamToDevice(characteristic, payload);
+        // Wait 500ms between labels
+        await new Promise(r => setTimeout(r, 500));
+      }
     } catch (err) {
       console.error("Print failed:", err);
     } finally {
