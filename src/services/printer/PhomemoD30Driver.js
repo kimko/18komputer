@@ -66,7 +66,7 @@ export const generatePhomemoPayload = async (receiptData) => {
   // Create a temporary canvas to measure text
   const tempCanvas = document.createElement("canvas");
   const tempCtx = tempCanvas.getContext("2d");
-  tempCtx.font = "bold 32px sans-serif";
+  tempCtx.font = "bold 24px sans-serif";
   const textWidth = tempCtx.measureText(fullText).width;
 
   // We use a canvas where width is the length of the receipt and height is the 12mm width of the label (96 pixels)
@@ -87,8 +87,8 @@ export const generatePhomemoPayload = async (receiptData) => {
   drawCtx.fillStyle = "#000";
   
   // Draw Single Line Text
-  drawCtx.font = "bold 32px sans-serif";
-  drawCtx.fillText(fullText, 10, 60);
+  drawCtx.font = "bold 24px sans-serif";
+  drawCtx.fillText(fullText, 10, 45);
 
   // Now, create the actual Phomemo canvas (96 width, varying height)
   // We rotate the drawCanvas by 90 degrees clockwise so it prints correctly along the label strip
