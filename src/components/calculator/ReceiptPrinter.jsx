@@ -10,7 +10,7 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
   const handleConnect = () => {
     connect(
       { 
-        acceptAllDevices: true, 
+        filters: [{ namePrefix: "D30" }], 
         optionalServices: ["0000ff00-0000-1000-8000-00805f9b34fb"] 
       },
       "0000ff02-0000-1000-8000-00805f9b34fb"
