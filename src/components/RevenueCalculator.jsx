@@ -4,6 +4,7 @@ import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import TrainCard from './calculator/TrainCard.jsx';
 import GrandTotalCard from './calculator/GrandTotalCard.jsx';
+import ReceiptPrinter from './calculator/ReceiptPrinter.jsx';
 import { getContrastColor } from '../utils/colorUtils.js';
 
 export default function RevenueCalculator() {
@@ -55,6 +56,19 @@ export default function RevenueCalculator() {
       return sum + stopsSum + bonusSum;
     }, 0);
 
+  const receiptTrains = trains
+    .filter(t => !t.isExcluded)
+    .map(t => {
+      const regularStops = t.stops.join(' + ');
+      const bonusStops = (t.bonusStops || []).map(b => b.val).join(' + ');
+      let route = regularStops;
+      if (bonusStops) route += (route ? ' + ' : '') + bonusStops;
+      
+      const stopsSum = t.stops.reduce((s, v) => s + v, 0);
+      const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
+      return { route: route || '0', revenue: stopsSum + bonusSum };
+    });
+
   return (
     <Box p="4">
       <Box maxW="2xl" mx="auto">
@@ -105,6 +119,12 @@ export default function RevenueCalculator() {
           grandTotal={grandTotal} 
           isHalfPay={isHalfPay} 
           onSetHalfPay={(val) => updateCompanyState({ isHalfPay: val })}
+        />
+
+        <ReceiptPrinter 
+          company={selectedCompanyId} 
+          trains={receiptTrains} 
+          totalRevenue={grandTotal} 
         />
       </Box>
     </Box>
