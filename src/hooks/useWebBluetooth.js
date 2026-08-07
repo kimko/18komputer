@@ -62,7 +62,7 @@ export function useWebBluetooth() {
 
   const connect = useCallback(async (options, characteristicUuid) => {
     try {
-      console.log(`[WebBLE] Initiating manual pairing with options:`, options);
+      console.log(`[WebBLE] [${new Date().toISOString()}] Initiating manual pairing with options:`, JSON.stringify(options));
       setIsConnecting(true);
       setError(null);
       
@@ -70,38 +70,39 @@ export function useWebBluetooth() {
         throw new Error("Web Bluetooth API is not available in this browser. Please use Chrome or Bluefy on iOS.");
       }
 
-      console.log("[WebBLE] Requesting device picker...");
+      console.log(`[WebBLE] [${new Date().toISOString()}] Requesting device picker...`);
       const device = await navigator.bluetooth.requestDevice(options);
       
-      console.log(`[WebBLE] User selected device: ${device.name || "Unknown Device"}`);
+      console.log(`[WebBLE] [${new Date().toISOString()}] User selected device: ${device.name || "Unknown Device"} (ID: ${device.id})`);
       setDeviceName(device.name || "Unknown Device");
       
       device.addEventListener('gattserverdisconnected', () => {
-         console.log("[WebBLE] Device disconnected.");
+         console.log(`[WebBLE] [${new Date().toISOString()}] Device disconnected event fired.`);
          setIsConnected(false);
          setCharacteristic(null);
       });
 
-      console.log("[WebBLE] Connecting to GATT server...");
+      console.log(`[WebBLE] [${new Date().toISOString()}] Connecting to GATT server... (this step may take a few seconds)`);
       const server = await device.gatt.connect();
       
-      console.log("[WebBLE] Fetching primary service...");
+      console.log(`[WebBLE] [${new Date().toISOString()}] GATT server connected! Fetching primary service ${options.optionalServices[0]}...`);
       const service = await server.getPrimaryService(options.optionalServices[0]);
       
-      console.log("[WebBLE] Fetching characteristic...");
+      console.log(`[WebBLE] [${new Date().toISOString()}] Primary service retrieved! Fetching characteristic ${characteristicUuid}...`);
       const char = await service.getCharacteristic(characteristicUuid);
       
-      console.log("[WebBLE] Manual pairing complete. Ready to print!");
+      console.log(`[WebBLE] [${new Date().toISOString()}] Characteristic retrieved! Manual pairing complete.`);
       setCharacteristic(char);
       setIsConnected(true);
     } catch (err) {
-      console.error("[WebBLE] Bluetooth connection error:", err);
+      console.error(`[WebBLE] [${new Date().toISOString()}] Bluetooth connection error:`, err);
       let errorMsg = err.message;
       if (errorMsg.includes("Unsupported device")) {
         errorMsg += " (Ensure you are not pairing through macOS settings, and OS Bluetooth is ON).";
       }
       setError(errorMsg);
     } finally {
+      console.log(`[WebBLE] [${new Date().toISOString()}] Connect function finished. Removing spinner.`);
       setIsConnecting(false);
     }
   }, []);
