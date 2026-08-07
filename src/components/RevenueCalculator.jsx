@@ -59,14 +59,20 @@ export default function RevenueCalculator() {
   const receiptTrains = trains
     .filter(t => !t.isExcluded)
     .map(t => {
-      const regularStops = t.stops.join(' + ');
-      const bonusStops = (t.bonusStops || []).map(b => b.val).join(' + ');
-      let route = regularStops;
-      if (bonusStops) route += (route ? ' + ' : '') + bonusStops;
+      const bonuses = t.bonusStops || [];
+      const stopCount = t.stops.length + bonuses.length;
+      const hasBonus = bonuses.length > 0;
+      
+      // Build display route: "20+20+10(P)+10(T)"
+      const parts = [
+        ...t.stops.map(v => `${v}`),
+        ...bonuses.map(b => `${b.val}(${b.label})`)
+      ];
+      const route = parts.join('+') || '0';
       
       const stopsSum = t.stops.reduce((s, v) => s + v, 0);
-      const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
-      return { route: route || '0', revenue: stopsSum + bonusSum };
+      const bonusSum = bonuses.reduce((s, b) => s + b.val, 0);
+      return { route, revenue: stopsSum + bonusSum, stopCount, hasBonus };
     });
 
   return (

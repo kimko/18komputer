@@ -108,28 +108,15 @@ export const generatePhomemoPayload = async (receiptData) => {
     lines.push(`${companyStr} $${receiptData.totalRevenue || 0}`);
   } else {
     trains.forEach((t, i) => {
-      // Parse stops
-      const tokens = (t.route || "").split('+').map(x => x.trim()).filter(Boolean);
-      let standardStops = 0;
-      let hasBonus = false;
-      
-      tokens.forEach(token => {
-        if (/^\d+$/.test(token)) {
-          standardStops++;
-        } else {
-          hasBonus = true;
-        }
-      });
-      
-      const trainDesc = tokens.length > 0 
-        ? (hasBonus ? `${standardStops}s+` : `${standardStops}s`)
+      const trainDesc = t.stopCount > 0
+        ? (t.hasBonus ? `${t.stopCount}s+` : `${t.stopCount}s`)
         : `T${i+1}`;
         
       const prefix = i === 0 
         ? `${companyStr} ${trainDesc} $${t.revenue} ` 
         : `${trainDesc} $${t.revenue} `;
       
-      const routeStr = (t.route || "").replace(/\s+/g, ""); // remove spaces around +
+      const routeStr = t.route || "0";
       let fullStr = prefix + routeStr;
       
       // Strict 26-character wrapping
