@@ -14,6 +14,8 @@ export const streamToDevice = async (characteristic, payloadArray) => {
     throw new Error("Cannot print: No Bluetooth characteristic is connected.");
   }
 
+  console.log(`[BLE Transport] Starting stream of ${payloadArray.length} bytes in chunks of ${PACKET_SIZE_BYTES}...`);
+
   for (let i = 0; i < payloadArray.length; i += PACKET_SIZE_BYTES) {
     let chunk;
     if (i + PACKET_SIZE_BYTES < payloadArray.length) {
@@ -22,7 +24,10 @@ export const streamToDevice = async (characteristic, payloadArray) => {
       chunk = payloadArray.slice(i, payloadArray.length);
     }
     
+    console.log(`[BLE Transport] Sending chunk ${i} to ${i + chunk.length - 1}...`);
     // Using writeValueWithResponse guarantees the hardware acknowledged the packet before sending the next one
     await characteristic.writeValueWithResponse(chunk);
   }
+
+  console.log(`[BLE Transport] Stream complete!`);
 };

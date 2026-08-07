@@ -45,6 +45,8 @@ const getPrintData = (canvas) => {
  * @returns {Uint8Array} The raw byte payload
  */
 export const generatePhomemoPayload = async (receiptData) => {
+  console.log(`[Phomemo Driver] Generating payload for company: ${receiptData.company || "Company"}`);
+  
   // We use a canvas where width is the length of the receipt and height is the 12mm width of the label (96 pixels)
   // This allows us to draw normally left-to-right.
   const LABEL_WIDTH_PX = 96;
@@ -108,8 +110,11 @@ export const generatePhomemoPayload = async (receiptData) => {
   pCtx.rotate(Math.PI / 2);
   pCtx.drawImage(drawCanvas, -drawCanvas.width / 2, -drawCanvas.height / 2);
 
+  console.log(`[Phomemo Driver] Virtual canvas drawn and rotated. Dimensions: ${LABEL_WIDTH_PX}x${LABEL_LENGTH_PX}`);
+
   // Get raw raster bitmap
   const bitmapData = getPrintData(phomemoCanvas);
+  console.log(`[Phomemo Driver] Bitmap encoded. Raw raster size: ${bitmapData.length} bytes`);
 
   // Wrap with headers
   const header = HEADER_DATA(phomemoCanvas.width / 8, bitmapData.length / (phomemoCanvas.width / 8));
