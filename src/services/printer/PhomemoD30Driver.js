@@ -108,10 +108,26 @@ export const generatePhomemoPayload = async (receiptData) => {
     lines.push(`${companyStr} $${receiptData.totalRevenue || 0}`);
   } else {
     trains.forEach((t, i) => {
-      // First line gets the company name prefix
+      // Parse stops
+      const tokens = (t.route || "").split('+').map(x => x.trim()).filter(Boolean);
+      let standardStops = 0;
+      let hasBonus = false;
+      
+      tokens.forEach(token => {
+        if (/^\d+$/.test(token)) {
+          standardStops++;
+        } else {
+          hasBonus = true;
+        }
+      });
+      
+      const trainDesc = tokens.length > 0 
+        ? (hasBonus ? `${standardStops}s+` : `${standardStops}s`)
+        : `T${i+1}`;
+        
       const prefix = i === 0 
-        ? `${companyStr} T${i+1} $${t.revenue} ` 
-        : `T${i+1} $${t.revenue} `;
+        ? `${companyStr} ${trainDesc} $${t.revenue} ` 
+        : `${trainDesc} $${t.revenue} `;
       
       const routeStr = (t.route || "").replace(/\s+/g, ""); // remove spaces around +
       let fullStr = prefix + routeStr;
@@ -126,6 +142,9 @@ export const generatePhomemoPayload = async (receiptData) => {
         }
       }
     });
+
+    // Append final summary line
+    lines.push(`$${receiptData.totalRevenue} - ${trains.length} trains`);
   }
 
   // 2. Chunk into blocks of 4 for pagination
@@ -149,45 +168,4 @@ export const generatePhomemoPayload = async (receiptData) => {
   return payloads;
 };
 
-/**
- * Generates a test payload to calibrate two-line printing on 1.57" x 0.47" (40mm x 12mm) die-cut labels.
- */
-export const generateTestPayload = async () => {
-  const payloads = [];
-  const rulerStr = "1234567890123456789012345678901234567890";
 
-  // Label 1: 20px monospace
-  {
-    const { c, ctx } = createBaseCanvas(true);
-    ctx.font = "bold 20px monospace";
-    ctx.fillText(rulerStr, 5, 20);
-    ctx.fillText(rulerStr, 5, 45);
-    ctx.fillText(rulerStr, 5, 70);
-    ctx.fillText(rulerStr, 5, 95);
-    payloads.push(createPayloadFromCanvas(c));
-  }
-
-  // Label 2: 18px monospace
-  {
-    const { c, ctx } = createBaseCanvas(true);
-    ctx.font = "bold 18px monospace";
-    ctx.fillText(rulerStr, 5, 20);
-    ctx.fillText(rulerStr, 5, 45);
-    ctx.fillText(rulerStr, 5, 70);
-    ctx.fillText(rulerStr, 5, 95);
-    payloads.push(createPayloadFromCanvas(c));
-  }
-
-  // Label 3: 16px monospace
-  {
-    const { c, ctx } = createBaseCanvas(true);
-    ctx.font = "bold 16px monospace";
-    ctx.fillText(rulerStr, 5, 20);
-    ctx.fillText(rulerStr, 5, 45);
-    ctx.fillText(rulerStr, 5, 70);
-    ctx.fillText(rulerStr, 5, 95);
-    payloads.push(createPayloadFromCanvas(c));
-  }
-
-  return payloads;
-};

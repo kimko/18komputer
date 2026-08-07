@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Button, Flex, Text } from '@chakra-ui/react';
 import { useWebBluetooth } from '../../hooks/useWebBluetooth.js';
 import { streamToDevice } from '../../services/printer/BleTransportService.js';
-import { generatePhomemoPayload, generateTestPayload } from '../../services/printer/PhomemoD30Driver.js';
-
+import { generatePhomemoPayload } from '../../services/printer/PhomemoD30Driver.js';
 export default function ReceiptPrinter({ company, trains, totalRevenue }) {
   const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName } = useWebBluetooth();
   const [isPrinting, setIsPrinting] = useState(false);
@@ -42,23 +41,6 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
     }
   };
 
-  const handleTestPrint = async () => {
-    if (!characteristic) return;
-    setIsPrinting(true);
-    try {
-      const payloads = await generateTestPayload();
-      // Test payload now returns an array of payloads for consecutive printing
-      for (const payload of payloads) {
-        await streamToDevice(characteristic, payload);
-        // Wait 500ms between labels to allow hardware to advance
-        await new Promise(r => setTimeout(r, 500));
-      }
-    } catch (err) {
-      console.error("Test print failed:", err);
-    } finally {
-      setIsPrinting(false);
-    }
-  };
 
   return (
     <Flex direction="column" gap="2" mt="4" p="4" bg="gray.800" borderRadius="md" border="1px solid" borderColor="gray.700">
@@ -87,15 +69,7 @@ export default function ReceiptPrinter({ company, trains, totalRevenue }) {
             >
               Print Receipt
             </Button>
-            <Button 
-              size="sm" 
-              colorPalette="orange" 
-              variant="outline"
-              onClick={handleTestPrint}
-              loading={isPrinting}
-            >
-              Test Print
-            </Button>
+
             <Button size="sm" variant="ghost" colorPalette="red" onClick={disconnect}>
               Disconnect
             </Button>
