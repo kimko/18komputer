@@ -188,34 +188,38 @@ export const generateTestPayload = async () => {
     return { c, ctx };
   };
 
-  // Label 1: The X-Axis Ruler & Font Weight Test
-  {
-    const { c, ctx } = createBaseCanvas();
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText("12345|7890|2345|7890|2345|7890|2345|7890", 10, 30);
-    ctx.fillText("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 10, 60);
-    ctx.fillText("BBG T1 $150 10+20+30+40+50", 10, 90);
-    payloads.push(createPayloadFromCanvas(c));
-  }
+  const rulerStr = "1234567890123456789012345678901234567890";
 
-  // Label 2: The Y-Axis Boundary Test
-  {
-    const { c, ctx } = createBaseCanvas();
-    ctx.font = "20px sans-serif";
-    ctx.fillText("Row 1: Top Edge Test (Y=20)", 10, 20);
-    ctx.fillText("Row 2: Mid-Top (Y=45)", 10, 45);
-    ctx.fillText("Row 3: Mid-Bottom (Y=70)", 10, 70);
-    ctx.fillText("Row 4: Bottom Edge Test (Y=95)", 10, 95);
-    payloads.push(createPayloadFromCanvas(c));
-  }
-
-  // Label 3: The Monospace Test
+  // Label 1: 20px monospace
   {
     const { c, ctx } = createBaseCanvas();
     ctx.font = "bold 20px monospace";
-    ctx.fillText("BBG T1 $150 10+20+30+40", 10, 30);
-    ctx.fillText("T2 $40 10+30", 10, 60);
-    ctx.fillText("T3 $50 20+30", 10, 90);
+    ctx.fillText(rulerStr, 5, 20);
+    ctx.fillText(rulerStr, 5, 45);
+    ctx.fillText(rulerStr, 5, 70);
+    ctx.fillText(rulerStr, 5, 95);
+    payloads.push(createPayloadFromCanvas(c));
+  }
+
+  // Label 2: 18px monospace
+  {
+    const { c, ctx } = createBaseCanvas();
+    ctx.font = "bold 18px monospace";
+    ctx.fillText(rulerStr, 5, 20);
+    ctx.fillText(rulerStr, 5, 45);
+    ctx.fillText(rulerStr, 5, 70);
+    ctx.fillText(rulerStr, 5, 95);
+    payloads.push(createPayloadFromCanvas(c));
+  }
+
+  // Label 3: 16px monospace
+  {
+    const { c, ctx } = createBaseCanvas();
+    ctx.font = "bold 16px monospace";
+    ctx.fillText(rulerStr, 5, 20);
+    ctx.fillText(rulerStr, 5, 45);
+    ctx.fillText(rulerStr, 5, 70);
+    ctx.fillText(rulerStr, 5, 95);
     payloads.push(createPayloadFromCanvas(c));
   }
 
