@@ -66,7 +66,13 @@ export default function ReceiptPrinter({ company, companyName, trains, totalReve
           </>
         )}
 
-        <Button size="sm" variant="ghost" colorPalette="gray" onClick={() => probe()}>
+        <Button
+          size="sm"
+          variant="outline"
+          color="gray.300"
+          borderColor="gray.600"
+          onClick={() => probe()}
+        >
           Probe BLE
         </Button>
       </Flex>
