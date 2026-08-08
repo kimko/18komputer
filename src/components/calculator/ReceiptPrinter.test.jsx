@@ -166,14 +166,32 @@ describe('ReceiptPrinter when a printer is paired', () => {
 describe('ReceiptPrinter probing', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('offers to probe even when nothing is paired', () => {
+  it('stays out of the way by default, now that the printers are known to work', () => {
+    useWebBluetooth.mockReturnValue(hookState());
+    renderWithChakra(<ReceiptPrinter {...receipt} />);
+
+    expect(screen.queryByRole('button', { name: /Probe/i })).not.toBeInTheDocument();
+  });
+
+  it('is available when asked for, even with nothing paired', () => {
     const state = hookState();
     useWebBluetooth.mockReturnValue(state);
-    renderWithChakra(<ReceiptPrinter {...receipt} />);
+    renderWithChakra(<ReceiptPrinter {...receipt} showProbe />);
 
     fireEvent.click(screen.getByRole('button', { name: /Probe/i }));
 
     expect(state.probe).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides a report it already has when the probe is switched off', () => {
+    useWebBluetooth.mockReturnValue(
+      hookState({
+        probeReport: { name: 'PT210_8CF0', id: 'device-1', connected: true, services: [], errors: [] },
+      })
+    );
+    renderWithChakra(<ReceiptPrinter {...receipt} />);
+
+    expect(screen.queryByText(/PT210_8CF0/)).not.toBeInTheDocument();
   });
 
   it('shows the report on screen, since there is no console at a game table', () => {
@@ -198,7 +216,7 @@ describe('ReceiptPrinter probing', () => {
         },
       })
     );
-    renderWithChakra(<ReceiptPrinter {...receipt} />);
+    renderWithChakra(<ReceiptPrinter {...receipt} showProbe />);
 
     expect(screen.getByText(/000018f0-0000-1000-8000-00805f9b34fb/)).toBeInTheDocument();
     expect(screen.getByText(/writeWithoutResponse/)).toBeInTheDocument();

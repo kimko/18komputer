@@ -4,7 +4,9 @@ import { useWebBluetooth } from '../../hooks/useWebBluetooth.js';
 import { printReceipt } from '../../services/printer/PrinterService.js';
 import { formatProbeReport } from '../../services/printer/connectPrinter.js';
 
-export default function ReceiptPrinter({ company, companyName, trains, totalRevenue }) {
+// showProbe is off because both printers now connect reliably. Pass it to get
+// the diagnostics back when a new printer will not connect.
+export default function ReceiptPrinter({ company, companyName, trains, totalRevenue, showProbe = false }) {
   const {
     connect,
     disconnect,
@@ -66,18 +68,20 @@ export default function ReceiptPrinter({ company, companyName, trains, totalReve
           </>
         )}
 
-        <Button
-          size="sm"
-          variant="outline"
-          color="gray.300"
-          borderColor="gray.600"
-          onClick={() => probe()}
-        >
-          Probe BLE
-        </Button>
+        {showProbe && (
+          <Button
+            size="sm"
+            variant="outline"
+            color="gray.300"
+            borderColor="gray.600"
+            onClick={() => probe()}
+          >
+            Probe BLE
+          </Button>
+        )}
       </Flex>
 
-      {probeReport && (
+      {showProbe && probeReport && (
         <Box
           as="pre"
           mt="2"
