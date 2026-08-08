@@ -19,10 +19,11 @@
 - [x] **Printer registry:** Hold each printer's Bluetooth name, ids and settings in one place so the UI holds none.
 - [x] **GOOJPRT PT-210:** TDD an ESC/POS text driver for the 58mm receipt printer (32 columns, built-in font).
 - [x] **Pick the printer automatically** from the Bluetooth name, and reconnect to the one last used.
-- [x] **Probe button** that lists the services a device offers, for when a printer will not connect.
-- [ ] **Confirm the PT-210 over Bluetooth.** It may be classic Bluetooth only, which browsers cannot reach.
-      If so, add a USB cable transport (`navigator.serial`); the payload bytes are the same either way.
-- [ ] Tune the paper feed and the style switches in `Pt210Driver.js` against real paper.
+- [x] **Probe tool** that lists the services a device offers, for when a printer will not connect.
+      Hidden by default now that both printers work; pass `showProbe` to `ReceiptPrinter` to bring it back.
+- [x] **Confirm the PT-210 over Bluetooth.** It does speak Bluetooth Low Energy, so no USB cable is needed.
+      If a future printer turns out to be classic Bluetooth only, add a `navigator.serial` transport;
+      the payload bytes are the same either way.
 
 ## Phase 2: Backend Integration (Future)
 - [ ] Setup Elixir Phoenix backend.
