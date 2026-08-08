@@ -172,6 +172,8 @@ const makeProbeDevice = (services, { errorOn, connect } = {}) => ({
   id: 'device-1',
   addEventListener: vi.fn(),
   gatt: {
+    connected: true,
+    disconnect: vi.fn(),
     connect:
       connect ||
       vi.fn(async () => ({
@@ -238,6 +240,14 @@ describe('probeDevice', () => {
     expect(report.services[0].characteristics).toEqual([]);
     expect(report.services[1].characteristics).toHaveLength(1);
     expect(report.errors.join(' ')).toMatch(/000018f0/);
+  });
+
+  it('lets go of the connection, so it does not block the next pairing attempt', async () => {
+    const device = makeProbeDevice(services);
+
+    await probeDevice(device);
+
+    expect(device.gatt.disconnect).toHaveBeenCalled();
   });
 
   it('records a failure to connect rather than throwing', async () => {

@@ -88,6 +88,9 @@ export async function probeDevice(device, { timeoutMs = DEFAULT_TIMEOUT_MS } = {
     }
   } catch (err) {
     report.errors.push(err.message);
+  } finally {
+    // Holding the probed connection open would block the next pairing attempt.
+    if (device.gatt && device.gatt.connected) device.gatt.disconnect();
   }
 
   return report;
