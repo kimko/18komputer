@@ -3,6 +3,8 @@ import {
   connectWithTimeout,
   resolveWriteCharacteristic,
   openPrinterConnection,
+  probeDevice,
+  formatProbeReport,
 } from './connectPrinter.js';
 
 const printer = {
@@ -162,5 +164,130 @@ describe('openPrinterConnection', () => {
     const device = makeDevice(makeServer({}));
 
     await expect(openPrinterConnection(device, printer)).rejects.toThrow(/service-a/);
+  });
+});
+
+const makeProbeDevice = (services, { errorOn, connect } = {}) => ({
+  name: 'PT210_8CF0',
+  id: 'device-1',
+  addEventListener: vi.fn(),
+  gatt: {
+    connect:
+      connect ||
+      vi.fn(async () => ({
+        getPrimaryServices: vi.fn(async () =>
+          services.map((service) => ({
+            uuid: service.uuid,
+            getCharacteristics: vi.fn(async () => {
+              if (errorOn === service.uuid) throw new Error('GATT read not permitted');
+              return service.characteristics;
+            }),
+          }))
+        ),
+      })),
+  },
+});
+
+describe('probeDevice', () => {
+  const services = [
+    {
+      uuid: '000018f0-0000-1000-8000-00805f9b34fb',
+      characteristics: [
+        { uuid: '00002af1-0000-1000-8000-00805f9b34fb', properties: { writeWithoutResponse: true } },
+      ],
+    },
+    {
+      uuid: '0000ff00-0000-1000-8000-00805f9b34fb',
+      characteristics: [
+        { uuid: '0000ff02-0000-1000-8000-00805f9b34fb', properties: { write: true, read: true } },
+      ],
+    },
+  ];
+
+  it('reports which services and characteristics the device offers', async () => {
+    const report = await probeDevice(makeProbeDevice(services));
+
+    expect(report.name).toBe('PT210_8CF0');
+    expect(report.id).toBe('device-1');
+    expect(report.connected).toBe(true);
+    expect(report.errors).toEqual([]);
+    expect(report.services.map((s) => s.uuid)).toEqual([
+      '000018f0-0000-1000-8000-00805f9b34fb',
+      '0000ff00-0000-1000-8000-00805f9b34fb',
+    ]);
+  });
+
+  it('reports which write modes each characteristic supports', async () => {
+    const report = await probeDevice(makeProbeDevice(services));
+
+    expect(report.services[0].characteristics).toEqual([
+      {
+        uuid: '00002af1-0000-1000-8000-00805f9b34fb',
+        properties: ['writeWithoutResponse'],
+      },
+    ]);
+    expect(report.services[1].characteristics[0].properties).toEqual(['read', 'write']);
+  });
+
+  it('keeps going when one service cannot be read', async () => {
+    const report = await probeDevice(
+      makeProbeDevice(services, { errorOn: '000018f0-0000-1000-8000-00805f9b34fb' })
+    );
+
+    expect(report.services).toHaveLength(2);
+    expect(report.services[0].characteristics).toEqual([]);
+    expect(report.services[1].characteristics).toHaveLength(1);
+    expect(report.errors.join(' ')).toMatch(/000018f0/);
+  });
+
+  it('records a failure to connect rather than throwing', async () => {
+    const device = makeProbeDevice([], {
+      connect: vi.fn(async () => { throw new Error('GATT operation failed'); }),
+    });
+
+    const report = await probeDevice(device);
+
+    expect(report.connected).toBe(false);
+    expect(report.errors).toEqual(['GATT operation failed']);
+  });
+});
+
+describe('formatProbeReport', () => {
+  it('lists every service, characteristic and write mode', async () => {
+    const report = await probeDevice(
+      makeProbeDevice([
+        {
+          uuid: '000018f0-0000-1000-8000-00805f9b34fb',
+          characteristics: [
+            { uuid: '00002af1-0000-1000-8000-00805f9b34fb', properties: { writeWithoutResponse: true } },
+          ],
+        },
+      ])
+    );
+
+    const text = formatProbeReport(report);
+
+    expect(text).toContain('PT210_8CF0');
+    expect(text).toContain('000018f0-0000-1000-8000-00805f9b34fb');
+    expect(text).toContain('00002af1-0000-1000-8000-00805f9b34fb');
+    expect(text).toContain('writeWithoutResponse');
+  });
+
+  it('explains an empty result rather than looking like a broken printer', async () => {
+    const report = await probeDevice(makeProbeDevice([]));
+
+    expect(formatProbeReport(report)).toMatch(/no services/i);
+  });
+
+  it('shows the errors it collected', async () => {
+    const report = await probeDevice(
+      makeProbeDevice([], { connect: vi.fn(async () => { throw new Error('GATT operation failed'); }) })
+    );
+
+    expect(formatProbeReport(report)).toContain('GATT operation failed');
+  });
+
+  it('says nothing was probed when there is no report yet', () => {
+    expect(formatProbeReport(null)).toBe('');
   });
 });

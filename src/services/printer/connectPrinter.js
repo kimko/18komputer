@@ -43,6 +43,90 @@ export async function resolveWriteCharacteristic(server, printer) {
   );
 }
 
+// BluetoothCharacteristicProperties exposes getters, not own keys, so
+// Object.keys() on it returns nothing and the names have to be listed.
+const PROPERTY_NAMES = [
+  'broadcast',
+  'read',
+  'writeWithoutResponse',
+  'write',
+  'notify',
+  'indicate',
+  'authenticatedSignedWrites',
+  'reliableWrite',
+  'writableAuxiliaries',
+];
+
+const propertyNames = (properties) =>
+  properties ? PROPERTY_NAMES.filter((name) => properties[name]) : [];
+
+export async function probeDevice(device, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  const report = {
+    name: device.name || null,
+    id: device.id || null,
+    connected: false,
+    services: [],
+    errors: [],
+  };
+
+  try {
+    const server = await connectWithTimeout(device.gatt, timeoutMs);
+    report.connected = true;
+
+    for (const service of await server.getPrimaryServices()) {
+      const entry = { uuid: service.uuid, characteristics: [] };
+      try {
+        const characteristics = await service.getCharacteristics();
+        entry.characteristics = characteristics.map((characteristic) => ({
+          uuid: characteristic.uuid,
+          properties: propertyNames(characteristic.properties),
+        }));
+      } catch (err) {
+        report.errors.push(`Could not read characteristics of ${service.uuid}: ${err.message}`);
+      }
+      report.services.push(entry);
+    }
+  } catch (err) {
+    report.errors.push(err.message);
+  }
+
+  return report;
+}
+
+export function formatProbeReport(report) {
+  if (!report) return '';
+
+  const lines = [
+    `Device: ${report.name || 'unnamed'} (${report.id || 'no id'})`,
+    `Connected: ${report.connected ? 'yes' : 'no'}`,
+  ];
+
+  if (report.services.length === 0) {
+    lines.push(
+      '',
+      'No services were readable. Either this device does not speak Bluetooth',
+      'Low Energy, or its service ids are outside the range we ask for.'
+    );
+  }
+
+  report.services.forEach((service) => {
+    lines.push('', `service ${service.uuid}`);
+    if (service.characteristics.length === 0) {
+      lines.push('  (no characteristics readable)');
+    }
+    service.characteristics.forEach((characteristic) => {
+      lines.push(`  char ${characteristic.uuid}  [${characteristic.properties.join(', ')}]`);
+    });
+  });
+
+  if (report.errors.length > 0) {
+    lines.push('', 'Errors:');
+    report.errors.forEach((error) => lines.push(`  ${error}`));
+  }
+
+  return lines.join('\n');
+}
+
 export async function openPrinterConnection(
   device,
   printer,
