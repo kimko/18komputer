@@ -98,33 +98,84 @@ export function headerLines(fullName, shortName) {
   return [centerText(normalize(shortName) || wrapped[0].slice(0, COLS))];
 }
 
-export function formatReceiptLines(receiptData = {}) {
+export function splitReceipt(receiptData = {}) {
   const trains = receiptData.trains || [];
   const total = receiptData.totalRevenue || 0;
   const separator = '-'.repeat(COLS);
 
-  const lines = [...headerLines(receiptData.companyName, receiptData.company), separator];
+  const header = headerLines(receiptData.companyName, receiptData.company);
+  const body = [{ text: separator, bold: false }];
 
   if (trains.length === 0) {
-    lines.push(centerText('(no routes)'), separator, ...spreadLine('TOTAL', `$${total}`));
-    return lines;
+    body.push({ text: centerText('(no routes)'), bold: false });
+  } else {
+    trains.forEach((train, index) => {
+      const prefix =
+        trainLabel(train, index).padEnd(LABEL_W) +
+        `$${train.revenue || 0}`.padEnd(MONEY_W) +
+        ' ';
+      const routeWidth = Math.max(MIN_ROUTE_W, COLS - prefix.length);
+
+      wrapRoute(train.route || '0', routeWidth).forEach((routeLine, routeIndex) => {
+        const indent = routeIndex === 0 ? prefix : ' '.repeat(prefix.length);
+        body.push({ text: indent + routeLine, bold: false });
+      });
+    });
   }
 
-  trains.forEach((train, index) => {
-    const prefix =
-      trainLabel(train, index).padEnd(LABEL_W) +
-      `$${train.revenue || 0}`.padEnd(MONEY_W) +
-      ' ';
-    const routeWidth = Math.max(MIN_ROUTE_W, COLS - prefix.length);
+  body.push({ text: separator, bold: false });
+  spreadLine('TOTAL', `$${total}`).forEach((text) => body.push({ text, bold: true }));
 
-    wrapRoute(train.route || '0', routeWidth).forEach((routeLine, routeIndex) => {
-      lines.push(routeIndex === 0 ? prefix + routeLine : ' '.repeat(prefix.length) + routeLine);
-    });
+  if (trains.length > 0) {
+    const count = `${trains.length} train${trains.length === 1 ? '' : 's'}`;
+    body.push({ text: centerText(count), bold: false });
+  }
+
+  return { header, body };
+}
+
+export function formatReceiptLines(receiptData = {}) {
+  const { header, body } = splitReceipt(receiptData);
+  return [...header, ...body.map((line) => line.text)];
+}
+
+export const PT210_STYLE = { useCharTable: true, useDoubleHeightHeader: true };
+
+const ESC_INIT = [0x1b, 0x40];
+const ESC_CHARSET_PC437 = [0x1b, 0x74, 0x00];
+const ESC_ALIGN_LEFT = [0x1b, 0x61, 0x00];
+const ESC_BOLD_ON = [0x1b, 0x45, 0x01];
+const ESC_BOLD_OFF = [0x1b, 0x45, 0x00];
+const GS_SIZE_DBL_HEIGHT = [0x1d, 0x21, 0x01];
+const GS_SIZE_NORMAL = [0x1d, 0x21, 0x00];
+const LF = [0x0a];
+const ESC_FEED_LINES = (n) => [0x1b, 0x64, n & 0xff];
+
+const FEED_LINES = 5;
+
+export const generatePt210Payload = async (receiptData = {}) => {
+  const { header, body } = splitReceipt(receiptData);
+  const bytes = [];
+  const push = (...sequences) => sequences.forEach((sequence) => bytes.push(...sequence));
+  const pushLine = (text) => {
+    for (let i = 0; i < text.length; i++) bytes.push(text.charCodeAt(i) & 0x7f);
+    push(LF);
+  };
+
+  push(ESC_INIT);
+  if (PT210_STYLE.useCharTable) push(ESC_CHARSET_PC437);
+  push(ESC_ALIGN_LEFT, ESC_BOLD_ON);
+  if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_DBL_HEIGHT);
+  header.forEach(pushLine);
+  if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_NORMAL);
+  push(ESC_BOLD_OFF);
+
+  body.forEach(({ text, bold }) => {
+    if (bold) push(ESC_BOLD_ON);
+    pushLine(text);
+    if (bold) push(ESC_BOLD_OFF);
   });
 
-  lines.push(separator);
-  lines.push(...spreadLine('TOTAL', `$${total}`));
-  lines.push(centerText(`${trains.length} train${trains.length === 1 ? '' : 's'}`));
-
-  return lines;
-}
+  push(ESC_FEED_LINES(FEED_LINES));
+  return [new Uint8Array(bytes)];
+};

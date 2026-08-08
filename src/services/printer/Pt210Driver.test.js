@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   COLS,
+  PT210_STYLE,
   centerText,
   rightAlign,
   spreadLine,
@@ -9,6 +10,7 @@ import {
   wrapRoute,
   headerLines,
   formatReceiptLines,
+  generatePt210Payload,
 } from './Pt210Driver.js';
 
 describe('COLS', () => {
@@ -268,5 +270,143 @@ describe('formatReceiptLines', () => {
 
   it('does not throw on an empty object', () => {
     expect(() => formatReceiptLines({})).not.toThrow();
+  });
+});
+
+const toRaw = (payload) => String.fromCharCode(...payload);
+
+const CONTROL_CODES = /\x1b@|\x1b[taEdJ].|\x1d!./g;
+
+const decodeLines = (payload) => {
+  const lines = toRaw(payload).replace(CONTROL_CODES, '').split('\n');
+  if (lines[lines.length - 1] === '') lines.pop();
+  return lines;
+};
+
+const contains = (payload, sequence) =>
+  toRaw(payload).includes(String.fromCharCode(...sequence));
+
+describe('generatePt210Payload', () => {
+  const twoTrains = {
+    companyName: 'Baltimore & Ohio',
+    company: 'B&O',
+    trains: [
+      { route: '40+40+50+50', revenue: 180, stopCount: 4, hasBonus: false },
+      { route: '30+30+20+30(P)', revenue: 110, stopCount: 3, hasBonus: true },
+    ],
+    totalRevenue: 290,
+  };
+
+  beforeEach(() => {
+    PT210_STYLE.useCharTable = true;
+    PT210_STYLE.useDoubleHeightHeader = true;
+  });
+
+  it('produces exactly one payload, because a receipt is one continuous strip', async () => {
+    const payloads = await generatePt210Payload(twoTrains);
+    expect(payloads).toHaveLength(1);
+    expect(payloads[0]).toBeInstanceOf(Uint8Array);
+  });
+
+  it('resets the printer first and feeds the paper past the tear bar last', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(Array.from(payload.slice(0, 2))).toEqual([0x1b, 0x40]);
+    expect(Array.from(payload.slice(-3))).toEqual([0x1b, 0x64, 5]);
+  });
+
+  it('renders the receipt text', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(decodeLines(payload)).toEqual([
+      ' '.repeat(8) + 'BALTIMORE & OHIO',
+      '-'.repeat(32),
+      '4s   $180  40+40+50+50',
+      '3s+  $110  30+30+20+30(P)',
+      '-'.repeat(32),
+      'TOTAL' + ' '.repeat(23) + '$290',
+      ' '.repeat(12) + '2 trains',
+    ]);
+  });
+
+  it('draws exactly two separator lines', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    const separators = decodeLines(payload).filter((line) => line === '-'.repeat(32));
+    expect(separators).toHaveLength(2);
+  });
+
+  it('never emits a line wider than the paper', async () => {
+    const [payload] = await generatePt210Payload({
+      companyName: 'Chicago, Burlington and Quincy Railroad',
+      company: 'CBQ',
+      trains: [
+        { route: '50+40+40+30+30+60(P)+20+20', revenue: 310, stopCount: 6, hasBonus: true },
+        { route: '10+10+10+10+10+10+10+10+10+10+10+10', revenue: 120, stopCount: 12 },
+      ],
+      totalRevenue: 430,
+    });
+    decodeLines(payload).forEach((line) => expect(line.length).toBeLessThanOrEqual(32));
+  });
+
+  it('prints the company name bold and double height, then goes back to normal', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    const raw = toRaw(payload);
+    expect(raw).toContain('\x1bE\x01\x1d!\x01' + ' '.repeat(8) + 'BALTIMORE & OHIO');
+    expect(raw.indexOf('\x1d!\x00')).toBeGreaterThan(raw.indexOf('BALTIMORE'));
+    expect(raw.indexOf('\x1bE\x00')).toBeGreaterThan(raw.indexOf('BALTIMORE'));
+  });
+
+  it('prints the total line bold', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(toRaw(payload)).toContain('\x1bE\x01TOTAL');
+  });
+
+  it('selects the plain ASCII code page so the Chinese default does not apply', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(contains(payload, [0x1b, 0x74, 0x00])).toBe(true);
+  });
+
+  it('sends only plain ASCII even for an accented company name', async () => {
+    const [payload] = await generatePt210Payload({
+      companyName: 'Compañía del Ferrocarril',
+      company: 'MZA',
+      trains: [{ route: '40', revenue: 40, stopCount: 1 }],
+      totalRevenue: 40,
+    });
+    expect(Array.from(payload).every((byte) => byte < 0x80)).toBe(true);
+    expect(decodeLines(payload)[0]).toBe(' '.repeat(4) + 'COMPANIA DEL FERROCARRIL');
+  });
+
+  it('sends no cut and no bitmap commands', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(contains(payload, [0x1d, 0x56])).toBe(false);
+    expect(contains(payload, [0x1d, 0x76])).toBe(false);
+  });
+
+  it('omits the code page command when that style switch is off', async () => {
+    PT210_STYLE.useCharTable = false;
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(contains(payload, [0x1b, 0x74, 0x00])).toBe(false);
+    expect(decodeLines(payload)[0]).toBe(' '.repeat(8) + 'BALTIMORE & OHIO');
+  });
+
+  it('omits the double height command when that style switch is off', async () => {
+    PT210_STYLE.useDoubleHeightHeader = false;
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(contains(payload, [0x1d, 0x21, 0x01])).toBe(false);
+    expect(toRaw(payload)).toContain('\x1bE\x01' + ' '.repeat(8) + 'BALTIMORE & OHIO');
+  });
+
+  it('prints a usable receipt when nothing was run', async () => {
+    const [payload] = await generatePt210Payload({ companyName: 'Baltimore & Ohio', company: 'B&O' });
+    expect(decodeLines(payload)).toEqual([
+      ' '.repeat(8) + 'BALTIMORE & OHIO',
+      '-'.repeat(32),
+      ' '.repeat(10) + '(no routes)',
+      '-'.repeat(32),
+      'TOTAL' + ' '.repeat(25) + '$0',
+    ]);
+  });
+
+  it('does not throw on an empty object', async () => {
+    await expect(generatePt210Payload({})).resolves.toHaveLength(1);
   });
 });
