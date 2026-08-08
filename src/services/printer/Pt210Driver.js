@@ -1,3 +1,5 @@
+import { trainLabel } from './receiptLayout.js';
+
 export const COLS = 32;
 
 const LABEL_W = 5;
@@ -33,12 +35,6 @@ export function spreadLine(left, right, cols = COLS) {
   const gap = cols - left.length - right.length;
   if (gap < 1) return [left, rightAlign(right, cols)];
   return [left + ' '.repeat(gap) + right];
-}
-
-export function trainLabel(train, index) {
-  const stopCount = train.stopCount || 0;
-  if (stopCount === 0) return `T${index + 1}`;
-  return train.hasBonus ? `${stopCount}s+` : `${stopCount}s`;
 }
 
 export function wrapRoute(route, width) {
