@@ -64,5 +64,18 @@ The final game summary dashboard is implemented and provides real-time mathemati
   - **Magic Links (Share):** A "Share" button at the top-right allows users to instantly export the current game state. It generates a compressed URL (via LZString) and copies it to the clipboard. Anyone who clicks the link will automatically have the game imported and opened on their device.
 - **Data Flow:** All interactions (updating ORs, changing prices, modifying shares or cash) immediately dispatch updates to the mock API, persisting the state to `localStorage`.
 
+### 7. Printing an Operating Round Receipt
+The Revenue Calculator can print the trains it just totalled to a pocket Bluetooth printer, so the table gets a paper record of the run.
+- **UI:** A "Receipt Printer" panel below the Grand Total, with Pair, Print, Disconnect and Probe buttons. The panel names whichever printer is connected.
+- **Two supported printers:**
+  - **Phomemo D30**, a die-cut label printer. Text is drawn onto a small picture and sent as a bitmap, one label per four lines, so a long run prints as several labels.
+  - **GOOJPRT PT-210**, a 58mm receipt printer. Sends plain text using the printer's own built-in font, 32 characters per line, so a whole receipt is about 270 bytes and prints as one continuous strip. The company name is bold and double height, the total is pushed to the right edge, and long routes wrap on a `+` so no stop value is ever cut in half.
+- **Features:**
+  - **Pair once.** The pairing dialog lists both printers, and the app works out which one you picked from its Bluetooth name. There is nothing to configure.
+  - **Reconnects on its own.** On later visits the app reconnects in the background, preferring the printer you used last. If a printer is out of range it gives up after 5 seconds and tries the next one rather than hanging.
+  - **Probe.** When a printer will not connect, Probe pairs with anything nearby and lists the services and characteristics it offers, on screen rather than only in the browser console. This is the tool for working out whether a printer is reachable at all.
+  - **Accented company names** are converted to plain letters before printing, because these printers cannot render them.
+- **Requirements:** Web Bluetooth, so Chrome on desktop or Android, or Bluefy on iOS. Automatic reconnect additionally needs the browser to be able to list already-paired devices, and quietly does nothing where it cannot.
+
 ---
 *Phase 1 (Stateless Frontend) is functionally complete.*

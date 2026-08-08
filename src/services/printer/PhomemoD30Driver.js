@@ -1,3 +1,5 @@
+import { trainLabel } from './receiptLayout.js';
+
 const HEADER_DATA = (mmWidth, bytes) =>
   new Uint8Array([
     0x1b, 0x40, 0x1d, 0x76, 0x30, 0x00,
@@ -108,11 +110,9 @@ export const generatePhomemoPayload = async (receiptData) => {
     lines.push(`${companyStr} $${receiptData.totalRevenue || 0}`);
   } else {
     trains.forEach((t, i) => {
-      const trainDesc = t.stopCount > 0
-        ? (t.hasBonus ? `${t.stopCount}s+` : `${t.stopCount}s`)
-        : `T${i+1}`;
-        
-      const prefix = i === 0 
+      const trainDesc = trainLabel(t, i);
+
+      const prefix = i === 0
         ? `${companyStr} ${trainDesc} $${t.revenue} ` 
         : `${trainDesc} $${t.revenue} `;
       

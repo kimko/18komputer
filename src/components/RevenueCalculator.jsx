@@ -127,10 +127,11 @@ export default function RevenueCalculator() {
           onSetHalfPay={(val) => updateCompanyState({ isHalfPay: val })}
         />
 
-        <ReceiptPrinter 
-          company={selectedCompanyId} 
-          trains={receiptTrains} 
-          totalRevenue={grandTotal} 
+        <ReceiptPrinter
+          company={selectedCompanyId}
+          companyName={activeCompanies.find(c => c.shortName === selectedCompanyId)?.name}
+          trains={receiptTrains}
+          totalRevenue={grandTotal}
         />
       </Box>
     </Box>
