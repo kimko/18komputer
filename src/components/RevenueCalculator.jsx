@@ -27,9 +27,10 @@ export default function RevenueCalculator() {
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   const calculatorState = gameInstance.state?.calculatorState || {};
   
-  const currentCompanyState = calculatorState[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false };
+  const currentCompanyState = calculatorState[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false, totalShares: 10 };
   const trains = currentCompanyState.trains || [{ id: 1, stops: [], bonusStops: [] }];
   const isHalfPay = currentCompanyState.isHalfPay || false;
+  const totalShares = currentCompanyState.totalShares || 10;
 
   const updateCompanyState = (updates) => {
     if (!selectedCompanyId) return;
@@ -121,10 +122,12 @@ export default function RevenueCalculator() {
           ))}
         </VStack>
 
-        <GrandTotalCard 
-          grandTotal={grandTotal} 
-          isHalfPay={isHalfPay} 
+        <GrandTotalCard
+          grandTotal={grandTotal}
+          isHalfPay={isHalfPay}
           onSetHalfPay={(val) => updateCompanyState({ isHalfPay: val })}
+          totalShares={totalShares}
+          onSetTotalShares={(val) => updateCompanyState({ totalShares: val })}
         />
 
         <ReceiptPrinter

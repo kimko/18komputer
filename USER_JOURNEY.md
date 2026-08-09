@@ -50,7 +50,9 @@ The core utility for running Operating Rounds has been implemented.
   - **Multiple Trains:** Users can calculate multiple trains simultaneously. Trains can be added, removed, or duplicated via a "Copy Train" button. State is tracked independently for each company.
   - **Interactive History:** Each train has an itemized string of tapped stops (e.g., `60 + 70 + 40`). Stops can be instantly deleted by tapping them.
   - **Dynamic Bonuses**: Fully supports 18xx-specific revenue bonuses (like Towns, Ports, or 1822 Pullmans), rendered distinctly without counting against stop limits.
-  - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table dynamically generates the Revenue Per Share payout (from 10% to 100%).
+  - **Grand Total & Payouts:** A real-time Grand Total tracks all trains. Below the total, a table generates the Revenue Per Share payout, one column per share.
+  - **Company Type:** Each company can be set to 10-share or 5-share. A 10-share company shows ten columns from 10% to 100%; a 5-share company shows five columns of 20% each.
+  - **Full or Half Pay:** On half pay the company keeps half the revenue. The dividend per share is rounded up to the next whole dollar and the company keeps the remainder, so a $190 run on a 10-share company pays $10 per share and leaves $90 with the company. The same run on a 5-share company divides evenly: $19 per share, $95 kept. Both figures are shown under the Grand Total. The kept amount is not carried between rounds.
 - **Data Flow:** The calculator currently acts as a pure visual aid. Users can manually enter operating decisions into the final dashboard, or tap the company's subtitle inside the Dashboard's OR Numpad to automatically fetch the Grand Total from the calculator.
 
 ### 6. Company Values & Results (Dashboard)

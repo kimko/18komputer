@@ -127,4 +127,77 @@ describe('RevenueCalculator Component', () => {
     // Check payout table updates (10% of 50 should be $5)
     expect(screen.getByText('$5')).toBeInTheDocument();
   });
+
+  it('rounds a 10-share half pay up to the next whole dollar per share', async () => {
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+
+    // A $190 run: half is $95, which is $9.50 across 10 shares
+    fireEvent.click(screen.getByRole('button', { name: '100' }));
+    fireEvent.click(screen.getByRole('button', { name: '90' }));
+    expect(screen.getByText(/Grand Total: \$190/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Half Pay' }));
+
+    expect(screen.getByText('$10')).toBeInTheDocument();
+    expect(screen.getByText(/\$10 per share .* \$90 stays with the company/)).toBeInTheDocument();
+  });
+
+  it('shows one column per share for a 5-share company', async () => {
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    fireEvent.click(screen.getByRole('button', { name: '100' }));
+    fireEvent.click(screen.getByRole('button', { name: '90' }));
+
+    fireEvent.click(screen.getByRole('button', { name: '5 Share' }));
+
+    // Five columns of 20% each, so no 10% column any more
+    expect(screen.queryByText('10%')).not.toBeInTheDocument();
+    expect(screen.getByText('20%')).toBeInTheDocument();
+    expect(screen.getByText('100%')).toBeInTheDocument();
+
+    // Full pay: $190 over 5 shares is $38 each
+    expect(screen.getByText('$38')).toBeInTheDocument();
+    expect(screen.getByText(/\$38 per share .* \$0 stays with the company/)).toBeInTheDocument();
+
+    // Half pay divides evenly: $95 over 5 shares is $19 each
+    fireEvent.click(screen.getByRole('button', { name: 'Half Pay' }));
+    expect(screen.getByText('$19')).toBeInTheDocument();
+    expect(screen.getByText(/\$19 per share .* \$95 stays with the company/)).toBeInTheDocument();
+  });
+
+  it('keeps the share count and pay choice per company', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1830',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 },
+          { shortName: 'NYC', name: 'New York Central', color: '#000000', parValue: 67 }
+        ],
+        companyORs: []
+      }
+    });
+
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    fireEvent.click(screen.getByRole('button', { name: '5 Share' }));
+    expect(screen.queryByText('10%')).not.toBeInTheDocument();
+
+    // NYC has not been touched, so it falls back to 10 shares
+    fireEvent.click(screen.getByRole('button', { name: /NYC/i }));
+    expect(screen.getByText('10%')).toBeInTheDocument();
+
+    // PRR still remembers
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    expect(screen.queryByText('10%')).not.toBeInTheDocument();
+    expect(screen.getByText('20%')).toBeInTheDocument();
+  });
 });
