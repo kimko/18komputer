@@ -38,6 +38,32 @@ export function spreadLine(left, right, cols = COLS) {
   return [left + ' '.repeat(gap) + right];
 }
 
+const PCT_W = 4;
+const CELL_MONEY_W = 7;
+const CELL_GAP = '  ';
+const SINGLE_COLUMN_MAX = 5;
+
+export function payoutTableLines(perShare, totalShares = 10, cols = COLS) {
+  const shares = totalShares || 10;
+  if (!perShare) return [];
+
+  const cells = [];
+  for (let held = 1; held <= shares; held++) {
+    const pct = `${held * (100 / shares)}%`.padStart(PCT_W);
+    cells.push(pct + `$${perShare * held}`.padStart(CELL_MONEY_W));
+  }
+
+  if (shares <= SINGLE_COLUMN_MAX) return cells.map((cell) => centerText(cell, cols));
+
+  const rows = Math.ceil(shares / 2);
+  const lines = [];
+  for (let i = 0; i < rows; i++) {
+    const right = cells[i + rows];
+    lines.push(centerText(right ? cells[i] + CELL_GAP + right : cells[i], cols));
+  }
+  return lines;
+}
+
 export function wrapRoute(route, width) {
   const lines = [];
   let current = '';
@@ -126,12 +152,17 @@ export function splitReceipt(receiptData = {}) {
   const { perShare, companyKeeps } = calculatePayout(total, receiptData.totalShares, receiptData.isHalfPay);
   const push = (text) => body.push({ text, bold: false });
   spreadLine(shareLabel(receiptData.totalShares), payoutLabel(receiptData.isHalfPay)).forEach(push);
-  spreadLine('PER SHARE', `$${perShare}`).forEach(push);
   spreadLine('TREASURY', `$${companyKeeps}`).forEach(push);
 
   if (trains.length > 0) {
     const count = `${trains.length} train${trains.length === 1 ? '' : 's'}`;
     body.push({ text: centerText(count), bold: false });
+  }
+
+  const payoutTable = payoutTableLines(perShare, receiptData.totalShares);
+  if (payoutTable.length > 0) {
+    push('');
+    payoutTable.forEach(push);
   }
 
   return { header, body };
