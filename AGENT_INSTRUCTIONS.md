@@ -20,4 +20,6 @@ Before writing code, always reference:
 3. **State:** Keep Phase 1 state management clean and localized, masking `localStorage` interactions behind async functions to easily swap them for standard `fetch` API calls in Phase 2.
 4. **Task Tracking:** Always refer to and update the `TODO.md` file upon completing major milestones.
 5. **Version Control:** Always do incremental commits for easy rollback and branching. Keep commit messages terse.
-6. **User Journey:** Always update the `USER_JOURNEY.md` document every time a new feature is completed to reflect all current capabilities of the app.
+6. **Auto-Versioning:** Every time a commit is made, the patch version (e.g. `v1.0.0` -> `v1.0.1`) MUST be incremented automatically via the `scripts/bump-version.js` pre-commit hook. Never bypass this unless explicitly necessary.
+7. **Deployments:** The `deploy.yml` GitHub Action is configured to automatically trigger on `push` to `main`. DO NOT run `gh workflow run deploy.yml` manually via CLI after pushing, as this will cause GitHub to cancel both jobs due to concurrency limits.
+8. **User Journey:** Always update the `USER_JOURNEY.md` document every time a new feature is completed to reflect all current capabilities of the app.
