@@ -5,8 +5,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const APP_URL = process.env.TEST_ENV === 'local'
+  ? 'http://localhost:5173/18komputer/'
+  : process.env.TEST_ENV === 'ci'
+  ? 'http://localhost:4173/18komputer/'
+  : 'https://kimko.github.io/18komputer/';
+
 test('import and resume historical game', async ({ page }) => {
-  await page.goto('http://localhost:5173/18komputer/resume');
+  await page.goto(`${APP_URL}resume`);
   
   // Wait for the import button to be ready
   const importInput = page.locator('input[title="Import Legacy JSON"]');

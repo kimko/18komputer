@@ -259,6 +259,7 @@ describe('formatReceiptLines', () => {
 
 const toRaw = (payload) => String.fromCharCode(...payload);
 
+// oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
 const CONTROL_CODES = /\x1b@|\x1b[taEdJ].|\x1d!./g;
 
 const decodeLines = (payload) => {

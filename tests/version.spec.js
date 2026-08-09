@@ -6,7 +6,7 @@ const APP_URL = process.env.TEST_ENV === 'local'
   ? 'http://localhost:4173/18komputer/'
   : 'https://kimko.github.io/18komputer/';
 
-test('Application displays a valid version number and does not show vunknown', async ({ page }) => {
+test('Application displays a valid version number and does not show vunknown', { tag: '@smoke' }, async ({ page }) => {
   await page.goto(APP_URL);
   
   // Wait for the main menu to load

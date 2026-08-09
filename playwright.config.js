@@ -26,7 +26,7 @@ export default defineConfig({
   reporter: 'html',
 
   webServer: process.env.TEST_ENV === 'ci' ? {
-    command: 'npm run build && npm run preview',
+    command: 'npm run preview',
     port: 4173,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

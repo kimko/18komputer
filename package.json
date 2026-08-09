@@ -1,19 +1,20 @@
 {
   "name": "18komputer",
   "private": true,
-  "version": "1.0.30",
+  "version": "1.0.31",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp dist/index.html dist/404.html",
-    "lint": "oxlint -D warnings && eslint src --max-warnings=0",
+    "lint": "oxlint --deny-warnings && eslint src --max-warnings=0",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "npx playwright test --project=chromium",
     "test:e2e:local": "TEST_ENV=local npx playwright test --project=chromium",
-    "test:e2e:ci": "TEST_ENV=ci npx playwright test --project=chromium",
-    "test:e2e:prod": "TEST_ENV=prod npx playwright test tests/version.spec.js --project=chromium",
+    "test:e2e:ci": "npm run build && TEST_ENV=ci npx playwright test --project=chromium",
+    "test:e2e:smoke": "TEST_ENV=ci npx playwright test --grep @smoke --project=chromium",
+    "test:e2e:prod": "TEST_ENV=prod npx playwright test --grep @smoke --project=chromium",
     "prepare": "husky"
   },
   "dependencies": {

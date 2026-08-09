@@ -37,4 +37,6 @@ A mobile-first web assistant designed specifically for playing 18XX board games.
    ```
 
 ## Deployment
-This project is configured to deploy automatically to GitHub Pages via GitHub Actions. Any push to the `main` branch will trigger a production build and deploy to the `gh-pages` environment.
+Pushing to `main` triggers the `deploy.yml` GitHub Action, which builds the app, serves that build inside the runner and runs the `@smoke` tagged Playwright tests against it. Only if those pass does it publish to GitHub Pages (the `github-pages` environment). A broken build stops before publishing, so the previously deployed site keeps serving.
+
+Linting and the full test suite run on your machine, in the `pre-commit` and `pre-push` hooks, not on GitHub.
