@@ -135,6 +135,8 @@ export default function RevenueCalculator() {
           companyName={activeCompanies.find(c => c.shortName === selectedCompanyId)?.name}
           trains={receiptTrains}
           totalRevenue={grandTotal}
+          totalShares={totalShares}
+          isHalfPay={isHalfPay}
         />
       </Box>
     </Box>

@@ -1,4 +1,5 @@
-import { trainLabel } from './receiptLayout.js';
+import { trainLabel, shareLabel, payoutLabel } from './receiptLayout.js';
+import { calculatePayout } from '../../utils/payoutMath.js';
 
 export const COLS = 32;
 
@@ -121,6 +122,12 @@ export function splitReceipt(receiptData = {}) {
 
   body.push({ text: separator, bold: false });
   spreadLine('TOTAL', `$${total}`).forEach((text) => body.push({ text, bold: true }));
+
+  const { perShare, companyKeeps } = calculatePayout(total, receiptData.totalShares, receiptData.isHalfPay);
+  const push = (text) => body.push({ text, bold: false });
+  spreadLine(shareLabel(receiptData.totalShares), payoutLabel(receiptData.isHalfPay)).forEach(push);
+  spreadLine('PER SHARE', `$${perShare}`).forEach(push);
+  spreadLine('TREASURY', `$${companyKeeps}`).forEach(push);
 
   if (trains.length > 0) {
     const count = `${trains.length} train${trains.length === 1 ? '' : 's'}`;

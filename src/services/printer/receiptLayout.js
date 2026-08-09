@@ -1,3 +1,11 @@
+export function shareLabel(totalShares) {
+  return `${totalShares || 10}-SHARE`;
+}
+
+export function payoutLabel(isHalfPay) {
+  return isHalfPay ? 'HALF PAY' : 'FULL PAY';
+}
+
 export function trainLabel(train, index) {
   const stopCount = train.stopCount || 0;
   if (stopCount === 0) return `T${index + 1}`;

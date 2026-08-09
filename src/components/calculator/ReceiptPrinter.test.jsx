@@ -49,6 +49,8 @@ const receipt = {
   companyName: 'Baltimore & Ohio',
   trains: [{ route: '40+40', revenue: 80, stopCount: 2 }],
   totalRevenue: 80,
+  totalShares: 5,
+  isHalfPay: true,
 };
 
 describe('ReceiptPrinter when nothing is paired', () => {
@@ -113,6 +115,8 @@ describe('ReceiptPrinter when a printer is paired', () => {
       companyName: 'Baltimore & Ohio',
       trains: receipt.trains,
       totalRevenue: 80,
+      totalShares: 5,
+      isHalfPay: true,
     });
   });
 

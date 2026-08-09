@@ -6,7 +6,7 @@ import { formatProbeReport } from '../../services/printer/connectPrinter.js';
 
 // showProbe is off because both printers now connect reliably. Pass it to get
 // the diagnostics back when a new printer will not connect.
-export default function ReceiptPrinter({ company, companyName, trains, totalRevenue, showProbe = false }) {
+export default function ReceiptPrinter({ company, companyName, trains, totalRevenue, totalShares, isHalfPay, showProbe = false }) {
   const {
     connect,
     disconnect,
@@ -26,7 +26,7 @@ export default function ReceiptPrinter({ company, companyName, trains, totalReve
     setIsPrinting(true);
     setPrintError(null);
     try {
-      await printReceipt(characteristic, printer, { company, companyName, trains, totalRevenue });
+      await printReceipt(characteristic, printer, { company, companyName, trains, totalRevenue, totalShares, isHalfPay });
     } catch (err) {
       console.error('Print failed:', err);
       setPrintError(`Print failed: ${err.message}`);

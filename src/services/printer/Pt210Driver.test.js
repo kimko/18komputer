@@ -184,15 +184,43 @@ describe('formatReceiptLines', () => {
   };
 
   it('renders the whole receipt', () => {
-    expect(formatReceiptLines(twoTrains)).toEqual([
+    expect(formatReceiptLines({ ...twoTrains, totalShares: 10, isHalfPay: true })).toEqual([
       ' '.repeat(8) + 'BALTIMORE & OHIO',
       '-'.repeat(32),
       '4s   $180  40+40+50+50',
       '3s+  $110  30+30+20+30(P)',
       '-'.repeat(32),
       'TOTAL' + ' '.repeat(23) + '$290',
+      '10-SHARE' + ' '.repeat(16) + 'HALF PAY',
+      'PER SHARE' + ' '.repeat(20) + '$15',
+      'TREASURY' + ' '.repeat(20) + '$140',
       ' '.repeat(12) + '2 trains',
     ]);
+  });
+
+  it('pays everything out and leaves the treasury empty on full pay', () => {
+    const lines = formatReceiptLines({ ...twoTrains, totalShares: 10, isHalfPay: false });
+    expect(lines).toContain('10-SHARE' + ' '.repeat(16) + 'FULL PAY');
+    expect(lines).toContain('PER SHARE' + ' '.repeat(20) + '$29');
+    expect(lines).toContain('TREASURY' + ' '.repeat(22) + '$0');
+  });
+
+  it('doubles the dividend on a 5-share company', () => {
+    const lines = formatReceiptLines({ ...twoTrains, totalShares: 5, isHalfPay: false });
+    expect(lines).toContain('5-SHARE' + ' '.repeat(17) + 'FULL PAY');
+    expect(lines).toContain('PER SHARE' + ' '.repeat(20) + '$58');
+  });
+
+  it('divides a 5-share half pay evenly', () => {
+    const lines = formatReceiptLines({ ...twoTrains, totalRevenue: 190, totalShares: 5, isHalfPay: true });
+    expect(lines).toContain('PER SHARE' + ' '.repeat(20) + '$19');
+    expect(lines).toContain('TREASURY' + ' '.repeat(21) + '$95');
+  });
+
+  it('assumes a 10-share company on full pay when the receipt carries no settings', () => {
+    const lines = formatReceiptLines(twoTrains);
+    expect(lines).toContain('10-SHARE' + ' '.repeat(16) + 'FULL PAY');
+    expect(lines).toContain('PER SHARE' + ' '.repeat(20) + '$29');
   });
 
   it('never produces a line wider than the paper', () => {
@@ -204,6 +232,8 @@ describe('formatReceiptLines', () => {
         { route: '10+10+10+10+10+10+10+10+10+10+10+10', revenue: 120, stopCount: 12 },
       ],
       totalRevenue: 430,
+      totalShares: 5,
+      isHalfPay: true,
     });
     lines.forEach(line => expect(line.length).toBeLessThanOrEqual(32));
   });
@@ -244,6 +274,9 @@ describe('formatReceiptLines', () => {
       ' '.repeat(10) + '(no routes)',
       '-'.repeat(32),
       'TOTAL' + ' '.repeat(25) + '$0',
+      '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
+      'PER SHARE' + ' '.repeat(21) + '$0',
+      'TREASURY' + ' '.repeat(22) + '$0',
     ]);
   });
 
@@ -308,6 +341,9 @@ describe('generatePt210Payload', () => {
       '3s+  $110  30+30+20+30(P)',
       '-'.repeat(32),
       'TOTAL' + ' '.repeat(23) + '$290',
+      '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
+      'PER SHARE' + ' '.repeat(20) + '$29',
+      'TREASURY' + ' '.repeat(22) + '$0',
       ' '.repeat(12) + '2 trains',
     ]);
   });
@@ -388,6 +424,9 @@ describe('generatePt210Payload', () => {
       ' '.repeat(10) + '(no routes)',
       '-'.repeat(32),
       'TOTAL' + ' '.repeat(25) + '$0',
+      '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
+      'PER SHARE' + ' '.repeat(21) + '$0',
+      'TREASURY' + ' '.repeat(22) + '$0',
     ]);
   });
 
