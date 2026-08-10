@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { printReceipt } from './PrinterService.js';
+import { printReceipt, printResults } from './PrinterService.js';
 import { streamToDevice } from './BleTransportService.js';
 
 vi.mock('./BleTransportService.js', () => ({
@@ -113,5 +113,48 @@ describe('printReceipt', () => {
     await expect(printReceipt(characteristic, null, {})).rejects.toThrow(
       'Cannot print: no printer is selected.'
     );
+  });
+});
+
+describe('printResults', () => {
+  const payload = new Uint8Array([1, 2, 3]);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('refuses when no printer is selected', async () => {
+    await expect(printResults(characteristic, null, {})).rejects.toThrow('no printer is selected');
+  });
+
+  it('explains itself when the printer cannot do results', async () => {
+    const labelOnlyPrinter = { id: 'd30', displayName: 'Phomemo D30', buildPayloads: vi.fn() };
+    await expect(printResults(characteristic, labelOnlyPrinter, {}))
+      .rejects.toThrow('Phomemo D30 cannot print results');
+  });
+
+  it('builds from the results builder, not the receipt one', async () => {
+    const buildResultsPayloads = vi.fn().mockResolvedValue([payload]);
+    const buildPayloads = vi.fn();
+    const printer = { id: 'pt210', buildResultsPayloads, buildPayloads, chunkSize: 128, writeMode: 'auto' };
+
+    await printResults(characteristic, printer, { gameName: 'x' });
+
+    expect(buildResultsPayloads).toHaveBeenCalledWith({ gameName: 'x' });
+    expect(buildPayloads).not.toHaveBeenCalled();
+  });
+
+  it('sends every payload in order', async () => {
+    const second = new Uint8Array([4]);
+    const printer = {
+      id: 'pt210',
+      buildResultsPayloads: vi.fn().mockResolvedValue([payload, second]),
+      chunkSize: 128, writeMode: 'auto'
+    };
+
+    await printResults(characteristic, printer, {});
+
+    expect(streamToDevice).toHaveBeenNthCalledWith(1, characteristic, payload, expect.any(Object));
+    expect(streamToDevice).toHaveBeenNthCalledWith(2, characteristic, second, expect.any(Object));
   });
 });

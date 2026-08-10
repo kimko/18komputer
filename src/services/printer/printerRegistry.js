@@ -1,5 +1,5 @@
 import { generatePhomemoPayload } from './PhomemoD30Driver.js';
-import { generatePt210Payload } from './Pt210Driver.js';
+import { generatePt210Payload, generateResultsPayload } from './Pt210Driver.js';
 
 const shortUuid = (short) => `0000${short}-0000-1000-8000-00805f9b34fb`;
 
@@ -40,6 +40,7 @@ const PT210 = {
   chunkSize: 128,
   interPayloadDelayMs: 0,
   buildPayloads: generatePt210Payload,
+  buildResultsPayloads: generateResultsPayload,
 };
 
 export const PRINTERS = [D30, PT210];

@@ -159,4 +159,10 @@ describe('Dashboard', () => {
       expect(updateGameState).toHaveBeenCalledTimes(1);
     }, { timeout: 2000 });
   });
+
+  it('offers to print the results', async () => {
+    renderWithChakra(<Dashboard />);
+    await screen.findByText('Player Holdings');
+    expect(screen.getByText('Results Receipt')).toBeInTheDocument();
+  });
 });

@@ -52,6 +52,11 @@ describe('PRINTERS', () => {
     expect(d30.interPayloadDelayMs).toBe(500);
   });
 
+  it('lets the receipt printer print results, and not the label printer', () => {
+    expect(typeof findPrinterById('pt210').buildResultsPayloads).toBe('function');
+    expect(findPrinterById('d30').buildResultsPayloads).toBeUndefined();
+  });
+
   it('gives the PT-210 several ids to try, since its real ones are unknown', () => {
     const pt210 = findPrinterById('pt210');
     expect(pt210.endpoints.length).toBeGreaterThan(1);

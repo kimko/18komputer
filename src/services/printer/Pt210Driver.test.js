@@ -10,6 +10,7 @@ import {
   headerLines,
   formatReceiptLines,
   generatePt210Payload,
+  generateResultsPayload,
 } from './Pt210Driver.js';
 
 describe('sanitizeAscii', () => {
@@ -344,6 +345,12 @@ const decodeLines = (payload) => {
 const contains = (payload, sequence) =>
   toRaw(payload).includes(String.fromCharCode(...sequence));
 
+// The QR bitmap is not text, and decoding it as text invents lines of any width.
+const beforeRaster = (payload) => {
+  const at = toRaw(payload).indexOf(String.fromCharCode(0x1d, 0x76, 0x30, 0x00));
+  return at === -1 ? payload : payload.slice(0, at);
+};
+
 describe('generatePt210Payload', () => {
   const twoTrains = {
     companyName: 'Baltimore & Ohio',
@@ -458,5 +465,66 @@ describe('generatePt210Payload', () => {
       '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
       'TREASURY' + ' '.repeat(22) + '$0',
     ]);
+  });
+});
+
+describe('generateResultsPayload', () => {
+  const resultsData = {
+    gameName: '1817 4p Aug-07',
+    players: ['Liam'],
+    activeCompanies: [{ shortName: 'UR', totalShares: 5, parValue: 50 }],
+    maxOr: 3,
+    printedAt: new Date('2026-08-10T09:00:00Z'),
+    dashboardState: {
+      shareValues: { UR: 440 }, ors: { UR: { or1: 410 } },
+      playerAssets: { Liam: { cash: 2765, shares: { UR: 60 } } }
+    },
+    shareUrl: 'https://kimko.github.io/18komputer/resume#import=ABC'
+  };
+
+  it('produces one payload, because a receipt is one continuous strip', async () => {
+    expect(await generateResultsPayload(resultsData)).toHaveLength(1);
+  });
+
+  it('prints the standings', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    const text = decodeLines(payload).join('\n');
+    expect(text).toContain('FINAL RESULTS');
+    expect(text).toContain('1 LIAM');
+    expect(text).toContain('SCAN TO OPEN RESULTS');
+  });
+
+  it('rules a line off under the header and above the footer', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    const rules = decodeLines(beforeRaster(payload)).filter((line) => line === '-'.repeat(32));
+    expect(rules).toHaveLength(2);
+  });
+
+  it('includes the raster command for the code', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    expect(contains(payload, [0x1d, 0x76, 0x30, 0x00])).toBe(true);
+  });
+
+  it('never writes a text line wider than the paper', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    decodeLines(beforeRaster(payload)).forEach((line) =>
+      expect(line.length).toBeLessThanOrEqual(32)
+    );
+  });
+
+  it('feeds the paper past the tear bar', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    expect(contains(payload, [0x1b, 0x64])).toBe(true);
+  });
+
+  it('prints the slip and says so when the link is too long to encode', async () => {
+    const [payload] = await generateResultsPayload({
+      ...resultsData,
+      shareUrl: 'https://x/' + 'A'.repeat(2500)
+    });
+    const text = decodeLines(payload).join('\n');
+    expect(text).toContain('1 LIAM');
+    expect(text).toContain('LINK TOO LONG');
+    expect(contains(payload, [0x1d, 0x76, 0x30, 0x00])).toBe(false);
   });
 });
