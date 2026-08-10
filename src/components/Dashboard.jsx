@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Box, Center, Spinner, Flex, Button, Text, Tabs } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
-import LZString from 'lz-string';
 import { useGameData } from '../hooks/useGameData.js';
+import { buildShareToken, buildShareLink } from '../services/printer/shareLink.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
@@ -40,32 +40,9 @@ export default function Dashboard() {
   const handleShare = useCallback(async () => {
     if (!gameInstance) return;
 
-    // Omit staticConfig to prevent redundancy in the magic link
-    const { staticConfig: _, ...gameDataToShare } = gameInstance;
-
-    // Create a copy of the game instance to share, injecting the freshest local dashboardState
-    const shareInstance = { 
-      ...gameDataToShare, 
-      state: {
-        ...gameDataToShare.state,
-        dashboardState: dashboardState
-      },
-      exportedAt: new Date().toISOString() 
-    };
-    
-    // Log for Playwright debugging
     console.log('MAGIC_LINK_DASHBOARD_STATE', JSON.stringify(dashboardState));
-
-    // Generate magic link with compressed state
-    const compressedData = LZString.compressToEncodedURIComponent(JSON.stringify(shareInstance));
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    let rootSegment = '';
-    // If the first segment is NOT 'game', we assume it's the repo name for GitHub pages (e.g. /18komputer)
-    if (pathSegments.length > 0 && pathSegments[0] !== 'game') {
-      rootSegment = `/${pathSegments[0]}`;
-    }
-    
-    const resumeLink = `${window.location.origin}${rootSegment}/resume#import=${compressedData}`;
+    const token = buildShareToken(gameInstance, dashboardState);
+    const resumeLink = buildShareLink(window.location.origin, window.location.pathname, token);
 
     // Copy resume link to clipboard
     try {
