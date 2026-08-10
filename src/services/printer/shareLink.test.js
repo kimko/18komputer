@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import LZString from 'lz-string';
 import { buildShareToken, buildShareLink, readShareToken } from './shareLink.js';
-import { buildQrRaster } from './qrRaster.js';
-import fixtures from '../../../tests/fixtures/historical-games-import.json';
 
 const gameInstance = {
   id: 'inst_1',
@@ -157,19 +155,6 @@ describe('readShareToken', () => {
     expect(back.state.activeCompanies[0].shortName).toBe('A&A');
     expect(back.players).toEqual(['Liam', 'Kim']);
   });
-});
-
-describe('fitting a real game into a QR code', () => {
-  const games = Array.isArray(fixtures) ? fixtures : fixtures.games || [];
-
-  it.each(games.map((g) => [g.gameName || g.gameId, g]))(
-    'prints a scannable code for %s',
-    (_name, game) => {
-      const token = buildShareToken(game, game.state.dashboardState || {}, { includeCalculator: false });
-      const url = buildShareLink('https://kimko.github.io', '/18komputer/game/x/dashboard', token);
-      expect(buildQrRaster(url)).not.toBeNull();
-    }
-  );
 });
 
 describe('buildShareLink', () => {

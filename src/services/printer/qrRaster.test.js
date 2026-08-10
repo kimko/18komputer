@@ -2,8 +2,26 @@ import { describe, it, expect } from 'vitest';
 import { buildQrRaster, PRINT_WIDTH_DOTS, MIN_DOTS_PER_MODULE } from './qrRaster.js';
 
 const SHORT = 'https://kimko.github.io/18komputer/';
-const LONG = 'https://kimko.github.io/18komputer/resume#import=' + 'A'.repeat(700);
+const GAME_URL = 'https://kimko.github.io/18komputer/game/game_1786043602870_246/dashboard';
+const MAGIC_LINK = 'https://kimko.github.io/18komputer/resume#import=' + 'A'.repeat(700);
 const header = (raster) => Array.from(raster.slice(0, 8));
+
+// The corner finder square is exactly 7 modules wide, so its first solid run gives the scale.
+const measureDotsPerModule = (raster) => {
+  const rowBytes = raster[4] + raster[5] * 256;
+  const height = raster[6] + raster[7] * 256;
+  const bit = (x, y) => (raster[8 + y * rowBytes + (x >> 3)] >> (7 - (x & 7))) & 1;
+
+  for (let y = 0; y < height; y++) {
+    let x = 0;
+    while (x < rowBytes * 8 && !bit(x, y)) x++;
+    if (x === rowBytes * 8) continue;
+    let run = 0;
+    while (x + run < rowBytes * 8 && bit(x + run, y)) run++;
+    return run / 7;
+  }
+  return 0;
+};
 const widthBytes = (raster) => raster[4] + raster[5] * 256;
 const heightDots = (raster) => raster[6] + raster[7] * 256;
 
@@ -39,21 +57,25 @@ describe('buildQrRaster', () => {
     expect(Array.from(raster.slice(8)).some((b) => b !== 0)).toBe(true);
   });
 
-  it('still prints a readable code for a full-length game link', () => {
-    const raster = buildQrRaster(LONG);
+  it('prints a readable code for a game address', () => {
+    const raster = buildQrRaster(GAME_URL);
     expect(raster).not.toBeNull();
     expect(widthBytes(raster) * 8).toBeLessThanOrEqual(PRINT_WIDTH_DOTS);
     expect(Array.from(raster.slice(8)).some((b) => b !== 0)).toBe(true);
   });
 
-  it('keeps modules at or above the size that scans off thermal paper', () => {
-    const raster = buildQrRaster(LONG);
-    const modulesAcross = Math.round((widthBytes(raster) * 8) / MIN_DOTS_PER_MODULE);
-    expect(widthBytes(raster) * 8 / modulesAcross).toBeGreaterThanOrEqual(MIN_DOTS_PER_MODULE);
+  it('keeps squares at or above the 0.75mm that scans off thermal paper', () => {
+    [SHORT, GAME_URL].forEach((text) => {
+      expect(measureDotsPerModule(buildQrRaster(text))).toBeGreaterThanOrEqual(MIN_DOTS_PER_MODULE);
+    });
   });
 
   it('prints nothing rather than an unscannable block when the link is too long', () => {
     expect(buildQrRaster('https://x/' + 'A'.repeat(2500))).toBeNull();
+  });
+
+  it('refuses a whole-game link, which only fits at a size no camera can read', () => {
+    expect(buildQrRaster(MAGIC_LINK)).toBeNull();
   });
 
   it('prints nothing for no link at all', () => {

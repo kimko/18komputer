@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { useWebBluetooth } from '../hooks/useWebBluetooth.js';
 import { printResults } from '../services/printer/PrinterService.js';
-import { buildShareToken, buildShareLink } from '../services/printer/shareLink.js';
 
 export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) {
   const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = useWebBluetooth();
@@ -15,8 +14,6 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
     setIsPrinting(true);
     setPrintError(null);
     try {
-      // The calculator scratch is left out to keep the QR small enough to scan.
-      const token = buildShareToken(gameInstance, dashboardState, { includeCalculator: false });
       await printResults(characteristic, printer, {
         gameName: gameInstance.gameName,
         players: gameInstance.players,
@@ -24,7 +21,8 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
         dashboardState,
         maxOr,
         printedAt: new Date(),
-        shareUrl: buildShareLink(window.location.origin, window.location.pathname, token)
+        // Only the game's own address fits at a size that scans off thermal paper.
+        shareUrl: `${window.location.origin}${window.location.pathname}`
       });
     } catch (err) {
       console.error('Print failed:', err);
