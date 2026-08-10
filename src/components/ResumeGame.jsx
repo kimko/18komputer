@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid, Input, VStack, Textarea } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
-import LZString from 'lz-string';
 import { getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
+import { readShareToken } from '../services/printer/shareLink.js';
 import ModalBackdrop from './ui/ModalBackdrop.jsx';
 
 export default function ResumeGame() {
@@ -35,20 +35,18 @@ export default function ResumeGame() {
     // Check for Magic Link import
     const hash = window.location.hash;
     if (hash.startsWith('#import=')) {
-      const compressedData = hash.replace('#import=', '');
-      try {
-        const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
-        if (jsonString) {
-          const gameData = JSON.parse(jsonString);
-          importGame(gameData).then(() => {
-            window.location.hash = ''; // Clear hash
-            navigate(`/game/${gameData.id}/dashboard`);
-          });
+      (async () => {
+        try {
+          const gameData = await readShareToken(hash.replace('#import=', ''));
+          if (!gameData) return;
+          await importGame(gameData);
+          window.location.hash = ''; // Clear hash
+          navigate(`/game/${gameData.id}/dashboard`);
+        } catch (err) {
+          console.error('Failed to parse magic link', err);
+          setImportError('Invalid or corrupted share link.');
         }
-      } catch (err) {
-        console.error("Failed to parse magic link", err);
-        setImportError('Invalid or corrupted share link.');
-      }
+      })();
     }
   }, [navigate]);
 
@@ -133,10 +131,9 @@ export default function ResumeGame() {
     
     try {
       setLoading(true);
-      const jsonStr = LZString.decompressFromEncodedURIComponent(importToken.trim());
-      if (!jsonStr) throw new Error('Decompression failed');
-      
-      const data = JSON.parse(jsonStr);
+      const data = await readShareToken(importToken.trim());
+      if (!data) throw new Error('Decompression failed');
+
       await importGame(data);
       
       const list = await getGamesList();

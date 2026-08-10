@@ -66,7 +66,7 @@ describe('ResultsPrinter', () => {
     expect(sentPrinter).toBe(printer);
     expect(data.gameName).toBe('1817 4p Aug-07');
     expect(data.players).toEqual(['Liam']);
-    expect(data.shareUrl).toContain('#import=');
+    expect(data.shareUrl).toBe(window.location.origin + window.location.pathname);
   });
 
   it('shows a print failure on screen, not only in the console', async () => {

@@ -107,7 +107,13 @@ export function splitReceipt(receiptData = {}) {
   const separator = '-'.repeat(COLS);
 
   const header = headerLines(receiptData.companyName, receiptData.company);
-  const body = [{ text: separator, bold: false }];
+  const shortName = sanitizeAscii(receiptData.company).toUpperCase().replace(/\s+/g, ' ').trim();
+  const body = [];
+
+  if (shortName && !header.some((line) => line.trim() === shortName)) {
+    body.push({ text: centerText(shortName), bold: false });
+  }
+  body.push({ text: separator, bold: false });
 
   if (trains.length === 0) {
     body.push({ text: centerText('(no routes)'), bold: false });

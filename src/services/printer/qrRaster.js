@@ -2,11 +2,12 @@ import qrcode from 'qrcode-generator';
 
 export const PRINT_WIDTH_DOTS = 384;
 export const QUIET_ZONE_MODULES = 4;
-export const MIN_DOTS_PER_MODULE = 3;
+// Measured on the PT-210: 0.75mm squares scan, 0.63mm and below do not.
+export const MIN_DOTS_PER_MODULE = 6;
 
 const GS_RASTER = [0x1d, 0x76, 0x30, 0x00];
 
-export function buildQrRaster(text) {
+export function buildQrRaster(text, { dotsPerModule: forcedDots } = {}) {
   if (!text) return null;
 
   const qr = qrcode(0, 'L');
@@ -18,8 +19,9 @@ export function buildQrRaster(text) {
   }
 
   const modules = qr.getModuleCount() + QUIET_ZONE_MODULES * 2;
-  const dotsPerModule = Math.floor(PRINT_WIDTH_DOTS / modules);
+  const dotsPerModule = forcedDots || Math.floor(PRINT_WIDTH_DOTS / modules);
   if (dotsPerModule < MIN_DOTS_PER_MODULE) return null;
+  if (modules * dotsPerModule > PRINT_WIDTH_DOTS) return null;
 
   const sideDots = modules * dotsPerModule;
   const rowBytes = Math.ceil(sideDots / 8);
