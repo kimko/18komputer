@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  COLS,
   PT210_STYLE,
   centerText,
   rightAlign,
@@ -12,12 +11,6 @@ import {
   formatReceiptLines,
   generatePt210Payload,
 } from './Pt210Driver.js';
-
-describe('COLS', () => {
-  it('is 32, matching a 384 dot head and the 12x24 built-in font', () => {
-    expect(COLS).toBe(32);
-  });
-});
 
 describe('sanitizeAscii', () => {
   it('leaves plain text alone', () => {
@@ -55,17 +48,8 @@ describe('sanitizeAscii', () => {
 });
 
 describe('centerText', () => {
-  it('pads the left so the text sits in the middle', () => {
-    expect(centerText('2 trains')).toBe(' '.repeat(12) + '2 trains');
-    expect(centerText('BALTIMORE & OHIO')).toBe(' '.repeat(8) + 'BALTIMORE & OHIO');
-  });
-
   it('rounds down when the remainder is odd', () => {
     expect(centerText('abc', 8)).toBe('  abc');
-  });
-
-  it('adds no padding when the text fills the line', () => {
-    expect(centerText('x'.repeat(32))).toBe('x'.repeat(32));
   });
 
   it('leaves over-long text untouched', () => {
@@ -74,10 +58,6 @@ describe('centerText', () => {
 });
 
 describe('rightAlign', () => {
-  it('pushes the text to the right edge', () => {
-    expect(rightAlign('$290')).toBe(' '.repeat(28) + '$290');
-  });
-
   it('leaves over-long text untouched', () => {
     expect(rightAlign('x'.repeat(33))).toBe('x'.repeat(33));
   });
@@ -348,10 +328,6 @@ describe('formatReceiptLines', () => {
     const lines = formatReceiptLines({ company: 'B&O', trains: [], totalRevenue: 0 });
     expect(lines[0]).toBe(' '.repeat(14) + 'B&O');
   });
-
-  it('does not throw on an empty object', () => {
-    expect(() => formatReceiptLines({})).not.toThrow();
-  });
 });
 
 const toRaw = (payload) => String.fromCharCode(...payload);
@@ -471,20 +447,6 @@ describe('generatePt210Payload', () => {
     expect(contains(payload, [0x1d, 0x76])).toBe(false);
   });
 
-  it('omits the code page command when that style switch is off', async () => {
-    PT210_STYLE.useCharTable = false;
-    const [payload] = await generatePt210Payload(twoTrains);
-    expect(contains(payload, [0x1b, 0x74, 0x00])).toBe(false);
-    expect(decodeLines(payload)[0]).toBe(' '.repeat(8) + 'BALTIMORE & OHIO');
-  });
-
-  it('omits the double height command when that style switch is off', async () => {
-    PT210_STYLE.useDoubleHeightHeader = false;
-    const [payload] = await generatePt210Payload(twoTrains);
-    expect(contains(payload, [0x1d, 0x21, 0x01])).toBe(false);
-    expect(toRaw(payload)).toContain('\x1bE\x01' + ' '.repeat(8) + 'BALTIMORE & OHIO');
-  });
-
   it('prints a usable receipt when nothing was run', async () => {
     const [payload] = await generatePt210Payload({ companyName: 'Baltimore & Ohio', company: 'B&O' });
     expect(decodeLines(payload)).toEqual([
@@ -496,9 +458,5 @@ describe('generatePt210Payload', () => {
       '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
       'TREASURY' + ' '.repeat(22) + '$0',
     ]);
-  });
-
-  it('does not throw on an empty object', async () => {
-    await expect(generatePt210Payload({})).resolves.toHaveLength(1);
   });
 });

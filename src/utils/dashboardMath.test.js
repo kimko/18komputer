@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal, getCompanyShareCount, getPlayerTotalShares, getCompanyHoldings } from './dashboardMath';
+import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal, getCompanyShareCount, getPlayerTotalShares, getCompanyHoldings, getBankShares } from './dashboardMath';
 
 describe('dashboardMath', () => {
   const mockDashboardState = {
@@ -55,6 +55,39 @@ describe('dashboardMath', () => {
     // 3. Net worth checks out
     // Cash (1000) + Share Value (134) + Operating Income (90) = 1224
     expect(getPlayerNetWorth(state, companies, maxOr, player)).toBe(1224);
+  });
+
+  describe('getBankShares', () => {
+    const state = (playerAssets) => ({ shareValues: {}, ors: {}, playerAssets });
+
+    it('holds the whole company while nobody has bought in', () => {
+      expect(getBankShares(state({}), ['Alice', 'Bob'], 'PRR')).toBe(100);
+    });
+
+    it('holds whatever the players have not taken', () => {
+      const s = state({ Alice: { shares: { PRR: 40 } }, Bob: { shares: { PRR: 20 } } });
+      expect(getBankShares(s, ['Alice', 'Bob'], 'PRR')).toBe(40);
+    });
+
+    it('holds nothing once the company is sold out', () => {
+      const s = state({ Alice: { shares: { PRR: 60 } }, Bob: { shares: { PRR: 40 } } });
+      expect(getBankShares(s, ['Alice', 'Bob'], 'PRR')).toBe(0);
+    });
+
+    it('never goes negative, so the column cannot show an impossible figure', () => {
+      const s = state({ Alice: { shares: { PRR: 60 } }, Bob: { shares: { PRR: 60 } } });
+      expect(getBankShares(s, ['Alice', 'Bob'], 'PRR')).toBe(0);
+    });
+
+    it('ignores holdings belonging to somebody who is not a player', () => {
+      const s = state({ Alice: { shares: { PRR: 40 } }, Ghost: { shares: { PRR: 60 } } });
+      expect(getBankShares(s, ['Alice'], 'PRR')).toBe(60);
+    });
+
+    it('counts a player with no entry at all as holding nothing', () => {
+      const s = state({ Alice: { shares: { PRR: 40 } } });
+      expect(getBankShares(s, ['Alice', 'Bob'], 'PRR')).toBe(60);
+    });
   });
 
   describe('getCompanyHoldings', () => {

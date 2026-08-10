@@ -17,13 +17,13 @@ const formatShareCount = (count) => Number(Number(count).toFixed(1));
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import { saveUsers } from '../../api/mockApi.js';
 
-function PlayerGridRow({ label, players, getValue, valueProps = {}, endNode = null }) {
+function PlayerGridRow({ label, players, getValue, valueProps = {}, endNode = null, testId }) {
   return (
     <>
       <GridItem><Text color="gray.400" fontSize="sm">{label}</Text></GridItem>
       {players.map(p => (
         <GridItem key={`${label}-${p}`} textAlign="center">
-          <Text {...valueProps}>{getValue(p)}</Text>
+          <Text data-testid={testId} {...valueProps}>{getValue(p)}</Text>
         </GridItem>
       ))}
       <GridItem textAlign="center">{endNode}</GridItem>
@@ -232,6 +232,7 @@ export default function PlayerHoldingsGrid({
                     <PlayerGridRow
                       label={`↳ Shares ${c.totalShares || 10}`}
                       labelProps={{ color: "gray.500", fontSize: "xs", pl: "2" }}
+                      testId={`company-shares-${c.shortName}`}
                       players={players}
                       getValue={(p) => formatShareCount(gridData.playerShareCounts[p]?.[c.shortName] || 0)}
                       valueProps={{ color: "purple.200", fontSize: "sm" }}
@@ -262,6 +263,7 @@ export default function PlayerHoldingsGrid({
 
             <PlayerGridRow
               label="Total Shares"
+              testId="total-shares"
               players={players}
               getValue={(p) => formatShareCount(gridData.totalShares[p])}
               valueProps={{ fontWeight: "bold", color: "purple.300" }}

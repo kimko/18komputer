@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import LZString from 'lz-string';
 import { createGame, getGame, updateGameState, updateGamePlayers, getGamesList, updateGameName, importGame, deleteAllGames } from './mockApi.js';
 
 describe('Mock API (LocalStorage)', () => {
@@ -223,6 +224,73 @@ describe('Mock API (LocalStorage)', () => {
       const game = await createGame('1830', ['Alice', 'Bob']);
       await expect(updateGamePlayers(game.id, ['Alice'])).resolves.toBeDefined();
       expect((await getGame(game.id)).players).toEqual(['Alice']);
+    });
+  });
+
+  // The magic link is the one path where a whole game can be silently corrupted: it is
+  // compressed into a URL and rebuilt on a different device with no server to check it.
+  describe('magic link round trip', () => {
+    const compress = (game) => LZString.compressToEncodedURIComponent(JSON.stringify(game));
+    const decompress = (token) => JSON.parse(LZString.decompressFromEncodedURIComponent(token));
+
+    const fullGame = {
+      id: 'game_shared_1',
+      gameId: '1817',
+      gameName: '1817 4p Aug-07',
+      players: ['Brett', 'Eduardo', 'Liam', 'Kim'],
+      createdAt: '2026-08-07T23:02:46.066Z',
+      version: 2,
+      state: {
+        activeCompanies: [
+          { name: 'New York, Ontario & Western', shortName: 'NYOW', color: '#fef6c5', parValue: 50, totalShares: 5 },
+          { name: 'Bessemer and Lake Erie Railroad', shortName: 'Bess', color: '#262510', parValue: 50, totalShares: 10 }
+        ],
+        calculatorState: { NYOW: { trains: [{ id: 1, stops: [80, 50], bonusStops: [{ val: 10, label: 'C' }] }], isHalfPay: true } },
+        dashboardState: {
+          maxOr: 3,
+          ors: { NYOW: { or1: '380', or2: 380 } },
+          shareValues: { NYOW: 440 },
+          playerAssets: {
+            Kim: { cash: '1923', shares: { NYOW: 60, Bess: 10 } },
+            Liam: { cash: 2765, shares: {} }
+          }
+        }
+      }
+    };
+
+    it('rebuilds the game exactly as it went in', () => {
+      expect(decompress(compress(fullGame))).toEqual(fullGame);
+    });
+
+    it('keeps numbers and text-that-looks-like-numbers apart', () => {
+      const back = decompress(compress(fullGame));
+      expect(back.state.dashboardState.playerAssets.Kim.cash).toBe('1923');
+      expect(back.state.dashboardState.playerAssets.Liam.cash).toBe(2765);
+      expect(back.state.dashboardState.ors.NYOW.or1).toBe('380');
+      expect(back.state.dashboardState.ors.NYOW.or2).toBe(380);
+    });
+
+    it('survives company names with punctuation and accents', () => {
+      const accented = { ...fullGame, state: { ...fullGame.state,
+        activeCompanies: [{ name: 'Chemin de fer Nord-Est — Société', shortName: 'CFN', color: '#fef6c5' }] } };
+      expect(decompress(compress(accented)).state.activeCompanies[0].name)
+        .toBe('Chemin de fer Nord-Est — Société');
+    });
+
+    it('is accepted by the importer and comes back out of storage unchanged', async () => {
+      const imported = decompress(compress(fullGame));
+      await importGame(imported);
+
+      const fetched = await getGame(fullGame.id);
+      expect(fetched.players).toEqual(fullGame.players);
+      expect(fetched.state.dashboardState).toEqual(fullGame.state.dashboardState);
+      expect(fetched.state.activeCompanies).toEqual(fullGame.state.activeCompanies);
+    });
+
+    it('rejects a token that has been truncated in transit', () => {
+      const token = compress(fullGame);
+      const cut = token.slice(0, Math.floor(token.length / 2));
+      expect(() => decompress(cut)).toThrow();
     });
   });
 

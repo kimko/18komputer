@@ -161,29 +161,49 @@ describe('PlayerHoldingsGrid', () => {
     });
   });
 
+  // Cells are read by testid so the assertions name the row and the player, rather than
+  // counting how often a bare digit happens to appear anywhere in the grid.
+  const cells = (testId) => screen.getAllByTestId(testId).map(el => el.textContent);
+
   it('counts shares by the corporate structure', () => {
     // Alice 20% and Bob 40% of a 5-share company are 1 and 2 shares, leaving 2 in the bank
     renderComponent({ activeCompanies: [{ shortName: 'PRR', color: '#ff0000', totalShares: 5 }] });
 
-    // The Total Shares row alone before Details is opened
-    expect(screen.getAllByText('1')).toHaveLength(1);
-    expect(screen.getAllByText('2')).toHaveLength(1);
+    expect(cells('total-shares')).toEqual(['1', '2']);
 
     fireEvent.click(screen.getByText('Details'));
 
-    // The row names the structure it is counting in
     expect(screen.getByText('↳ Shares 5')).toBeInTheDocument();
-    // Alice now appears in both the per-company row and the total
-    expect(screen.getAllByText('1')).toHaveLength(2);
-    // Bob twice over, plus the bank once
-    expect(screen.getAllByText('2')).toHaveLength(3);
+    expect(cells('company-shares-PRR')).toEqual(['1', '2']);
   });
 
   it('counts a 10-share company in tenths', () => {
+    // The same percentages in a ten-share company are twice as many shares
     renderComponent();
-    // Alice 20% is 2 shares, Bob 40% is 4
-    expect(screen.getAllByText('2')).toHaveLength(1);
-    expect(screen.getAllByText('4')).toHaveLength(1);
+
+    expect(cells('total-shares')).toEqual(['2', '4']);
+
+    fireEvent.click(screen.getByText('Details'));
+    expect(cells('company-shares-PRR')).toEqual(['2', '4']);
+  });
+
+  it('adds a player up across companies of different structures', () => {
+    renderComponent({
+      activeCompanies: [
+        { shortName: 'PRR', color: '#ff0000', totalShares: 10 },
+        { shortName: 'NYC', color: '#000000', totalShares: 5 }
+      ],
+      dashboardState: {
+        ...mockDashboardState,
+        shareValues: { PRR: 100, NYC: 100 },
+        playerAssets: {
+          Alice: { cash: 0, shares: { PRR: 40, NYC: 20 } }, // 4 + 1
+          Bob: { cash: 0, shares: { NYC: 60 } }             // 3
+        }
+      }
+    });
+
+    expect(cells('total-shares')).toEqual(['5', '3']);
   });
 
   it('triggers popups for cash and shares', () => {

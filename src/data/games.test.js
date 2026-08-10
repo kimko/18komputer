@@ -2,72 +2,97 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
+const gamesDir = path.join(__dirname, 'games');
+const files = fs.readdirSync(gamesDir).filter(f => f.endsWith('.json') && f !== 'index.json');
+
+// Returns a list of problems rather than asserting, so one run reports every bad file at once.
+function validate(file, data) {
+  const problems = [];
+  const fail = (msg) => problems.push(`${file}: ${msg}`);
+  const isNumberArray = (v) => Array.isArray(v) && v.every(n => typeof n === 'number');
+
+  if (typeof data.id !== 'string') fail('id is missing or not a string');
+  if (typeof data.name !== 'string') fail('name is missing or not a string');
+
+  // The app loads a game with import(`../data/games/${gameId}.json`), so a mismatch is unloadable.
+  if (data.id !== file.replace(/\.json$/, '')) fail(`id "${data.id}" does not match the filename`);
+
+  if ('bggId' in data && typeof data.bggId !== 'number') fail('bggId is not a number');
+  if ('maxOr' in data && typeof data.maxOr !== 'number') fail('maxOr is not a number');
+
+  if (!isNumberArray(data.revenueStops)) fail('revenueStops must be an array of numbers');
+  if (data.parValues && !isNumberArray(data.parValues)) fail('parValues must be an array of numbers');
+  if (data.sharePrices && !isNumberArray(data.sharePrices)) fail('sharePrices must be an array of numbers');
+
+  if (!Array.isArray(data.companies) || data.companies.length === 0) {
+    fail('companies must be a non-empty array');
+  } else {
+    data.companies.forEach((c, i) => {
+      if (typeof c.name !== 'string') fail(`company ${i} has no name`);
+      if (typeof c.shortName !== 'string') fail(`company ${i} has no shortName`);
+      if (c.color && !/^#[0-9a-fA-F]{6}$/.test(c.color)) fail(`company ${i} colour "${c.color}" is not a hex value`);
+    });
+    // Everything in a saved game is keyed by shortName, so duplicates would merge two companies.
+    const names = data.companies.map(c => c.shortName);
+    const duplicates = [...new Set(names.filter((n, i) => names.indexOf(n) !== i))];
+    if (duplicates.length) fail(`duplicate shortName: ${duplicates.join(', ')}`);
+  }
+
+  (data.trains || []).forEach((t, i) => {
+    if (typeof t.name !== 'string') fail(`train ${i} has no name`);
+    if (typeof t.cost !== 'number') fail(`train ${i} has no cost`);
+  });
+
+  (data.revenueBonuses || []).forEach((b, i) => {
+    if (typeof b.label !== 'string') fail(`revenue bonus ${i} has no label`);
+    if (!isNumberArray(b.adds)) fail(`revenue bonus ${i} has no numeric adds`);
+  });
+
+  return problems;
+}
+
 describe('Game Data Schema Validation', () => {
-  const gamesDir = path.join(__dirname, 'games');
-  const files = fs.readdirSync(gamesDir).filter(f => f.endsWith('.json') && f !== 'index.json');
+  it('has at least one game to check', () => {
+    expect(files.length).toBeGreaterThan(0);
+  });
 
-  it.each(files)('%s should conform to GameData schema', (file) => {
-    const filePath = path.join(gamesDir, file);
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  it('every game file conforms to the schema', () => {
+    const problems = files.flatMap(file =>
+      validate(file, JSON.parse(fs.readFileSync(path.join(gamesDir, file), 'utf8')))
+    );
+    expect(problems).toEqual([]);
+  });
 
-    // 1. Primitive fields
-    expect(data.id, 'id is required').toBeTypeOf('string');
-    expect(data.name, 'name is required').toBeTypeOf('string');
-    
-    // bggId is optional, but if present must be number
-    if ('bggId' in data) {
-      expect(data.bggId).toBeTypeOf('number');
-    }
-
-    if ('maxOr' in data) {
-      expect(data.maxOr).toBeTypeOf('number');
-    }
-
-    // 2. Arrays
-    expect(Array.isArray(data.revenueStops), 'revenueStops must be an array').toBe(true);
-    expect(data.revenueStops.every(s => typeof s === 'number'), 'revenueStops must be numbers').toBe(true);
-
-    if (data.parValues) {
-      expect(Array.isArray(data.parValues)).toBe(true);
-      expect(data.parValues.every(s => typeof s === 'number')).toBe(true);
-    }
-
-    if (data.sharePrices) {
-      expect(Array.isArray(data.sharePrices)).toBe(true);
-      expect(data.sharePrices.every(s => typeof s === 'number')).toBe(true);
-    }
-
-    // 3. Companies
-    expect(Array.isArray(data.companies), 'companies must be an array').toBe(true);
-    expect(data.companies.length).toBeGreaterThan(0);
-    
-    data.companies.forEach((company, index) => {
-      expect(company.name, `Company ${index} name missing`).toBeTypeOf('string');
-      expect(company.shortName, `Company ${index} shortName missing`).toBeTypeOf('string');
-      
-      // Color should be a valid hex string if present
-      if (company.color) {
-        expect(company.color).toMatch(/^#[0-9a-fA-F]{6}$/);
-      }
+  describe('the validator itself', () => {
+    it('accepts a well-formed game', () => {
+      expect(validate('1830.json', {
+        id: '1830', name: '1830', revenueStops: [10, 20],
+        companies: [{ name: 'Pennsylvania', shortName: 'PRR', color: '#237333' }]
+      })).toEqual([]);
     });
 
-    // 4. Trains (optional)
-    if (data.trains) {
-      expect(Array.isArray(data.trains)).toBe(true);
-      data.trains.forEach((train, index) => {
-        expect(train.name, `Train ${index} name missing`).toBeTypeOf('string');
-        expect(train.cost, `Train ${index} cost missing`).toBeTypeOf('number');
+    it('catches an id that does not match its filename', () => {
+      const problems = validate('1830.json', {
+        id: '1829', name: '1830', revenueStops: [10],
+        companies: [{ name: 'A', shortName: 'A' }]
       });
-    }
+      expect(problems).toContain('1830.json: id "1829" does not match the filename');
+    });
 
-    // 5. Revenue Bonuses (optional)
-    if (data.revenueBonuses) {
-      expect(Array.isArray(data.revenueBonuses)).toBe(true);
-      data.revenueBonuses.forEach((bonus, index) => {
-        expect(bonus.label, `Bonus ${index} label missing`).toBeTypeOf('string');
-        expect(Array.isArray(bonus.adds), `Bonus ${index} adds missing`).toBe(true);
-        expect(bonus.adds.every(a => typeof a === 'number')).toBe(true);
+    it('catches two companies sharing a short name', () => {
+      const problems = validate('x.json', {
+        id: 'x', name: 'x', revenueStops: [10],
+        companies: [{ name: 'A', shortName: 'PRR' }, { name: 'B', shortName: 'PRR' }]
       });
-    }
+      expect(problems).toContain('x.json: duplicate shortName: PRR');
+    });
+
+    it('catches a colour that is not a hex value', () => {
+      const problems = validate('x.json', {
+        id: 'x', name: 'x', revenueStops: [10],
+        companies: [{ name: 'A', shortName: 'A', color: 'red' }]
+      });
+      expect(problems).toContain('x.json: company 0 colour "red" is not a hex value');
+    });
   });
 });
