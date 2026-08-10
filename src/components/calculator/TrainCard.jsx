@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Text, VStack, SimpleGrid } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, Heading, Text, VStack, SimpleGrid } from '@chakra-ui/react';
 
 export default function TrainCard({
   train,
@@ -28,7 +28,26 @@ export default function TrainCard({
       opacity={train.isExcluded ? 0.6 : 1}
       transition="opacity 0.2s"
     >
-      <Flex justify="flex-end" gap="2" mb="2" wrap="wrap">
+      <Flex justify="space-between" align="center" gap="2" mb="3" wrap="wrap">
+        <Flex align="center" gap="2" flexShrink="0">
+          <Text fontSize="xs" color="gray.500" letterSpacing="wide" textTransform="uppercase">
+            Train
+          </Text>
+          <Center
+            w="8"
+            h="8"
+            borderRadius="md"
+            bg={train.isExcluded ? "whiteAlpha.200" : "whiteAlpha.400"}
+            color={train.isExcluded ? "gray.500" : "white"}
+            fontWeight="bold"
+            fontSize="md"
+            flexShrink="0"
+          >
+            {index + 1}
+          </Center>
+        </Flex>
+
+        <Flex gap="2" wrap="wrap" justify="flex-end">
         <Button size="xs" variant="outline" colorPalette="red" onClick={() => onClear(train.id)} disabled={train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0)}>
           Clear
         </Button>
@@ -43,22 +62,24 @@ export default function TrainCard({
             Remove
           </Button>
         )}
+        </Flex>
       </Flex>
 
       <VStack align="start" gap="2" mb="4">
         <Heading size="lg" color={train.isExcluded ? "gray.400" : "white"}>
-          Train {index + 1} Total: ${trainTotal}
+          Total: ${trainTotal}
           <Text as="span" fontSize="sm" color="gray.400" fontWeight="normal" ml="2">
             ({train.stops.length} {train.stops.length === 1 ? 'stop' : 'stops'})
           </Text>
         </Heading>
-        <Flex wrap="wrap" gap="1" align="center" minH="32px">
+        <Flex wrap="wrap" gap="1" align="center" minH="40px">
           {train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
           {train.stops.map((stop, idx) => (
             <Flex key={`reg-${idx}`} align="center">
-              <Button 
-                size="xs" 
-                variant="ghost" 
+              <Button
+                size="sm"
+                fontSize="lg"
+                variant="ghost"
                 color="orange.300"
                 aria-label={`Remove stop ${stop}`}
                 onClick={() => onRemoveStop(train.id, idx)}
@@ -66,14 +87,15 @@ export default function TrainCard({
               >
                 {stop}
               </Button>
-              {(idx < train.stops.length - 1 || (train.bonusStops && train.bonusStops.length > 0)) && <Text color="gray.600" mx="1">+</Text>}
+              {(idx < train.stops.length - 1 || (train.bonusStops && train.bonusStops.length > 0)) && <Text color="gray.600" mx="1" fontSize="lg">+</Text>}
             </Flex>
           ))}
           {train.bonusStops && train.bonusStops.map((stop, idx) => (
             <Flex key={`bonus-${idx}`} align="center">
-              <Button 
-                size="xs" 
-                variant="ghost" 
+              <Button
+                size="sm"
+                fontSize="lg"
+                variant="ghost"
                 color="cyan.400"
                 aria-label={`Remove bonus stop ${stop.val}`}
                 onClick={() => onRemoveBonusStop(train.id, idx)}
@@ -81,7 +103,7 @@ export default function TrainCard({
               >
                 {stop.val}({stop.label})
               </Button>
-              {idx < train.bonusStops.length - 1 && <Text color="gray.600" mx="1">+</Text>}
+              {idx < train.bonusStops.length - 1 && <Text color="gray.600" mx="1" fontSize="lg">+</Text>}
             </Flex>
           ))}
         </Flex>

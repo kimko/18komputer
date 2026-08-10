@@ -47,7 +47,8 @@ The initial game setup flow has been implemented.
 The core utility for running Operating Rounds has been implemented.
 - **UI:** A mobile-first, touch-friendly calculator layout optimized for rapid data entry.
 - **Features:**
-  - Dynamic selector for the active operating company.
+  - Dynamic selector for the active operating company. Every company keeps its own colour at full strength; the selected one is picked out by a white ring rather than by dimming the rest. Its full name sits in a banner above the row, so the short code on the button is never the only clue about which company you are running.
+  - **Telling trains apart:** each train card is headed by its number in a badge, which is the fastest thing to find when scrolling a phone, and the cards are spaced far enough apart to read as separate blocks.
   - **Multiple Trains:** Users can calculate multiple trains simultaneously. Trains can be added, removed, or duplicated via a "Copy Train" button. State is tracked independently for each company.
   - **Interactive History:** Each train has an itemized string of tapped stops (e.g., `60 + 70 + 40`). Stops can be instantly deleted by tapping them.
   - **Dynamic Bonuses**: Fully supports 18xx-specific revenue bonuses (like Towns, Ports, or 1822 Pullmans), rendered distinctly without counting against stop limits.

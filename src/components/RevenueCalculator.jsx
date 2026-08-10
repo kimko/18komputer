@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, VStack, Text, Center, Flex, Spinner } from '@chakra-ui/react';
+
 import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import TrainCard from './calculator/TrainCard.jsx';
@@ -33,7 +34,8 @@ export default function RevenueCalculator() {
   const trains = currentCompanyState.trains || [{ id: 1, stops: [], bonusStops: [] }];
   const isHalfPay = currentCompanyState.isHalfPay || false;
 
-  const totalShares = activeCompanies.find(c => c.shortName === selectedCompanyId)?.totalShares || DEFAULT_TOTAL_SHARES;
+  const selectedCompany = activeCompanies.find(c => c.shortName === selectedCompanyId);
+  const totalShares = selectedCompany?.totalShares || DEFAULT_TOTAL_SHARES;
   const holdings = getCompanyHoldings(gameInstance.state?.dashboardState?.playerAssets, selectedCompanyId);
   const structures = getStructures(gameInstance.staticConfig)
     .map(s => ({ ...s, disabled: s.totalShares !== totalShares && !canUseStructure(s, holdings) }));
@@ -92,30 +94,53 @@ export default function RevenueCalculator() {
   return (
     <Box p="4">
       <Box maxW="2xl" mx="auto">
+        {selectedCompany && (
+          <Center mb="4">
+            <Box
+              data-testid="selected-company-name"
+              bg="gray.700"
+              color="white"
+              px="4"
+              py="2"
+              borderRadius="md"
+              boxShadow="lg"
+              fontWeight="bold"
+              textAlign="center"
+            >
+              {selectedCompany.name || selectedCompany.shortName}
+            </Box>
+          </Center>
+        )}
+
         <Box mb="6">
           {activeCompanies.length === 0 ? (
             <Text color="red.400">No active companies. Go to Manage Companies first.</Text>
           ) : (
-            <Flex wrap="wrap" gap="2">
-              {activeCompanies.map(c => (
-                <Button
-                  key={c.shortName}
-                  bg={c.color || 'gray.700'}
-                  color={getContrastColor(c.color || '#2d3748')}
-                  borderRadius="md"
-                  fontWeight="bold"
-                  opacity={selectedCompanyId === c.shortName ? 1 : 0.4}
-                  _hover={{ opacity: 1 }}
-                  onClick={() => setSelectedCompanyId(c.shortName)}
-                >
-                  {c.shortName}
-                </Button>
-              ))}
+            <Flex wrap="wrap" gap="3">
+              {activeCompanies.map(c => {
+                const isSelected = selectedCompanyId === c.shortName;
+                return (
+                  <Button
+                    key={c.shortName}
+                    bg={c.color || 'gray.700'}
+                    color={getContrastColor(c.color || '#2d3748')}
+                    borderRadius="md"
+                    fontWeight="bold"
+                    outline={isSelected ? '2px solid' : 'none'}
+                    outlineColor="white"
+                    outlineOffset="2px"
+                    _hover={{ outline: '2px solid', outlineColor: 'whiteAlpha.500', outlineOffset: '2px' }}
+                    onClick={() => setSelectedCompanyId(c.shortName)}
+                  >
+                    {c.shortName}
+                  </Button>
+                );
+              })}
             </Flex>
           )}
         </Box>
 
-        <VStack gap="3" align="stretch" mb="4">
+        <VStack gap="5" align="stretch" mb="4">
           {trains.map((train, i) => (
             <TrainCard
               key={train.id}
@@ -146,7 +171,7 @@ export default function RevenueCalculator() {
 
         <ReceiptPrinter
           company={selectedCompanyId}
-          companyName={activeCompanies.find(c => c.shortName === selectedCompanyId)?.name}
+          companyName={selectedCompany?.name}
           trains={receiptTrains}
           totalRevenue={grandTotal}
           totalShares={totalShares}

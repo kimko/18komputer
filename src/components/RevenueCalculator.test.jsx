@@ -52,6 +52,44 @@ describe('RevenueCalculator Component', () => {
     mockApi.updateGameState.mockResolvedValue({});
   });
 
+  it('names the selected company at the top, and swaps it when you switch', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1830',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 },
+          { shortName: 'NYC', name: 'New York Central', color: '#000000', parValue: 67 }
+        ],
+        companyORs: []
+      }
+    });
+
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    // The first company is selected on load
+    expect(await screen.findByTestId('selected-company-name')).toHaveTextContent('Pennsylvania Railroad');
+
+    fireEvent.click(screen.getByRole('button', { name: /NYC/i }));
+    expect(screen.getByTestId('selected-company-name')).toHaveTextContent('New York Central');
+  });
+
+  it('numbers each train so they can be told apart', async () => {
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    expect(screen.getAllByText('Train')).toHaveLength(1);
+    expect(screen.getByText('1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Copy$/i }));
+
+    expect(screen.getAllByText('Train')).toHaveLength(2);
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
   it('should allow adding multiple trains and calculating grand total', async () => {
     renderWithChakra(<RevenueCalculator />);
     await screen.findByText(/Grand Total/i);
