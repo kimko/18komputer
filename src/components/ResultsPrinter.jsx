@@ -1,0 +1,66 @@
+import { useState } from 'react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { useWebBluetooth } from '../hooks/useWebBluetooth.js';
+import { printResults } from '../services/printer/PrinterService.js';
+import { buildShareToken, buildShareLink } from '../services/printer/shareLink.js';
+
+export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) {
+  const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = useWebBluetooth();
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printError, setPrintError] = useState(null);
+
+  const canPrintResults = Boolean(printer?.buildResultsPayloads);
+
+  const handlePrint = async () => {
+    setIsPrinting(true);
+    setPrintError(null);
+    try {
+      // The calculator scratch is left out to keep the QR small enough to scan.
+      const token = buildShareToken(gameInstance, dashboardState, { includeCalculator: false });
+      await printResults(characteristic, printer, {
+        gameName: gameInstance.gameName,
+        players: gameInstance.players,
+        activeCompanies: gameInstance.state?.activeCompanies || [],
+        dashboardState,
+        maxOr,
+        printedAt: new Date(),
+        shareUrl: buildShareLink(window.location.origin, window.location.pathname, token)
+      });
+    } catch (err) {
+      console.error('Print failed:', err);
+      setPrintError(`Print failed: ${err.message}`);
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
+  return (
+    <Flex direction="column" gap="2" mt="4" p="4" bg="gray.800" borderRadius="md" border="1px solid" borderColor="gray.700">
+      <Text fontSize="sm" color="gray.400" fontWeight="bold">Results Receipt</Text>
+
+      {!isConnected && (
+        <Button size="sm" colorPalette="teal" onClick={connect} loading={isConnecting}>
+          Pair Printer
+        </Button>
+      )}
+
+      {isConnected && !canPrintResults && (
+        <Text fontSize="sm" color="orange.300">
+          {deviceName || 'This printer'} prints labels. Results need the receipt printer.
+        </Text>
+      )}
+
+      {isConnected && canPrintResults && (
+        <Flex gap="2">
+          <Button size="sm" colorPalette="teal" onClick={handlePrint} loading={isPrinting}>
+            Print Results
+          </Button>
+          <Button size="sm" variant="outline" color="white" onClick={disconnect}>Disconnect</Button>
+        </Flex>
+      )}
+
+      {error && <Text fontSize="sm" color="red.300">{error}</Text>}
+      {printError && <Box><Text fontSize="sm" color="red.300">{printError}</Text></Box>}
+    </Flex>
+  );
+}
