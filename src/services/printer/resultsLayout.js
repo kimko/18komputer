@@ -1,4 +1,4 @@
-import { COLS, centerText, spreadLine, sanitizeAscii } from './Pt210Driver.js';
+import { COLS, centerText, spreadLine, sanitizeAscii } from './receiptLayout.js';
 import {
   getPlayerNetWorth,
   getPlayerShareValue,
