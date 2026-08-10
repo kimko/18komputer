@@ -1094,9 +1094,110 @@ git commit -m "feat: print the game result on a receipt"
 
 ---
 
+### Task 8: Remove the duplication between the two receipt builders
+
+`generateResultsPayload` (Task 4) repeats about 20 lines from `generatePt210Payload`: the byte
+scaffolding, the init and charset commands, the bold double-height header, and the body loop. This
+task pulls that into one place, now that both receipts work and both suites are green.
+
+Ruled by the human at pre-flight: build duplicated first, extract here. The spec's promise that the
+operating-round builder is untouched softens to "its behaviour does not change, and its existing
+tests prove it".
+
+**Files:**
+- Modify: `src/services/printer/Pt210Driver.js`
+
+**Interfaces:**
+- Consumes: nothing new
+- Produces: nothing new. This is behaviour-preserving; the existing tests are the specification.
+
+- [ ] **Step 1: Confirm the tests are green before touching anything**
+
+Run: `npx vitest run src/services/printer/Pt210Driver.test.js`
+Expected: PASS. Note the count; it must be identical at the end.
+
+- [ ] **Step 2: Extract the shared emitter**
+
+In `src/services/printer/Pt210Driver.js`, add this above `generatePt210Payload`:
+
+```javascript
+// Both receipts open the same way: reset, charset, a bold double-height header, then the body.
+const emitReceiptBytes = (header, body) => {
+  const bytes = [];
+  const push = (...sequences) => sequences.forEach((sequence) => bytes.push(...sequence));
+  const pushLine = (text) => {
+    for (let i = 0; i < text.length; i++) bytes.push(text.charCodeAt(i) & 0x7f);
+    push(LF);
+  };
+
+  push(ESC_INIT);
+  if (PT210_STYLE.useCharTable) push(ESC_CHARSET_PC437);
+  push(ESC_ALIGN_LEFT, ESC_BOLD_ON);
+  if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_DBL_HEIGHT);
+  header.forEach(pushLine);
+  if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_NORMAL);
+  push(ESC_BOLD_OFF);
+
+  body.forEach(({ text, bold }) => {
+    if (bold) push(ESC_BOLD_ON);
+    pushLine(text);
+    if (bold) push(ESC_BOLD_OFF);
+  });
+
+  return { bytes, push, pushLine };
+};
+```
+
+Rewrite `generatePt210Payload` to use it:
+
+```javascript
+export const generatePt210Payload = async (receiptData = {}) => {
+  const { header, body } = splitReceipt(receiptData);
+  const { bytes, push } = emitReceiptBytes(header, body);
+  push(ESC_FEED_LINES(FEED_LINES));
+  return [new Uint8Array(bytes)];
+};
+```
+
+Rewrite `generateResultsPayload` to use it:
+
+```javascript
+export const generateResultsPayload = async (resultsData = {}) => {
+  const { header, body } = buildResultsReceipt(resultsData);
+  const raster = buildQrRaster(resultsData.shareUrl);
+  const { bytes, push, pushLine } = emitReceiptBytes(header, body);
+
+  if (raster) {
+    push(ESC_ALIGN_CENTER);
+    push(raster);
+    push(ESC_ALIGN_LEFT, LF);
+  } else {
+    pushLine(centerText('LINK TOO LONG TO PRINT'));
+  }
+
+  push(ESC_FEED_LINES(FEED_LINES));
+  return [new Uint8Array(bytes)];
+};
+```
+
+- [ ] **Step 3: Run the tests to prove nothing changed**
+
+Run: `npx vitest run src/services/printer/`
+Expected: PASS, with exactly the same test count as Step 1. No test file may be edited in this task.
+If a test needs changing, the extraction changed behaviour and is wrong.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/services/printer/Pt210Driver.js
+git commit -m "refactor: one emitter for both receipt types"
+```
+
+---
+
 ## Verification
 
-After Task 7, check it on the real printer:
+After Task 8, check it on the real printer:
 
 1. `npm run dev`, open a finished game, go to Results.
 2. Pair the PT-210, press Print Results.
