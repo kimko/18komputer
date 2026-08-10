@@ -294,6 +294,28 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
 
 
 
+  // --- 5b. REMOVING A PLAYER TAKES THEIR HOLDINGS WITH THEM ---
+  const removedPlayer = playerNames[playerNames.length - 1];
+  console.log(`Removing ${removedPlayer} and checking nothing of theirs is left behind...`);
+  await page.getByRole('button', { name: 'Remove', exact: true }).last().click();
+
+  // A player holding shares or cash is confirmed first; an empty one goes straight away.
+  const confirmRemove = page.getByRole('button', { name: 'Remove player' });
+  if (await confirmRemove.count() > 0) await confirmRemove.click();
+
+  await page.waitForTimeout(600);
+  const leftovers = await page.evaluate((name) => {
+    const db = JSON.parse(localStorage.getItem('18komputer_games') || '{}');
+    return Object.values(db).map(g => ({
+      inPlayers: (g.players || []).includes(name),
+      inAssets: Boolean(g.state?.dashboardState?.playerAssets?.[name])
+    }));
+  }, removedPlayer);
+  for (const g of leftovers) {
+    expect(g.inPlayers).toBe(false);
+    expect(g.inAssets).toBe(false);
+  }
+
   // --- 6. MAGIC LINK SHARE ---
   // Wait for the final debounced state updates to flush to gameInstance
   await page.waitForTimeout(600);

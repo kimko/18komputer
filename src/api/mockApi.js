@@ -192,14 +192,24 @@ export function updateGamePlayers(instanceId, players) {
   return enqueue(async () => {
     await delay();
     const db = readStorage();
-    
+
     if (!db[instanceId]) {
       throw new Error('Game not found');
     }
-    
+
     db[instanceId].players = players;
+
+    // Holdings are dropped here rather than through updateGameState, because deepMerge keeps
+    // keys the update leaves out and would put a removed player straight back.
+    const assets = db[instanceId].state?.dashboardState?.playerAssets;
+    if (assets) {
+      Object.keys(assets).forEach(name => {
+        if (!players.includes(name)) delete assets[name];
+      });
+    }
+
     writeStorage(db);
-    
+
     return db[instanceId];
   });
 }

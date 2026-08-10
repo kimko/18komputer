@@ -10,6 +10,17 @@ export function useGameData(instanceId) {
   const previousStateRef = useRef(null);
   const pendingUpdatesRef = useRef(null);
 
+  // Send any debounced edit immediately. Anything that changes the roster has to do this first,
+  // or a late-firing edit writes back the holdings of a player who was just removed.
+  const flushPendingUpdates = useCallback(() => {
+    if (!timeoutRef.current || !pendingUpdatesRef.current) return null;
+    clearTimeout(timeoutRef.current);
+    const finalUpdates = pendingUpdatesRef.current;
+    timeoutRef.current = null;
+    pendingUpdatesRef.current = null;
+    return updateGameState(instanceId, finalUpdates);
+  }, [instanceId]);
+
   useEffect(() => {
     let isMounted = true;
     if (!instanceId) return;
@@ -38,15 +49,9 @@ export function useGameData(instanceId) {
       isMounted = false;
       // If we have pending updates when the component unmounts (e.g. user navigating tabs rapidly),
       // flush them immediately to the mockApi queue so the next mounted component reads the correct state.
-      if (timeoutRef.current && pendingUpdatesRef.current) {
-        clearTimeout(timeoutRef.current);
-        const finalUpdates = pendingUpdatesRef.current;
-        timeoutRef.current = null;
-        pendingUpdatesRef.current = null;
-        updateGameState(instanceId, finalUpdates).catch(console.error);
-      }
+      flushPendingUpdates()?.catch(console.error);
     };
-  }, [instanceId]);
+  }, [instanceId, flushPendingUpdates]);
 
   const updateGameStateDebounced = useCallback((updates) => {
     if (!gameInstance) return;
@@ -86,15 +91,28 @@ export function useGameData(instanceId) {
   const updatePlayers = useCallback(async (newPlayers) => {
     if (!gameInstance) return;
     const previousPlayers = gameInstance.players;
-    setGameInstance(prev => ({ ...prev, players: newPlayers }));
-    
+    const previousState = gameInstance.state;
+
+    await flushPendingUpdates()?.catch(console.error);
+
+    setGameInstance(prev => {
+      const assets = prev.state?.dashboardState?.playerAssets;
+      if (!assets) return { ...prev, players: newPlayers };
+      const kept = Object.fromEntries(Object.entries(assets).filter(([name]) => newPlayers.includes(name)));
+      return {
+        ...prev,
+        players: newPlayers,
+        state: { ...prev.state, dashboardState: { ...prev.state.dashboardState, playerAssets: kept } }
+      };
+    });
+
     try {
       await updateGamePlayers(instanceId, newPlayers);
     } catch (err) {
       console.error('Failed to update players, rolling back:', err);
-      setGameInstance(prev => ({ ...prev, players: previousPlayers }));
+      setGameInstance(prev => ({ ...prev, players: previousPlayers, state: previousState }));
     }
-  }, [instanceId, gameInstance]);
+  }, [instanceId, gameInstance, flushPendingUpdates]);
 
   const updateName = useCallback(async (newName) => {
     if (!gameInstance) return;

@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text, IconButton, Input } from '@chakra-ui/react';
+import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 import { 
   getBankShares, 
   getPlayerShareValue, 
@@ -41,6 +42,7 @@ export default function PlayerHoldingsGrid({
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [pendingRemoval, setPendingRemoval] = useState(null);
 
   const handleAddPlayer = (e) => {
     e.preventDefault();
@@ -52,8 +54,18 @@ export default function PlayerHoldingsGrid({
     }
   };
 
-  const handleRemovePlayer = (playerToRemove) => {
+  const removePlayer = (playerToRemove) => {
     updatePlayers(players.filter(p => p !== playerToRemove));
+    setPendingRemoval(null);
+  };
+
+  const handleRemovePlayer = (playerToRemove) => {
+    const assets = dashboardState.playerAssets[playerToRemove];
+    const holdsSomething = Number(assets?.cash || 0) > 0
+      || Object.values(assets?.shares || {}).some(pct => Number(pct) > 0);
+
+    if (holdsSomething) setPendingRemoval(playerToRemove);
+    else removePlayer(playerToRemove);
   };
 
 
@@ -308,6 +320,30 @@ export default function PlayerHoldingsGrid({
             )}
           </Grid>
         </Box>
+      )}
+
+      {pendingRemoval && (
+        <ModalBackdrop
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remove-player-title"
+          onClose={() => setPendingRemoval(null)}
+          textAlign="center"
+        >
+          <Heading id="remove-player-title" size="md" mb="2" color="red.400">
+            Remove {pendingRemoval}?
+          </Heading>
+          <Text color="gray.300" mb="2" fontSize="sm">
+            Their <strong>{formatShareCount(gridData.totalShares[pendingRemoval] || 0)} shares</strong>
+            {' '}and <strong>{formatCurrency(dashboardState.playerAssets[pendingRemoval]?.cash || 0)}</strong>
+            {' '}go back to the bank.
+          </Text>
+          <Text color="gray.500" mb="6" fontSize="xs">This action cannot be undone.</Text>
+          <Flex gap="4">
+            <Button flex="1" variant="outline" color="white" onClick={() => setPendingRemoval(null)}>Cancel</Button>
+            <Button flex="1" colorPalette="red" onClick={() => removePlayer(pendingRemoval)}>Remove player</Button>
+          </Flex>
+        </ModalBackdrop>
       )}
     </Box>
   );

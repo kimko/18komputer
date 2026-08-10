@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createGame, getGame, updateGameState, getGamesList, updateGameName, importGame, deleteAllGames } from './mockApi.js';
+import { createGame, getGame, updateGameState, updateGamePlayers, getGamesList, updateGameName, importGame, deleteAllGames } from './mockApi.js';
 
 describe('Mock API (LocalStorage)', () => {
   beforeEach(() => {
@@ -158,6 +158,71 @@ describe('Mock API (LocalStorage)', () => {
       };
       
       expect(() => importGame(invalidGame)).toThrow('Invalid game data format: missing dashboardState.playerAssets');
+    });
+  });
+
+  describe('updateGamePlayers', () => {
+    const withHoldings = async () => {
+      const game = await createGame('1830', ['Alice', 'Bob']);
+      await updateGameState(game.id, {
+        dashboardState: {
+          ors: {}, shareValues: {},
+          playerAssets: {
+            Alice: { cash: 500, shares: { PRR: 40 } },
+            Bob: { cash: 300, shares: { PRR: 20, NYC: 30 } }
+          }
+        }
+      });
+      return game;
+    };
+
+    it('should delete the holdings of a removed player', async () => {
+      const game = await withHoldings();
+
+      await updateGamePlayers(game.id, ['Alice']);
+
+      const fetched = await getGame(game.id);
+      expect(fetched.players).toEqual(['Alice']);
+      expect(fetched.state.dashboardState.playerAssets.Bob).toBeUndefined();
+    });
+
+    it('should leave the remaining players untouched', async () => {
+      const game = await withHoldings();
+
+      await updateGamePlayers(game.id, ['Alice']);
+
+      const { playerAssets } = (await getGame(game.id)).state.dashboardState;
+      expect(playerAssets.Alice).toEqual({ cash: 500, shares: { PRR: 40 } });
+    });
+
+    it('should leave every entry alone when a player is added', async () => {
+      const game = await withHoldings();
+
+      await updateGamePlayers(game.id, ['Alice', 'Bob', 'Cara']);
+
+      const { playerAssets } = (await getGame(game.id)).state.dashboardState;
+      expect(Object.keys(playerAssets).sort()).toEqual(['Alice', 'Bob']);
+      expect(playerAssets.Bob.shares).toEqual({ PRR: 20, NYC: 30 });
+    });
+
+    it('should prune holdings left behind by an earlier removal', async () => {
+      const game = await withHoldings();
+      // A game saved before this fix: holdings for somebody who is not a player any more.
+      await updateGameState(game.id, {
+        dashboardState: { playerAssets: { Ghost: { cash: 99, shares: { PRR: 60 } } } }
+      });
+
+      await updateGamePlayers(game.id, ['Alice', 'Bob']);
+
+      const { playerAssets } = (await getGame(game.id)).state.dashboardState;
+      expect(playerAssets.Ghost).toBeUndefined();
+      expect(Object.keys(playerAssets).sort()).toEqual(['Alice', 'Bob']);
+    });
+
+    it('should not throw for a game that has no dashboard state yet', async () => {
+      const game = await createGame('1830', ['Alice', 'Bob']);
+      await expect(updateGamePlayers(game.id, ['Alice'])).resolves.toBeDefined();
+      expect((await getGame(game.id)).players).toEqual(['Alice']);
     });
   });
 

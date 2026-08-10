@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal, getCompanyShareCount, getPlayerTotalShares } from './dashboardMath';
+import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal, getCompanyShareCount, getPlayerTotalShares, getCompanyHoldings } from './dashboardMath';
 
 describe('dashboardMath', () => {
   const mockDashboardState = {
@@ -55,6 +55,32 @@ describe('dashboardMath', () => {
     // 3. Net worth checks out
     // Cash (1000) + Share Value (134) + Operating Income (90) = 1224
     expect(getPlayerNetWorth(state, companies, maxOr, player)).toBe(1224);
+  });
+
+  describe('getCompanyHoldings', () => {
+    const assets = {
+      Alice: { shares: { PRR: 40 } },
+      Bob: { shares: { PRR: 20, NYC: 30 } },
+      Ghost: { shares: { PRR: 60 } }
+    };
+
+    it('counts only the players on the list', () => {
+      expect(getCompanyHoldings(assets, ['Alice', 'Bob'], 'PRR').sort((a, b) => a - b)).toEqual([20, 40]);
+    });
+
+    it('ignores holdings left behind by somebody who is no longer a player', () => {
+      // 60% would otherwise make a 5-share structure look reachable when it is not.
+      expect(getCompanyHoldings(assets, ['Alice', 'Bob'], 'PRR')).not.toContain(60);
+    });
+
+    it('skips players holding nothing in that company', () => {
+      expect(getCompanyHoldings(assets, ['Alice', 'Bob'], 'NYC')).toEqual([30]);
+    });
+
+    it('copes with missing assets or players', () => {
+      expect(getCompanyHoldings(undefined, ['Alice'], 'PRR')).toEqual([]);
+      expect(getCompanyHoldings(assets, undefined, 'PRR')).toEqual([]);
+    });
   });
 
   describe('share counts', () => {

@@ -10,9 +10,10 @@ export const getShareValue = (dashboardState, activeCompanies, shortName) => {
   return c?.parValue || 0;
 };
 
-export const getCompanyHoldings = (playerAssets, shortName) =>
-  Object.values(playerAssets || {})
-    .map(assets => Number(assets?.shares?.[shortName] || 0))
+// Reads the named players only, so holdings left behind by a removed player cannot reach the rules.
+export const getCompanyHoldings = (playerAssets, players, shortName) =>
+  (players || [])
+    .map(p => Number(playerAssets?.[p]?.shares?.[shortName] || 0))
     .filter(pct => pct > 0);
 
 export const getCompanyShareCount = (sharePct, totalShares) => {

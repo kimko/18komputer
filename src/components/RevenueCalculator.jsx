@@ -36,7 +36,7 @@ export default function RevenueCalculator() {
 
   const selectedCompany = activeCompanies.find(c => c.shortName === selectedCompanyId);
   const totalShares = selectedCompany?.totalShares || DEFAULT_TOTAL_SHARES;
-  const holdings = getCompanyHoldings(gameInstance.state?.dashboardState?.playerAssets, selectedCompanyId);
+  const holdings = getCompanyHoldings(gameInstance.state?.dashboardState?.playerAssets, gameInstance.players, selectedCompanyId);
   const structures = getStructures(gameInstance.staticConfig)
     .map(s => ({ ...s, disabled: s.totalShares !== totalShares && !canUseStructure(s, holdings) }));
 

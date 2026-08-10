@@ -133,7 +133,7 @@ export default function ActivateCompany() {
                     <Flex wrap="wrap" gap="2">
                       {structures.map(structure => {
                         const isSelected = activeCompanies[company.shortName]?.totalShares === structure.totalShares;
-                        const holdings = getCompanyHoldings(gameInstance?.state?.dashboardState?.playerAssets, company.shortName);
+                        const holdings = getCompanyHoldings(gameInstance?.state?.dashboardState?.playerAssets, gameInstance?.players, company.shortName);
                         return (
                           <Button
                             key={structure.totalShares}

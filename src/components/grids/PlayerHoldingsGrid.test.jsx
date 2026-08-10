@@ -84,23 +84,81 @@ describe('PlayerHoldingsGrid', () => {
     expect(screen.getByText('↳ Shares 2')).toBeInTheDocument();
   });
 
-  it('handles adding and removing players', () => {
+  it('handles adding players', () => {
     const updatePlayers = vi.fn();
-    
+
     renderComponent({ updatePlayers });
-    
-    // Type in input
+
     const input = screen.getByPlaceholderText('New player...');
     fireEvent.change(input, { target: { value: 'Charlie' } });
-    
-    // Add
+
     fireEvent.click(screen.getByText('Add'));
     expect(updatePlayers).toHaveBeenCalledWith(['Alice', 'Bob', 'Charlie']);
-    
-    // Remove
-    const removeBtns = screen.getAllByRole('button', { name: 'Remove' });
-    fireEvent.click(removeBtns[0]);
-    expect(updatePlayers).toHaveBeenCalledWith(['Bob']);
+  });
+
+  describe('removing a player', () => {
+    // Alice holds shares and cash; Cara holds nothing at all.
+    const withEmptyPlayer = {
+      players: ['Alice', 'Bob', 'Cara'],
+      dashboardState: {
+        ...mockDashboardState,
+        playerAssets: { ...mockDashboardState.playerAssets, Cara: { cash: 0, shares: {} } }
+      }
+    };
+
+    it('removes a player holding nothing without asking', () => {
+      const updatePlayers = vi.fn();
+      renderComponent({ ...withEmptyPlayer, updatePlayers });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[2]);
+
+      expect(updatePlayers).toHaveBeenCalledWith(['Alice', 'Bob']);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('asks before removing a player who holds something', () => {
+      const updatePlayers = vi.fn();
+      renderComponent({ updatePlayers });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(updatePlayers).not.toHaveBeenCalled();
+    });
+
+    it('names the shares and the cash that would be lost', () => {
+      renderComponent();
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+
+      // Alice holds 20% of a 10-share company, so 2 shares, and $500
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toHaveTextContent('Alice');
+      expect(dialog).toHaveTextContent('2 shares');
+      expect(dialog).toHaveTextContent('$500');
+    });
+
+    it('keeps the player when the confirm is cancelled', () => {
+      const updatePlayers = vi.fn();
+      renderComponent({ updatePlayers });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(updatePlayers).not.toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('removes the player when the confirm is accepted', () => {
+      const updatePlayers = vi.fn();
+      renderComponent({ updatePlayers });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+      fireEvent.click(screen.getByRole('button', { name: 'Remove player' }));
+
+      expect(updatePlayers).toHaveBeenCalledWith(['Bob']);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('counts shares by the corporate structure', () => {
