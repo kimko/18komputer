@@ -39,9 +39,11 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
       <Text fontSize="sm" color="gray.400" fontWeight="bold">Results Receipt</Text>
 
       {!isConnected && (
-        <Button size="sm" colorPalette="teal" onClick={connect} loading={isConnecting}>
-          Pair Printer
-        </Button>
+        <Flex gap="2">
+          <Button size="sm" colorPalette="teal" onClick={connect} loading={isConnecting}>
+            Pair Printer
+          </Button>
+        </Flex>
       )}
 
       {isConnected && !canPrintResults && (
