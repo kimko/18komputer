@@ -15,7 +15,7 @@ is for afterwards.
 
 A magic link for a real four-player 1817 game is **2,492 characters**. Compressing that into a QR
 needs the largest code that exists, 177×177 modules. On a 384-dot print head that is a 0.25mm
-module, and thermal ink bleeds — it would not scan.
+module, and thermal ink bleeds - it would not scan.
 
 Dropping the calculator scratch data and shortening the keys brings the results-only payload to
 about **762 characters**, which is a 97×97 code at 3 dots per module, or 0.375mm. Dense, but it
@@ -23,9 +23,9 @@ should scan with a decent phone in reasonable light.
 
 | payload | characters | grid | dots per module | module size |
 |---|---|---|---|---|
-| full magic link | 2,492 | 185 | 2 | 0.250mm — will not scan |
-| **results only** | **762** | **105** | **3** | **0.375mm — what we are building** |
-| trimmed further | ~570 | 93 | 4 | 0.500mm — comfortable, not needed |
+| full magic link | 2,492 | 185 | 2 | 0.250mm - will not scan |
+| **results only** | **762** | **105** | **3** | **0.375mm - what we are building** |
+| trimmed further | ~570 | 93 | 4 | 0.500mm - comfortable, not needed |
 
 Chosen deliberately: the dense code, keeping every operating round and all holdings, over a
 comfortable code that would have to drop the OR history.
@@ -80,7 +80,7 @@ comfortable code that would have to drop the OR history.
 
 - Players are listed in finishing order by net worth. The winner's line prints bold.
 - `SHARES` sits above the money so the three money lines still visibly add up to the headline.
-- Share counts come from `getPlayerTotalShares`, which counts by corporate structure — 20% of a
+- Share counts come from `getPlayerTotalShares`, which counts by corporate structure - 20% of a
   five-share company is 1 share, not 2. They print whole for any game played in the app, because the
   structure rules stop anyone reaching a percentage their company cannot express. A game imported
   from an older save may carry an odd holding, which prints as `1.5` rather than being rounded to a
@@ -94,7 +94,7 @@ comfortable code that would have to drop the OR history.
 
 Five units, each with one job.
 
-### `src/services/printer/shareLink.js` — new
+### `src/services/printer/shareLink.js` - new
 
 The Share button currently builds the magic link inline in `Dashboard.jsx`. The barcode must not
 drift from it, so the link builder moves out here:
@@ -110,13 +110,13 @@ with `false`, which is what gets the payload down to 762 characters.
 This is the one piece of existing code the feature changes, and it is changed because leaving two
 copies of the link format in two files is how they diverge.
 
-### `src/services/printer/resultsLayout.js` — new
+### `src/services/printer/resultsLayout.js` - new
 
 Game state in, an array of 32-column strings out. No printer, no bytes. Reuses `spreadLine`,
 `centerText` and `formatCurrency` that already exist, and `getPlayerNetWorth`,
 `getPlayerShareValue`, `getPlayerOperatingIncome`, `getPlayerTotalShares` from `dashboardMath.js`.
 
-### `src/services/printer/qrRaster.js` — new
+### `src/services/printer/qrRaster.js` - new
 
 A string in, ESC/POS raster bytes out.
 
@@ -128,7 +128,7 @@ A string in, ESC/POS raster bytes out.
 4. Scale each module, pack each row into bits (1 = black), pad the row width up to a multiple of 8,
    and wrap it in `GS v 0`.
 
-### `Pt210Driver.generateResultsPayload` — new function in an existing file
+### `Pt210Driver.generateResultsPayload` - new function in an existing file
 
 Glues the text lines and the raster into one payload, the same way `generatePt210Payload` does for
 an operating round. The operating-round builder is **not** touched, so its existing "sends no cut
@@ -139,7 +139,7 @@ its absence is what the UI reads to know results cannot be printed there.
 
 `PrinterService.js` gains `printResults(characteristic, printer, data)`, mirroring `printReceipt`.
 
-### `src/components/ResultsPrinter.jsx` — new
+### `src/components/ResultsPrinter.jsx` - new
 
 The button on the results page, beside Share. Reuses `useWebBluetooth` exactly as the calculator's
 `ReceiptPrinter` does.
@@ -171,29 +171,29 @@ Dashboard
 
 ## Testing
 
-**`resultsLayout`** — no line wider than 32 columns · players ordered by net worth · a tie keeps both
+**`resultsLayout`** - no line wider than 32 columns · players ordered by net worth · a tie keeps both
 players and does not drop one · a name too long is truncated not wrapped · a single player prints ·
 a fractional share count prints as `1.5` rather than rounding · money right-aligns to the edge.
 
-**`qrRaster`** — a known payload gives the expected grid size · byte count equals
+**`qrRaster`** - a known payload gives the expected grid size · byte count equals
 `ceil(width / 8) × height` · each module is scaled by the chosen dot count · a payload needing
 under 3 dots per module returns nothing · the quiet zone is present · row width is padded to a
 multiple of 8.
 
-**`Pt210Driver.generateResultsPayload`** — contains the raster command and the text · never a line
+**`Pt210Driver.generateResultsPayload`** - contains the raster command and the text · never a line
 wider than the paper · ends with the feed past the tear bar · a payload with no QR still prints the
 slip.
 
-**`printerRegistry`** — the PT-210 has a results builder, the D30 does not.
+**`printerRegistry`** - the PT-210 has a results builder, the D30 does not.
 
-**`shareLink`** — the same game gives the same token from both callers · `includeCalculator: false`
+**`shareLink`** - the same game gives the same token from both callers · `includeCalculator: false`
 drops the calculator state and nothing else · the token round-trips back to the same game.
 
-**`ResultsPrinter`** — offers to pair when nothing is connected · prints through a connected PT-210 ·
+**`ResultsPrinter`** - offers to pair when nothing is connected · prints through a connected PT-210 ·
 explains itself on a D30 · shows a print failure on screen.
 
 ## Out of scope
 
 No D30 layout. No per-player slips. No company table on the slip. No paper cut command. No link
-shortener — that needs the Phase 2 backend, and without it the payload size is fixed by what
+shortener - that needs the Phase 2 backend, and without it the payload size is fixed by what
 LZString can do.
