@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import Dashboard from './Dashboard.jsx';
@@ -93,6 +93,40 @@ describe('Dashboard', () => {
     expect(screen.getAllByText('$200').length).toBeGreaterThan(1);
     expect(screen.getAllByText('$120').length).toBeGreaterThan(1);
     expect(screen.getByText('↳ Op Income')).toBeInTheDocument();
+  });
+
+  describe('tapping a company label', () => {
+    it('flashes the full company name from either grid', async () => {
+      renderWithChakra(<Dashboard />);
+      await screen.findByText('Company Values & Results');
+
+      expect(screen.queryByTestId('company-name-flash')).not.toBeInTheDocument();
+
+      // The badge appears once per grid, and either one works
+      const badges = screen.getAllByText('PRR');
+      fireEvent.click(badges[0]);
+      expect(screen.getByTestId('company-name-flash')).toHaveTextContent('Pennsylvania Railroad');
+
+      fireEvent.click(badges[badges.length - 1]);
+      expect(screen.getByTestId('company-name-flash')).toHaveTextContent('Pennsylvania Railroad');
+    });
+
+    it('fades the name away on its own', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        renderWithChakra(<Dashboard />);
+        await screen.findByText('Company Values & Results');
+
+        fireEvent.click(screen.getAllByText('PRR')[0]);
+        const flash = screen.getByTestId('company-name-flash');
+        expect(flash).toHaveStyle({ opacity: '1' });
+
+        await act(async () => { vi.advanceTimersByTime(1200); });
+        expect(screen.getByTestId('company-name-flash')).toHaveStyle({ opacity: '0' });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   it('opens and updates via popups', async () => {

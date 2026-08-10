@@ -8,8 +8,11 @@ import {
   getPlayerNetWorth,
   getShareValue,
   getCompanyOrTotal,
+  getCompanyShareCount,
   formatCurrency
 } from '../../utils/dashboardMath.js';
+
+const formatShareCount = (count) => Number(Number(count).toFixed(1));
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import { saveUsers } from '../../api/mockApi.js';
 
@@ -33,7 +36,8 @@ export default function PlayerHoldingsGrid({
   maxOr,
   dashboardState,
   updatePlayers,
-  setActivePopup
+  setActivePopup,
+  onCompanyClick
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -65,6 +69,8 @@ export default function PlayerHoldingsGrid({
       netWorths: {},
       playerShareValues: {},
       playerOpIncomes: {},
+      playerShareCounts: {},
+      bankShareCounts: {},
       stockWeights: {},
       diffPcts: {}
     };
@@ -72,6 +78,7 @@ export default function PlayerHoldingsGrid({
     let grandTotalOpIncome = 0;
     activeCompanies.forEach(c => {
       data.bankShares[c.shortName] = getBankShares(dashboardState, players, c.shortName);
+      data.bankShareCounts[c.shortName] = getCompanyShareCount(data.bankShares[c.shortName], c.totalShares);
       data.shareValues[c.shortName] = getShareValue(dashboardState, activeCompanies, c.shortName);
       data.opIncomes[c.shortName] = getCompanyOrTotal(dashboardState, maxOr, c.shortName);
       grandTotalOpIncome += data.opIncomes[c.shortName];
@@ -88,11 +95,13 @@ export default function PlayerHoldingsGrid({
       
       data.playerShareValues[p] = {};
       data.playerOpIncomes[p] = {};
+      data.playerShareCounts[p] = {};
       activeCompanies.forEach(c => {
         const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-        const totalShares = c.totalShares || 10;
-        data.playerShareValues[p][c.shortName] = totalShares > 0 ? (sharePct / (100 / totalShares)) * data.shareValues[c.shortName] : 0;
-        data.playerOpIncomes[p][c.shortName] = totalShares > 0 ? (sharePct / 100) * data.opIncomes[c.shortName] : 0;
+        const shareCount = getCompanyShareCount(sharePct, c.totalShares);
+        data.playerShareCounts[p][c.shortName] = shareCount;
+        data.playerShareValues[p][c.shortName] = shareCount * data.shareValues[c.shortName];
+        data.playerOpIncomes[p][c.shortName] = (sharePct / 100) * data.opIncomes[c.shortName];
       });
     });
     
@@ -190,7 +199,7 @@ export default function PlayerHoldingsGrid({
             {activeCompanies.map(c => (
               <Fragment key={c.shortName}>
                 <GridItem>
-                  <CompanyBadge company={c} />
+                  <CompanyBadge company={c} onClick={() => onCompanyClick?.(c)} cursor="pointer" />
                 </GridItem>
                 {players.map(p => {
                   const shares = dashboardState.playerAssets[p]?.shares?.[c.shortName];
@@ -208,8 +217,20 @@ export default function PlayerHoldingsGrid({
 
                 {showDetails && (
                   <>
-                    <PlayerGridRow 
-                      label="↳ Share Value" 
+                    <PlayerGridRow
+                      label={`↳ Shares ${c.totalShares || 10}`}
+                      labelProps={{ color: "gray.500", fontSize: "xs", pl: "2" }}
+                      players={players}
+                      getValue={(p) => formatShareCount(gridData.playerShareCounts[p]?.[c.shortName] || 0)}
+                      valueProps={{ color: "purple.200", fontSize: "sm" }}
+                      endNode={
+                        <Text color="gray.500" fontSize="sm">
+                          {formatShareCount(gridData.bankShareCounts[c.shortName] || 0)}
+                        </Text>
+                      }
+                    />
+                    <PlayerGridRow
+                      label="↳ Share Value"
                       labelProps={{ color: "gray.500", fontSize: "xs", pl: "2" }} 
                       players={players} 
                       getValue={(p) => formatCurrency(gridData.playerShareValues[p]?.[c.shortName] || 0)}
@@ -230,7 +251,7 @@ export default function PlayerHoldingsGrid({
             <PlayerGridRow
               label="Total Shares"
               players={players}
-              getValue={(p) => gridData.totalShares[p]}
+              getValue={(p) => formatShareCount(gridData.totalShares[p])}
               valueProps={{ fontWeight: "bold", color: "purple.300" }}
             />
             

@@ -7,8 +7,9 @@ export default function CompanyValuesGrid({
   activeCompanies, 
   maxOr, 
   dashboardState, 
-  updateMaxOr, 
-  setActivePopup 
+  updateMaxOr,
+  setActivePopup,
+  onCompanyClick
 }) {
   if (activeCompanies.length === 0) return null;
 
@@ -36,7 +37,7 @@ export default function CompanyValuesGrid({
             return (
             <Fragment key={c.shortName}>
               <GridItem>
-                <CompanyBadge company={c} />
+                <CompanyBadge company={c} onClick={() => onCompanyClick?.(c)} cursor="pointer" />
               </GridItem>
               <GridItem>
                 <Button data-testid="share-price-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'shareValue', companyId: c.shortName })}>

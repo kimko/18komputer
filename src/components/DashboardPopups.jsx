@@ -2,13 +2,13 @@ import NumpadPopup from './popups/NumpadPopup.jsx';
 import PricePickerPopup from './popups/PricePickerPopup.jsx';
 import ShareCountPopup from './popups/ShareCountPopup.jsx';
 import { getShareValue, getCalculatorGrandTotal, getBankShares } from '../utils/dashboardMath.js';
+import { getStructure, getHoldingOptions } from '../utils/corporateStructures.js';
 
 export default function DashboardPopups({
   activePopup,
   setActivePopup,
   dashboardState,
   activeCompanies,
-  maxPlayerHolding,
   players,
   gameInstance,
   updateDashboardField,
@@ -81,7 +81,10 @@ export default function DashboardPopups({
         <ShareCountPopup
           company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
           player={activePopup.player}
-          maxAvailable={Math.min(maxPlayerHolding, getBankShares(dashboardState, players, activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0))}
+          options={getHoldingOptions(
+            getStructure(gameInstance?.staticConfig, activeCompanies.find(c => c.shortName === activePopup.companyId)?.totalShares),
+            getBankShares(dashboardState, players, activePopup.companyId) + Number(dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId] || 0)
+          )}
           value={dashboardState.playerAssets[activePopup.player]?.shares?.[activePopup.companyId]}
           onChange={(val) => {
             updateDashboardField('playerAssets', prev => {

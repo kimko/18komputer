@@ -95,7 +95,7 @@ export default function GameLayout({ children }) {
           </Link>
           <Link href={`/game/${gameId}/setup`}>
             <Button variant="ghost" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
-              Activate Company
+              Manage Companies
             </Button>
           </Link>
           <Link href={`/game/${gameId}/calculator`}>
@@ -141,7 +141,7 @@ export default function GameLayout({ children }) {
       >
         <Link href={`/game/${gameId}/setup`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>
           <Button w="100%" h="12" variant="outline" borderColor="whiteAlpha.400" color="white" _hover={{ bg: 'whiteAlpha.200' }} size="sm">
-            Company
+            Companies
           </Button>
         </Link>
         <Link href={`/game/${gameId}/calculator`} style={{ display: 'flex', flex: 1, padding: '0 2px' }}>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePayout, SHARE_COUNTS } from './payoutMath.js';
+import { calculatePayout } from './payoutMath.js';
 
 describe('calculatePayout', () => {
   describe('a $190 run', () => {
@@ -51,17 +51,27 @@ describe('calculatePayout', () => {
     expect(calculatePayout(190, 0, false)).toEqual(calculatePayout(190, 10, false));
   });
 
+  describe('a 2-share company, where one player holds the whole thing', () => {
+    it('hands over the lot on full pay', () => {
+      expect(calculatePayout(190, 2, false)).toEqual({ perShare: 190, distributed: 190, companyKeeps: 0 });
+    });
+
+    it('splits a $190 run straight down the middle on half pay', () => {
+      expect(calculatePayout(190, 2, true)).toEqual({ perShare: 95, distributed: 95, companyKeeps: 95 });
+    });
+
+    it('gives the odd dollar to the shareholder on half pay', () => {
+      expect(calculatePayout(71, 2, true)).toEqual({ perShare: 36, distributed: 36, companyKeeps: 35 });
+    });
+  });
+
   it('never leaves the company owing money', () => {
     for (let revenue = 0; revenue <= 2000; revenue += 10) {
-      for (const shares of SHARE_COUNTS) {
+      for (const shares of [10, 5, 2]) {
         for (const isHalfPay of [false, true]) {
           expect(calculatePayout(revenue, shares, isHalfPay).companyKeeps).toBeGreaterThanOrEqual(0);
         }
       }
     }
-  });
-
-  it('offers 10-share and 5-share companies', () => {
-    expect(SHARE_COUNTS).toEqual([10, 5]);
   });
 });

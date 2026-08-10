@@ -31,7 +31,7 @@ describe('GameLayout', () => {
     renderWithChakra(<GameLayout><div>Child Content</div></GameLayout>);
     
     expect(screen.getByText('Child Content')).toBeInTheDocument();
-    expect(screen.queryByText('Activate Company')).not.toBeInTheDocument();
+    expect(screen.queryByText('Manage Companies')).not.toBeInTheDocument();
   });
 
   it('renders navigation when in a game route', () => {
@@ -42,8 +42,8 @@ describe('GameLayout', () => {
     expect(screen.getByText('Child Content')).toBeInTheDocument();
     
     expect(screen.getAllByText('Home').length).toBe(2);
-    expect(screen.getAllByText('Activate Company').length).toBe(1);
-    expect(screen.getAllByText('Company').length).toBe(1);
+    expect(screen.getAllByText('Manage Companies').length).toBe(1);
+    expect(screen.getAllByText('Companies').length).toBe(1);
     expect(screen.getAllByText('Calculator').length).toBe(1);
     expect(screen.getAllByText('Calc').length).toBe(1);
     expect(screen.getAllByText('Results').length).toBe(2);

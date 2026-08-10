@@ -1,6 +1,7 @@
 import {
   getShareValue,
   getCompanyOrTotal,
+  getCompanyShareCount,
 } from './dashboardMath.js';
 import { getContrastColor } from './colorUtils.js';
 
@@ -68,7 +69,7 @@ export const getBubbleChartData = (dashboardState, activeCompanies, maxOr, playe
       const marketCap = sharePrice * (100 / (100 / totalShares));
       
       const sharePct = Number(dashboardState.playerAssets[p]?.shares?.[c.shortName] || 0);
-      const shareCount = sharePct / (100 / totalShares);
+      const shareCount = getCompanyShareCount(sharePct, totalShares);
       
       // 1. Share Value
       const shareValue = (sharePct / 100) * marketCap;

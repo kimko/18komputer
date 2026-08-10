@@ -36,7 +36,22 @@ A mobile-first web assistant designed specifically for playing 18XX board games.
    npm run test
    ```
 
+## How work reaches `main`
+Development happens on a local `feat/...` branch with as many small commits as you like. Those are
+scratch and never leave your machine. Once the branch is ready, squash it into a single commit on
+`main` with a proper summary message and push that:
+
+```bash
+git checkout main
+git merge --squash feat/whatever
+git commit
+git push
+git branch -D feat/whatever
+```
+
+There are no pull requests. Every commit on `main` is one shipped change and one patch version.
+
 ## Deployment
 Pushing to `main` triggers the `deploy.yml` GitHub Action, which builds the app, serves that build inside the runner and runs the `@smoke` tagged Playwright tests against it. Only if those pass does it publish to GitHub Pages (the `github-pages` environment). A broken build stops before publishing, so the previously deployed site keeps serving.
 
-Linting and the full test suite run on your machine, in the `pre-commit` and `pre-push` hooks, not on GitHub.
+Linting and the full test suite run on your machine, in the `pre-commit` and `pre-push` hooks, not on GitHub. The linters run on every commit; the Playwright suite and the version bump only run when you commit to `main`, so branch commits stay fast.

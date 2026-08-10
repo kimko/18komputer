@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Box, Center, Spinner, Flex, Button, Text, Tabs } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import LZString from 'lz-string';
@@ -20,6 +20,20 @@ export default function Dashboard() {
   
   const [activePopup, setActivePopup] = useState(null);
   const [shareMessage, setShareMessage] = useState(null);
+  const [companyFlash, setCompanyFlash] = useState(null);
+  const flashTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+
+  const showCompanyName = useCallback((company) => {
+    if (!company?.name) return;
+    clearTimeout(flashTimer.current);
+    setCompanyFlash({ name: company.name, visible: true });
+    flashTimer.current = setTimeout(
+      () => setCompanyFlash(current => current && { ...current, visible: false }),
+      1200
+    );
+  }, []);
 
   const dashboardState = useMemo(() => gameInstance?.state?.dashboardState || { ors: {}, shareValues: {}, playerAssets: {} }, [gameInstance?.state?.dashboardState]);
 
@@ -72,10 +86,6 @@ export default function Dashboard() {
   const maxOr = dashboardState.maxOr || gameInstance.staticConfig?.maxOr || 3;
   const players = gameInstance.players || [];
   const sharePriceOptions = gameInstance.staticConfig?.sharePrices || gameInstance.staticConfig?.parValues || [];
-  const maxPlayerHolding = gameInstance.staticConfig?.maxPlayerHolding 
-    ? parseInt(gameInstance.staticConfig.maxPlayerHolding, 10) 
-    : 60;
-
 
   const updateMaxOr = (newMax) => {
     if (newMax < 1) return;
@@ -121,15 +131,17 @@ export default function Dashboard() {
             dashboardState={dashboardState}
             updateMaxOr={updateMaxOr}
             setActivePopup={setActivePopup}
+            onCompanyClick={showCompanyName}
           />
 
-          <PlayerHoldingsGrid 
+          <PlayerHoldingsGrid
             players={players}
             activeCompanies={activeCompanies}
             maxOr={maxOr}
             dashboardState={dashboardState}
             updatePlayers={updatePlayers}
             setActivePopup={setActivePopup}
+            onCompanyClick={showCompanyName}
           />
         </Tabs.Content>
 
@@ -151,13 +163,35 @@ export default function Dashboard() {
         </Tabs.Content>
       </Tabs.Root>
 
+      {companyFlash && (
+        <Box
+          data-testid="company-name-flash"
+          position="fixed"
+          top="20"
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex="20"
+          bg="gray.700"
+          color="white"
+          px="4"
+          py="2"
+          borderRadius="md"
+          boxShadow="lg"
+          fontWeight="bold"
+          pointerEvents="none"
+          opacity={companyFlash.visible ? 1 : 0}
+          transition="opacity 0.3s"
+        >
+          {companyFlash.name}
+        </Box>
+      )}
+
       {/* Popups */}
       <DashboardPopups
         activePopup={activePopup}
         setActivePopup={setActivePopup}
         dashboardState={dashboardState}
         activeCompanies={activeCompanies}
-        maxPlayerHolding={maxPlayerHolding}
         players={players}
         gameInstance={gameInstance}
         updateDashboardField={updateDashboardField}

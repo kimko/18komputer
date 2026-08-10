@@ -6,6 +6,8 @@ import TrainCard from './calculator/TrainCard.jsx';
 import GrandTotalCard from './calculator/GrandTotalCard.jsx';
 import ReceiptPrinter from './calculator/ReceiptPrinter.jsx';
 import { getContrastColor } from '../utils/colorUtils.js';
+import { getStructures, canUseStructure, DEFAULT_TOTAL_SHARES } from '../utils/corporateStructures.js';
+import { getCompanyHoldings } from '../utils/dashboardMath.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -27,10 +29,14 @@ export default function RevenueCalculator() {
   const activeCompanies = gameInstance.state?.activeCompanies || [];
   const calculatorState = gameInstance.state?.calculatorState || {};
   
-  const currentCompanyState = calculatorState[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false, totalShares: 10 };
+  const currentCompanyState = calculatorState[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false };
   const trains = currentCompanyState.trains || [{ id: 1, stops: [], bonusStops: [] }];
   const isHalfPay = currentCompanyState.isHalfPay || false;
-  const totalShares = currentCompanyState.totalShares || 10;
+
+  const totalShares = activeCompanies.find(c => c.shortName === selectedCompanyId)?.totalShares || DEFAULT_TOTAL_SHARES;
+  const holdings = getCompanyHoldings(gameInstance.state?.dashboardState?.playerAssets, selectedCompanyId);
+  const structures = getStructures(gameInstance.staticConfig)
+    .map(s => ({ ...s, disabled: s.totalShares !== totalShares && !canUseStructure(s, holdings) }));
 
   const updateCompanyState = (updates) => {
     if (!selectedCompanyId) return;
@@ -39,6 +45,13 @@ export default function RevenueCalculator() {
       [selectedCompanyId]: { ...currentCompanyState, ...updates }
     };
     updateGameStateDebounced({ calculatorState: nextCompanyStates });
+  };
+
+  const setTotalShares = (val) => {
+    if (!selectedCompanyId) return;
+    updateGameStateDebounced({
+      activeCompanies: activeCompanies.map(c => c.shortName === selectedCompanyId ? { ...c, totalShares: val } : c)
+    });
   };
 
   let allBonuses = [];
@@ -81,7 +94,7 @@ export default function RevenueCalculator() {
       <Box maxW="2xl" mx="auto">
         <Box mb="6">
           {activeCompanies.length === 0 ? (
-            <Text color="red.400">No active companies. Go to Activate Company first.</Text>
+            <Text color="red.400">No active companies. Go to Manage Companies first.</Text>
           ) : (
             <Flex wrap="wrap" gap="2">
               {activeCompanies.map(c => (
@@ -127,7 +140,8 @@ export default function RevenueCalculator() {
           isHalfPay={isHalfPay}
           onSetHalfPay={(val) => updateCompanyState({ isHalfPay: val })}
           totalShares={totalShares}
-          onSetTotalShares={(val) => updateCompanyState({ totalShares: val })}
+          onSetTotalShares={setTotalShares}
+          structures={structures}
         />
 
         <ReceiptPrinter

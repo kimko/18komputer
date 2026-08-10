@@ -55,13 +55,33 @@ describe('PlayerHoldingsGrid', () => {
 
   it('toggles details', () => {
     renderComponent();
-    
+
     // Details are hidden initially. The toggle button text should be 'Details'
     const detailsBtn = screen.getByText('Details');
     expect(screen.queryByText('↳ Share Value')).not.toBeInTheDocument();
-    
+    expect(screen.queryByText(/↳ Shares/)).not.toBeInTheDocument();
+
     fireEvent.click(detailsBtn);
     expect(screen.getAllByText('↳ Share Value')[0]).toBeInTheDocument();
+  });
+
+  it('names the corporate structure on the shares row', () => {
+    // A company saved before structures existed still reads as 10
+    renderComponent();
+    fireEvent.click(screen.getByText('Details'));
+    expect(screen.getByText('↳ Shares 10')).toBeInTheDocument();
+  });
+
+  it('names a 2-share structure on the shares row', () => {
+    renderComponent({
+      activeCompanies: [{ shortName: 'PRR', color: '#ff0000', totalShares: 2 }],
+      dashboardState: {
+        ...mockDashboardState,
+        playerAssets: { Alice: { cash: 0, shares: { PRR: 100 } }, Bob: { cash: 0, shares: {} } }
+      }
+    });
+    fireEvent.click(screen.getByText('Details'));
+    expect(screen.getByText('↳ Shares 2')).toBeInTheDocument();
   });
 
   it('handles adding and removing players', () => {
@@ -81,6 +101,31 @@ describe('PlayerHoldingsGrid', () => {
     const removeBtns = screen.getAllByRole('button', { name: 'Remove' });
     fireEvent.click(removeBtns[0]);
     expect(updatePlayers).toHaveBeenCalledWith(['Bob']);
+  });
+
+  it('counts shares by the corporate structure', () => {
+    // Alice 20% and Bob 40% of a 5-share company are 1 and 2 shares, leaving 2 in the bank
+    renderComponent({ activeCompanies: [{ shortName: 'PRR', color: '#ff0000', totalShares: 5 }] });
+
+    // The Total Shares row alone before Details is opened
+    expect(screen.getAllByText('1')).toHaveLength(1);
+    expect(screen.getAllByText('2')).toHaveLength(1);
+
+    fireEvent.click(screen.getByText('Details'));
+
+    // The row names the structure it is counting in
+    expect(screen.getByText('↳ Shares 5')).toBeInTheDocument();
+    // Alice now appears in both the per-company row and the total
+    expect(screen.getAllByText('1')).toHaveLength(2);
+    // Bob twice over, plus the bank once
+    expect(screen.getAllByText('2')).toHaveLength(3);
+  });
+
+  it('counts a 10-share company in tenths', () => {
+    renderComponent();
+    // Alice 20% is 2 shares, Bob 40% is 4
+    expect(screen.getAllByText('2')).toHaveLength(1);
+    expect(screen.getAllByText('4')).toHaveLength(1);
   });
 
   it('triggers popups for cash and shares', () => {

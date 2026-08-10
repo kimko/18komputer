@@ -2,12 +2,7 @@ import { Flex, Text, Button, SimpleGrid } from '@chakra-ui/react';
 import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 
-export default function ShareCountPopup({ company, player, value, maxAvailable, onChange, onClose }) {
-  const options = [];
-  for (let i = 0; i <= maxAvailable; i += 10) {
-    options.push(i);
-  }
-
+export default function ShareCountPopup({ company, player, value, options = [], onChange, onClose }) {
   return (
     <ModalBackdrop onClose={onClose}>
         <Flex align="center" gap="2" mb="4">

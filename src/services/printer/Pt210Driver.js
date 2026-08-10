@@ -45,7 +45,7 @@ const SINGLE_COLUMN_MAX = 5;
 
 export function payoutTableLines(perShare, totalShares = 10, cols = COLS) {
   const shares = totalShares || 10;
-  if (!perShare) return [];
+  if (!perShare || shares === 2) return [];
 
   const cells = [];
   for (let held = 1; held <= shares; held++) {

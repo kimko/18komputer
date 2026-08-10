@@ -25,6 +25,17 @@
       If a future printer turns out to be classic Bluetooth only, add a `navigator.serial` transport;
       the payload bytes are the same either way.
 
+## Phase 1: Rules still to flesh out
+- [ ] **Half pay is not legal in every title.** The Full Pay / Half Pay toggle is currently shown for
+      every game. 1817 allows half pay, so it is right for the title we are working on, but the
+      option should come from the game's own rules the way the corporate structure now does.
+- [ ] **Corporate structures are only mapped correctly for the 1817 family.** The ids in each game's
+      `corporateStructures` are read through one table in `src/utils/corporateStructures.js`, and
+      those ids mean different things in different titles. Reading the real structures needs
+      `scripts/parse-games.js` to parse the game-level `corporate structures:` block (its
+      `common stock` fraction is the share count) and a way to regenerate the JSON without losing
+      the hand-added `sharePrices`, `maxPlayerHolding` and `hasPullmans`.
+
 ## Phase 2: Backend Integration (Future)
 - [ ] Setup Elixir Phoenix backend.
 - [ ] Migrate `localStorage` mock API calls to actual REST endpoints.

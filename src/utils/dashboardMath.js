@@ -10,25 +10,32 @@ export const getShareValue = (dashboardState, activeCompanies, shortName) => {
   return c?.parValue || 0;
 };
 
+export const getCompanyHoldings = (playerAssets, shortName) =>
+  Object.values(playerAssets || {})
+    .map(assets => Number(assets?.shares?.[shortName] || 0))
+    .filter(pct => pct > 0);
+
+export const getCompanyShareCount = (sharePct, totalShares) => {
+  const shares = Number(totalShares) || 10;
+  return Number(sharePct || 0) / (100 / shares);
+};
+
 export const getPlayerShareValue = (dashboardState, activeCompanies, player) => {
   const assets = dashboardState.playerAssets[player] || { shares: {} };
   let sv = 0;
   activeCompanies.forEach(c => {
-    const totalShares = c.totalShares || 10;
-    const sharePct = Number(assets.shares[c.shortName] || 0);
-    sv += (totalShares > 0 ? (sharePct / (totalShares > 0 ? (100 / totalShares) : 1)) : 0) * getShareValue(dashboardState, activeCompanies, c.shortName);
+    sv += getCompanyShareCount(assets.shares[c.shortName], c.totalShares)
+      * getShareValue(dashboardState, activeCompanies, c.shortName);
   });
   return sv;
 };
 
 export const getPlayerTotalShares = (dashboardState, activeCompanies, player) => {
   const assets = dashboardState.playerAssets[player] || { shares: {} };
-  let totalPct = 0;
-  activeCompanies.forEach(c => {
-    const totalShares = c.totalShares || 10;
-    totalPct += Number(assets.shares[c.shortName] || 0) / (100 / totalShares);
-  });
-  return totalPct;
+  return activeCompanies.reduce(
+    (total, c) => total + getCompanyShareCount(assets.shares[c.shortName], c.totalShares),
+    0
+  );
 };
 
 export const getCompanyOrTotal = (dashboardState, maxOr, shortName) => {

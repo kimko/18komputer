@@ -144,6 +144,10 @@ describe('payoutTableLines', () => {
   it('assumes ten shares when the receipt carries no setting', () => {
     expect(payoutTableLines(15)).toEqual(payoutTableLines(15, 10));
   });
+
+  it('prints no table for a 2-share company, which has a single holder', () => {
+    expect(payoutTableLines(95, 2)).toEqual([]);
+  });
 });
 
 describe('wrapRoute', () => {
@@ -269,6 +273,13 @@ describe('formatReceiptLines', () => {
     expect(lines).toContain('TREASURY' + ' '.repeat(21) + '$95');
     expect(lines).toContain('           20%    $19');
     expect(lines).toContain('          100%    $95');
+  });
+
+  it('splits a 2-share half pay evenly and prints no table', () => {
+    const lines = formatReceiptLines({ ...twoTrains, totalRevenue: 190, totalShares: 2, isHalfPay: true });
+    expect(lines).toContain('2-SHARE' + ' '.repeat(17) + 'HALF PAY');
+    expect(lines).toContain('TREASURY' + ' '.repeat(21) + '$95');
+    expect(lines.some((line) => line.includes('50%') || line.includes('100%'))).toBe(false);
   });
 
   it('assumes a 10-share company on full pay when the receipt carries no settings', () => {

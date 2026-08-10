@@ -77,7 +77,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
 
   // --- 3. ACTIVATE COMPANIES ---
   console.log('Activating companies...');
-  await expect(page.getByRole('heading', { name: 'Activate Company' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
   
   // Find all activate buttons
   const activateButtons = page.getByRole('button', { name: 'Activate', exact: true });
@@ -95,7 +95,20 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
     // Always get the first "Activate" button since the previous one became "Deactivate"
     const activateBtn = currentActivateBtns.first();
     await activateBtn.click();
-    
+
+    // Games that offer several corporate structures get a random one
+    const structureLabel = page.getByText('Select Co. Structure').nth(i);
+    try {
+      await structureLabel.waitFor({ state: 'visible', timeout: 1000 });
+      const structureButtons = await structureLabel.locator('..').getByRole('button').all();
+      if (structureButtons.length > 0) {
+        const randomStructureIdx = Math.floor(Math.random() * structureButtons.length);
+        await structureButtons[randomStructureIdx].click();
+      }
+    } catch {
+      // Game only has one corporate structure, so nothing is offered
+    }
+
     // Wait to see if par value buttons appear
     const parLabel = page.getByText('Select Initial Par Value').nth(i);
     try {

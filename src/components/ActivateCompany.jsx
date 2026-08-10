@@ -3,6 +3,8 @@ import { Box, Button, VStack, Heading, Text, Center, Flex, Spinner, Input } from
 import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import { getContrastColor } from '../utils/colorUtils.js';
+import { getStructures, hasStructureChoice, canUseStructure, DEFAULT_TOTAL_SHARES } from '../utils/corporateStructures.js';
+import { getCompanyHoldings } from '../utils/dashboardMath.js';
 
 export default function ActivateCompany() {
   const [match, params] = useRoute('/game/:id/setup');
@@ -14,7 +16,10 @@ export default function ActivateCompany() {
     if (gameInstance?.state?.activeCompanies) {
       const map = {};
       gameInstance.state.activeCompanies.forEach(c => {
-        map[c.shortName] = c.parValue;
+        map[c.shortName] = {
+          parValue: c.parValue,
+          totalShares: c.totalShares || DEFAULT_TOTAL_SHARES
+        };
       });
       setActiveCompanies(map);
     }
@@ -25,13 +30,16 @@ export default function ActivateCompany() {
   if (!gameInstance || !gameInstance.staticConfig) return <Center h="100vh" bg="gray.900" color="white">Error loading game data.</Center>;
 
   const gameDef = gameInstance.staticConfig;
+  const structures = getStructures(gameDef);
+  const showStructures = hasStructureChoice(gameDef);
 
   const saveState = (newState) => {
     const finalCompanies = gameDef.companies
       .filter(c => newState[c.shortName] !== undefined)
       .map(c => ({
         ...c,
-        parValue: newState[c.shortName]
+        parValue: newState[c.shortName].parValue,
+        totalShares: newState[c.shortName].totalShares
       }));
 
     updateGameStateDebounced({ activeCompanies: finalCompanies });
@@ -48,16 +56,19 @@ export default function ActivateCompany() {
     if (next[shortName] !== undefined) {
       delete next[shortName];
     } else {
-      next[shortName] = gameDef.parValues[0] || 0;
+      next[shortName] = {
+        parValue: gameDef.parValues[0] || 0,
+        totalShares: DEFAULT_TOTAL_SHARES
+      };
     }
     setActiveCompanies(next);
     saveState(next);
   };
 
-  const updateParValue = (shortName, val) => {
+  const updateCompany = (shortName, updates) => {
     const next = {
       ...activeCompanies,
-      [shortName]: parseInt(val, 10)
+      [shortName]: { ...activeCompanies[shortName], ...updates }
     };
     setActiveCompanies(next);
     saveState(next);
@@ -67,7 +78,7 @@ export default function ActivateCompany() {
     <Box minH="100vh" bg="gray.900" color="white" p="8">
       <Box maxW="2xl" mx="auto">
         <Heading as="h2" size="xl" color="orange.400" mb="6">
-          Activate Company
+          Manage Companies
         </Heading>
 
         {gameDef.companies?.length > 6 && (
@@ -116,6 +127,34 @@ export default function ActivateCompany() {
                   </Button>
                 </Flex>
 
+                {isActive && showStructures && (
+                  <Box mt="4">
+                    <Text fontSize="sm" color="gray.400" mb="2">Select Co. Structure</Text>
+                    <Flex wrap="wrap" gap="2">
+                      {structures.map(structure => {
+                        const isSelected = activeCompanies[company.shortName]?.totalShares === structure.totalShares;
+                        const holdings = getCompanyHoldings(gameInstance?.state?.dashboardState?.playerAssets, company.shortName);
+                        return (
+                          <Button
+                            key={structure.totalShares}
+                            size="md"
+                            flex="1"
+                            minW="60px"
+                            color={isSelected ? "white" : "whiteAlpha.800"}
+                            _hover={{ bg: isSelected ? undefined : 'whiteAlpha.200' }}
+                            colorPalette={isSelected ? "orange" : "gray"}
+                            variant={isSelected ? "solid" : "outline"}
+                            disabled={!isSelected && !canUseStructure(structure, holdings)}
+                            onClick={() => updateCompany(company.shortName, { totalShares: structure.totalShares })}
+                          >
+                            {structure.name}
+                          </Button>
+                        );
+                      })}
+                    </Flex>
+                  </Box>
+                )}
+
                 {isActive && !hasShares && gameDef.parValues && gameDef.parValues.length > 0 && (
                   <Box mt="4">
                     <Text fontSize="sm" color="gray.400" mb="2">Select Initial Par Value</Text>
@@ -126,11 +165,11 @@ export default function ActivateCompany() {
                           size="md"
                           flex="1"
                           minW="60px"
-                          color={activeCompanies[company.shortName] === val ? "white" : "whiteAlpha.800"}
-                          _hover={{ bg: activeCompanies[company.shortName] === val ? undefined : 'whiteAlpha.200' }}
-                          colorPalette={activeCompanies[company.shortName] === val ? "orange" : "gray"}
-                          variant={activeCompanies[company.shortName] === val ? "solid" : "outline"}
-                          onClick={() => updateParValue(company.shortName, val)}
+                          color={activeCompanies[company.shortName]?.parValue === val ? "white" : "whiteAlpha.800"}
+                          _hover={{ bg: activeCompanies[company.shortName]?.parValue === val ? undefined : 'whiteAlpha.200' }}
+                          colorPalette={activeCompanies[company.shortName]?.parValue === val ? "orange" : "gray"}
+                          variant={activeCompanies[company.shortName]?.parValue === val ? "solid" : "outline"}
+                          onClick={() => updateCompany(company.shortName, { parValue: parseInt(val, 10) })}
                         >
                           {val}
                         </Button>

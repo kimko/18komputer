@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import RevenueCalculator from './RevenueCalculator.jsx';
@@ -14,6 +14,14 @@ vi.mock('wouter', () => ({
 vi.mock('../api/mockApi.js', () => ({
   getGame: vi.fn(),
   updateGameState: vi.fn()
+}));
+
+vi.mock('../data/games/1830.json', () => ({
+  default: { id: '1830', name: '1830', corporateStructures: [] }
+}));
+
+vi.mock('../data/games/1817.json', () => ({
+  default: { id: '1817', name: '1817', corporateStructures: [0, 1, 2], maxPlayerHolding: 60 }
 }));
 
 const renderWithChakra = (ui) => {
@@ -146,6 +154,18 @@ describe('RevenueCalculator Component', () => {
   });
 
   it('shows one column per share for a 5-share company', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1817',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
+        ],
+        companyORs: []
+      }
+    });
+
     renderWithChakra(<RevenueCalculator />);
     await screen.findByText(/Grand Total/i);
 
@@ -170,10 +190,10 @@ describe('RevenueCalculator Component', () => {
     expect(screen.getByText(/\$19 per share .* \$95 stays with the company/)).toBeInTheDocument();
   });
 
-  it('keeps the share count and pay choice per company', async () => {
+  it('keeps the corporate structure per company and saves it on the company', async () => {
     mockApi.getGame.mockResolvedValue({
       id: 'inst_123',
-      gameId: '1830',
+      gameId: '1817',
       players: ['Alice', 'Bob'],
       state: {
         activeCompanies: [
@@ -191,6 +211,16 @@ describe('RevenueCalculator Component', () => {
     fireEvent.click(screen.getByRole('button', { name: '5 Share' }));
     expect(screen.queryByText('10%')).not.toBeInTheDocument();
 
+    // The choice belongs to the company, so the Manage Companies screen sees it too
+    await waitFor(() => {
+      expect(mockApi.updateGameState).toHaveBeenCalledWith('inst_123', {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67, totalShares: 5 },
+          { shortName: 'NYC', name: 'New York Central', color: '#000000', parValue: 67 }
+        ]
+      });
+    });
+
     // NYC has not been touched, so it falls back to 10 shares
     fireEvent.click(screen.getByRole('button', { name: /NYC/i }));
     expect(screen.getByText('10%')).toBeInTheDocument();
@@ -199,5 +229,95 @@ describe('RevenueCalculator Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
     expect(screen.queryByText('10%')).not.toBeInTheDocument();
     expect(screen.getByText('20%')).toBeInTheDocument();
+  });
+
+  it('blocks a structure that cannot express what players already hold', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1817',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67, totalShares: 10 }
+        ],
+        dashboardState: { playerAssets: { Alice: { shares: { PRR: 30 } } } },
+        companyORs: []
+      }
+    });
+
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+
+    expect(screen.getByRole('button', { name: '10 Share' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '5 Share' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '2 Share' })).toBeDisabled();
+  });
+
+  it('drops the payout table for a 2-share company and splits half pay evenly', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1817',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67, totalShares: 2 }
+        ],
+        companyORs: []
+      }
+    });
+
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    fireEvent.click(screen.getByRole('button', { name: '100' }));
+    fireEvent.click(screen.getByRole('button', { name: '90' }));
+
+    // No table at all, so no percentage columns
+    expect(screen.queryByText('50%')).not.toBeInTheDocument();
+    expect(screen.queryByText('100%')).not.toBeInTheDocument();
+
+    expect(screen.getByText(/\$190 to the shareholder .* \$0 stays with the company/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Half Pay' }));
+    expect(screen.getByText(/\$95 to the shareholder .* \$95 stays with the company/)).toBeInTheDocument();
+  });
+
+  it('starts on the structure already saved on the company', async () => {
+    mockApi.getGame.mockResolvedValue({
+      id: 'inst_123',
+      gameId: '1817',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67, totalShares: 5 }
+        ],
+        companyORs: []
+      }
+    });
+
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    fireEvent.click(screen.getByRole('button', { name: '100' }));
+
+    // Five shares of 20% each, $20 apiece, without anyone touching the toggle
+    expect(screen.getByText('20%')).toBeInTheDocument();
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.queryByText('10%')).not.toBeInTheDocument();
+    expect(screen.getByText('$20')).toBeInTheDocument();
+  });
+
+  it('offers no structure buttons when the game only has one', async () => {
+    renderWithChakra(<RevenueCalculator />);
+    await screen.findByText(/Grand Total/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+
+    expect(screen.queryByRole('button', { name: '10 Share' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '5 Share' })).not.toBeInTheDocument();
   });
 });

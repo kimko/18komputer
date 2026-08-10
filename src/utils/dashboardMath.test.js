@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal } from './dashboardMath';
+import { getShareValue, getPlayerShareValue, getCompanyOrTotal, getPlayerOperatingIncome, getPlayerNetWorth, getCalculatorGrandTotal, getCompanyShareCount, getPlayerTotalShares } from './dashboardMath';
 
 describe('dashboardMath', () => {
   const mockDashboardState = {
@@ -55,6 +55,45 @@ describe('dashboardMath', () => {
     // 3. Net worth checks out
     // Cash (1000) + Share Value (134) + Operating Income (90) = 1224
     expect(getPlayerNetWorth(state, companies, maxOr, player)).toBe(1224);
+  });
+
+  describe('share counts', () => {
+    it('getCompanyShareCount turns a percentage into shares', () => {
+      expect(getCompanyShareCount(40, 10)).toBe(4);
+      expect(getCompanyShareCount(40, 5)).toBe(2);
+      expect(getCompanyShareCount(100, 2)).toBe(2);
+      expect(getCompanyShareCount(0, 5)).toBe(0);
+    });
+
+    it('getCompanyShareCount treats a company with no structure as 10-share', () => {
+      expect(getCompanyShareCount(40, undefined)).toBe(4);
+    });
+
+    it('getPlayerTotalShares adds up across mixed corporate structures', () => {
+      const state = {
+        shareValues: {},
+        ors: {},
+        playerAssets: { Alice: { shares: { TWO: 100, FIVE: 40, TEN: 40 } } }
+      };
+      const companies = [
+        { shortName: 'TWO', totalShares: 2 },
+        { shortName: 'FIVE', totalShares: 5 },
+        { shortName: 'TEN', totalShares: 10 }
+      ];
+
+      // 2 + 2 + 4
+      expect(getPlayerTotalShares(state, companies, 'Alice')).toBe(8);
+    });
+
+    it('getPlayerShareValue prices each share by the structure', () => {
+      const state = {
+        shareValues: { TWO: 100 },
+        ors: {},
+        playerAssets: { Alice: { shares: { TWO: 100 } } }
+      };
+      // The whole company is 2 shares at $100
+      expect(getPlayerShareValue(state, [{ shortName: 'TWO', totalShares: 2 }], 'Alice')).toBe(200);
+    });
   });
 
   it('getCalculatorGrandTotal correctly calculates train revenue', () => {
