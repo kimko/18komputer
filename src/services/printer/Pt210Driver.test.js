@@ -211,9 +211,29 @@ describe('formatReceiptLines', () => {
     totalRevenue: 290,
   };
 
+  it('prints the short name centred under the full name', () => {
+    const lines = formatReceiptLines(twoTrains);
+    expect(lines[0].trim()).toBe('BALTIMORE & OHIO');
+    expect(lines[1]).toBe(' '.repeat(14) + 'B&O');
+  });
+
+  it('does not repeat the short name when it is already the header', () => {
+    const lines = formatReceiptLines({ ...twoTrains, companyName: undefined });
+    expect(lines[0]).toBe(' '.repeat(14) + 'B&O');
+    expect(lines[1]).toBe('-'.repeat(32));
+  });
+
+  it('does not repeat the short name when a long name fell back to it', () => {
+    const long = 'Bau- und Betriebsgesellschaft für städtische Straßenbahnen in Wien';
+    const lines = formatReceiptLines({ ...twoTrains, companyName: long, company: 'WStB' });
+    expect(lines[0]).toBe(' '.repeat(14) + 'WSTB');
+    expect(lines[1]).toBe('-'.repeat(32));
+  });
+
   it('renders the whole receipt', () => {
     expect(formatReceiptLines({ ...twoTrains, totalShares: 10, isHalfPay: true })).toEqual([
       ' '.repeat(8) + 'BALTIMORE & OHIO',
+      ' '.repeat(14) + 'B&O',
       '-'.repeat(32),
       '4s   $180  40+40+50+50',
       '3s+  $110  30+30+20+30(P)',
@@ -316,6 +336,7 @@ describe('formatReceiptLines', () => {
   it('reports no routes when nothing was run', () => {
     expect(formatReceiptLines({ companyName: 'Baltimore & Ohio', company: 'B&O' })).toEqual([
       ' '.repeat(8) + 'BALTIMORE & OHIO',
+      ' '.repeat(14) + 'B&O',
       '-'.repeat(32),
       ' '.repeat(10) + '(no routes)',
       '-'.repeat(32),
@@ -383,6 +404,7 @@ describe('generatePt210Payload', () => {
     const [payload] = await generatePt210Payload(twoTrains);
     expect(decodeLines(payload)).toEqual([
       ' '.repeat(8) + 'BALTIMORE & OHIO',
+      ' '.repeat(14) + 'B&O',
       '-'.repeat(32),
       '4s   $180  40+40+50+50',
       '3s+  $110  30+30+20+30(P)',
@@ -458,6 +480,7 @@ describe('generatePt210Payload', () => {
     const [payload] = await generatePt210Payload({ companyName: 'Baltimore & Ohio', company: 'B&O' });
     expect(decodeLines(payload)).toEqual([
       ' '.repeat(8) + 'BALTIMORE & OHIO',
+      ' '.repeat(14) + 'B&O',
       '-'.repeat(32),
       ' '.repeat(10) + '(no routes)',
       '-'.repeat(32),

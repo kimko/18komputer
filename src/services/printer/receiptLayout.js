@@ -41,6 +41,20 @@ export function payoutLabel(isHalfPay) {
 
 export function trainLabel(train, index) {
   const stopCount = train.stopCount || 0;
-  if (stopCount === 0) return `T${index + 1}`;
+  if (stopCount === 0 && !train.hasBonus) return `T${index + 1}`;
   return train.hasBonus ? `${stopCount}s+` : `${stopCount}s`;
+}
+
+// Bonus stops pay out but do not fill the train, so they are counted separately.
+export function toReceiptTrain(train = {}) {
+  const stops = train.stops || [];
+  const bonuses = train.bonusStops || [];
+  const route = [...stops.map(String), ...bonuses.map((b) => `${b.val}(${b.label})`)].join('+');
+
+  return {
+    route: route || '0',
+    revenue: stops.reduce((sum, v) => sum + v, 0) + bonuses.reduce((sum, b) => sum + b.val, 0),
+    stopCount: stops.length,
+    hasBonus: bonuses.length > 0
+  };
 }

@@ -9,6 +9,7 @@ import ReceiptPrinter from './calculator/ReceiptPrinter.jsx';
 import { getContrastColor } from '../utils/colorUtils.js';
 import { getStructures, canUseStructure, DEFAULT_TOTAL_SHARES } from '../utils/corporateStructures.js';
 import { getCompanyHoldings } from '../utils/dashboardMath.js';
+import { toReceiptTrain } from '../services/printer/receiptLayout.js';
 
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
@@ -72,24 +73,7 @@ export default function RevenueCalculator() {
       return sum + stopsSum + bonusSum;
     }, 0);
 
-  const receiptTrains = trains
-    .filter(t => !t.isExcluded)
-    .map(t => {
-      const bonuses = t.bonusStops || [];
-      const stopCount = t.stops.length + bonuses.length;
-      const hasBonus = bonuses.length > 0;
-      
-      // Build display route: "20+20+10(P)+10(T)"
-      const parts = [
-        ...t.stops.map(v => `${v}`),
-        ...bonuses.map(b => `${b.val}(${b.label})`)
-      ];
-      const route = parts.join('+') || '0';
-      
-      const stopsSum = t.stops.reduce((s, v) => s + v, 0);
-      const bonusSum = bonuses.reduce((s, b) => s + b.val, 0);
-      return { route, revenue: stopsSum + bonusSum, stopCount, hasBonus };
-    });
+  const receiptTrains = trains.filter(t => !t.isExcluded).map(toReceiptTrain);
 
   return (
     <Box p="4">
