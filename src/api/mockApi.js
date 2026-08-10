@@ -114,7 +114,7 @@ function deepMerge(target, source) {
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function generateGameName(gameId, playerCount, date) {
+export function generateGameName(gameId, playerCount, date) {
   return `${gameId} ${playerCount}p ${MONTH_NAMES[date.getMonth()]}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
