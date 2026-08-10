@@ -7,6 +7,7 @@ import { buildShareToken, buildShareLink } from '../services/printer/shareLink.j
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
 import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
+import ResultsPrinter from './ResultsPrinter.jsx';
 import CompanyCharts from './charts/CompanyCharts.jsx';
 import PlayerCharts from './charts/PlayerCharts.jsx';
 import {
@@ -119,6 +120,12 @@ export default function Dashboard() {
             updatePlayers={updatePlayers}
             setActivePopup={setActivePopup}
             onCompanyClick={showCompanyName}
+          />
+
+          <ResultsPrinter
+            gameInstance={gameInstance}
+            dashboardState={dashboardState}
+            maxOr={maxOr}
           />
         </Tabs.Content>
 
