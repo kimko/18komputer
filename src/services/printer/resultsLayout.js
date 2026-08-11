@@ -23,7 +23,7 @@ const positionLine = (rank, name, money) => {
 export function buildResultsReceipt({ gameName, players, activeCompanies, dashboardState, maxOr, printedAt, shareUrl }) {
   const header = [centerText(upper(gameName || 'GAME')), centerText('FINAL RESULTS')];
   const body = [];
-  const push = (text, bold = false) => body.push({ text, bold });
+  const push = (text, bold = false, big = false) => body.push({ text, bold, big });
 
   push(RULE);
 
@@ -36,7 +36,7 @@ export function buildResultsReceipt({ gameName, players, activeCompanies, dashbo
   }
 
   ranked.forEach(({ p, net }, i) => {
-    push(positionLine(i + 1, p, formatCurrency(net)), i === 0);
+    push(positionLine(i + 1, p, formatCurrency(net)), i === 0, true);
     const row = (label, value) => push(spreadLine(INDENT + label, value)[0]);
     row('SHARES', formatShares(getPlayerTotalShares(dashboardState, activeCompanies, p)));
     row('CASH', formatCurrency(Number(dashboardState.playerAssets[p]?.cash || 0)));

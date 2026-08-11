@@ -195,8 +195,15 @@ export const generatePt210Payload = async (receiptData = {}) => {
   if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_NORMAL);
   push(ESC_BOLD_OFF);
 
-  // Taller rather than wider: the printer has no half steps, and doubling the width
-  // would cut the line to 21 characters and split routes across two of them.
+  pushBody(body, push, pushLine);
+  pushVersion(push, pushLine);
+  push(ESC_FEED_LINES(FEED_LINES));
+  return [new Uint8Array(bytes)];
+};
+
+// Taller rather than wider: the printer has no half steps, and doubling the width
+// would cut the line to 21 characters and split the longer lines across two of them.
+function pushBody(body, push, pushLine) {
   body.forEach(({ text, bold, big }) => {
     if (big) push(GS_SIZE_DBL_HEIGHT);
     if (bold) push(ESC_BOLD_ON);
@@ -204,11 +211,7 @@ export const generatePt210Payload = async (receiptData = {}) => {
     if (bold) push(ESC_BOLD_OFF);
     if (big) push(GS_SIZE_NORMAL);
   });
-
-  pushVersion(push, pushLine);
-  push(ESC_FEED_LINES(FEED_LINES));
-  return [new Uint8Array(bytes)];
-};
+}
 
 // Font B on the smaller of the printer's two faces, so it sits under the slip without shouting.
 function pushVersion(push, pushLine) {
@@ -235,11 +238,7 @@ export const generateResultsPayload = async (resultsData = {}) => {
   if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_NORMAL);
   push(ESC_BOLD_OFF);
 
-  body.forEach(({ text, bold }) => {
-    if (bold) push(ESC_BOLD_ON);
-    pushLine(text);
-    if (bold) push(ESC_BOLD_OFF);
-  });
+  pushBody(body, push, pushLine);
 
   if (raster) {
     push(ESC_ALIGN_CENTER);

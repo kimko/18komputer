@@ -541,6 +541,35 @@ describe('generateResultsPayload', () => {
     expect(text).toContain('SCAN TO OPEN RESULTS');
   });
 
+  it('prints each player standing double height, in finishing order', async () => {
+    const [payload] = await generateResultsPayload({
+      ...resultsData,
+      players: ['Liam', 'Kim'],
+      dashboardState: {
+        ...resultsData.dashboardState,
+        playerAssets: { Liam: { cash: 2765, shares: { UR: 60 } }, Kim: { cash: 100, shares: {} } }
+      }
+    });
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const raw = toRaw(payload).replace(/\x1bE./g, '');
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const enlarged = [...raw.matchAll(/\x1d!\x01([^\n]*)\n\x1d!\x00/g)].map((match) => match[1].trim());
+
+    expect(enlarged.map((line) => line.split(/\s{2,}/)[0])).toEqual(['1 LIAM', '2 KIM']);
+    enlarged.forEach((line) => expect(line).toMatch(/\$[\d,]+$/));
+  });
+
+  it('leaves the indented breakdown under each player at normal size', async () => {
+    const [payload] = await generateResultsPayload(resultsData);
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const raw = toRaw(payload).replace(/\x1bE./g, '');
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const enlarged = [...raw.matchAll(/\x1d!\x01([^\n]*)\n\x1d!\x00/g)].map((match) => match[1]);
+
+    expect(enlarged.join('\n')).not.toContain('SHARES');
+    expect(enlarged.join('\n')).not.toContain('CASH');
+  });
+
   it('rules a line off under the header and above the footer', async () => {
     const [payload] = await generateResultsPayload(resultsData);
     const rules = decodeLines(beforeRaster(payload)).filter((line) => line === '-'.repeat(32));
