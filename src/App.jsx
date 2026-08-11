@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard.jsx';
 import ResumeGame from './components/ResumeGame.jsx';
 import ManageUsers from './components/ManageUsers.jsx';
 import { PrinterConnectionProvider } from './hooks/PrinterConnectionProvider.jsx';
+import Toaster from './components/ui/Toaster.jsx';
 
 const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -29,6 +30,7 @@ function App() {
       </Route>
       </Switch>
       </GameLayout>
+      <Toaster />
       </PrinterConnectionProvider>
     </Router>
   )

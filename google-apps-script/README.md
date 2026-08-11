@@ -57,7 +57,7 @@ purpose, and `doPost` parses `e.postData.contents` itself.
 | Call | Meaning |
 | --- | --- |
 | `GET  ?id=game_123_4` | Return that row, or `{ ok: false, error: 'not_found' }` |
-| `POST` a game as JSON | Update the row with that id, or add one |
+| `POST` a game as JSON | Update the row with that id, or add one. Answers with `created: true` when it added one, which is how the app knows to say "Game saved" rather than "Game updated" |
 
 A write takes the script lock, so two people pressing Share at the same moment cannot half-write a
 row.

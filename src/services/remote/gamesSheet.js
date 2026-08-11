@@ -1,5 +1,6 @@
 import { buildShareToken, readShareToken } from '../printer/shareLink.js';
 import { SHEET_ENDPOINT, isSheetConfigured } from './sheetConfig.js';
+import { matchesSaved, rememberSaved, hasSavedGame } from './savedGames.js';
 
 const MAX_DATA_LENGTH = 45000;
 const TIMEOUT_MS = 15000;
@@ -43,6 +44,11 @@ export async function saveGameToSheet(gameInstance, dashboardState) {
   const data = buildShareToken(gameInstance, dashboardState);
   if (data.length > MAX_DATA_LENGTH) throw new Error(MESSAGES.too_large);
 
+  if (matchesSaved(gameInstance.id, data)) return { outcome: 'unchanged', updatedAt: null };
+
+  // Older deployments of the script do not say which they did, so fall back to what we know.
+  const seenBefore = hasSavedGame(gameInstance.id);
+
   const body = await call(SHEET_ENDPOINT, {
     method: 'POST',
     // Not application/json: that makes the browser ask permission first, which Apps Script ignores.
@@ -57,12 +63,17 @@ export async function saveGameToSheet(gameInstance, dashboardState) {
     })
   });
 
-  return { updatedAt: body.updated };
+  rememberSaved(gameInstance.id, data);
+  const created = body.created === undefined ? !seenBefore : Boolean(body.created);
+  return { outcome: created ? 'created' : 'updated', updatedAt: body.updated };
 }
 
 export async function loadGameFromSheet(gameId) {
   const body = await call(`${SHEET_ENDPOINT}?id=${encodeURIComponent(gameId)}`);
   const game = await readShareToken(body.data);
   if (!game) throw new Error('The game in the sheet could not be read.');
+
+  // What just came out of the sheet is by definition what is in the sheet.
+  rememberSaved(gameId, body.data);
   return { game, updatedAt: body.updated };
 }

@@ -4,6 +4,7 @@ import { usePrinterConnection } from '../hooks/printerConnection.js';
 import { printResults } from '../services/printer/PrinterService.js';
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 import { buildRemoteLink } from '../services/printer/shareLink.js';
+import { toastSheetOutcome } from './ui/toast.js';
 
 export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) {
   const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = usePrinterConnection();
@@ -22,7 +23,8 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
     // wrong is worse than no code, and a paper record is worth having either way.
     let shareUrl = null;
     try {
-      await saveGameToSheet(gameInstance, dashboardState);
+      const { outcome } = await saveGameToSheet(gameInstance, dashboardState);
+      toastSheetOutcome(outcome);
       shareUrl = buildRemoteLink(window.location.origin, window.location.pathname, gameInstance.id);
     } catch (err) {
       console.error('Failed to save the game to the sheet', err);

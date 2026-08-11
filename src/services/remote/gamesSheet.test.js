@@ -34,6 +34,7 @@ const answers = (payload, { status = 200 } = {}) =>
 const postedBody = (fetchMock) => JSON.parse(fetchMock.mock.calls[0][1].body);
 
 beforeEach(() => {
+  localStorage.clear();
   global.fetch = vi.fn();
 });
 
@@ -62,12 +63,64 @@ describe('saveGameToSheet', () => {
     expect(result.updatedAt).toBe('2026-08-11T19:02:00.000Z');
   });
 
+  it('reports whether the sheet added a row or overwrote one', async () => {
+    global.fetch = answers({ ok: true, created: true });
+    expect((await saveGameToSheet(gameInstance, dashboardState)).outcome).toBe('created');
+
+    localStorage.clear();
+    global.fetch = answers({ ok: true, created: false });
+    expect((await saveGameToSheet(gameInstance, dashboardState)).outcome).toBe('updated');
+  });
+
+  it('guesses from what it has seen when the sheet does not say', async () => {
+    global.fetch = answers({ ok: true });
+    expect((await saveGameToSheet(gameInstance, dashboardState)).outcome).toBe('created');
+
+    const changed = { ...dashboardState, shareValues: { 'A&A': 500 } };
+    global.fetch = answers({ ok: true });
+    expect((await saveGameToSheet(gameInstance, changed)).outcome).toBe('updated');
+  });
+
   it('posts as plain text, because asking permission first would fail', async () => {
     global.fetch = answers({ ok: true });
 
     await saveGameToSheet(gameInstance, dashboardState);
 
     expect(global.fetch.mock.calls[0][1].headers['Content-Type']).toBe('text/plain;charset=utf-8');
+  });
+
+  it('does not ask the sheet again when nothing about the game changed', async () => {
+    global.fetch = answers({ ok: true, created: true });
+    await saveGameToSheet(gameInstance, dashboardState);
+
+    global.fetch = answers({ ok: true });
+    const result = await saveGameToSheet(gameInstance, dashboardState);
+
+    expect(result).toEqual({ outcome: 'unchanged', updatedAt: null });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('asks the sheet again once a value changes', async () => {
+    global.fetch = answers({ ok: true, created: true });
+    await saveGameToSheet(gameInstance, dashboardState);
+
+    global.fetch = answers({ ok: true, created: false });
+    const moved = { ...dashboardState, ors: { 'A&A': { or1: 420 } } };
+    const result = await saveGameToSheet(gameInstance, moved);
+
+    expect(result.outcome).toBe('updated');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('remembers nothing after a failure, so the next attempt still tries', async () => {
+    global.fetch = answers({ ok: false, error: 'busy' });
+    await expect(saveGameToSheet(gameInstance, dashboardState)).rejects.toThrow();
+
+    global.fetch = answers({ ok: true, created: true });
+    const result = await saveGameToSheet(gameInstance, dashboardState);
+
+    expect(result.outcome).toBe('created');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('refuses a game too big for a cell without asking the sheet', async () => {
@@ -131,6 +184,22 @@ describe('loadGameFromSheet', () => {
     expect(game.state.dashboardState.ors).toEqual(dashboardState.ors);
     expect(game.state.dashboardState.shareValues['A&A']).toBe(440);
     expect(updatedAt).toBe('2026-08-11T19:02:00.000Z');
+  });
+
+  it('counts a freshly fetched game as already saved', async () => {
+    global.fetch = answers({ ok: true });
+    await saveGameToSheet(gameInstance, dashboardState);
+    const data = postedBody(global.fetch).data;
+    localStorage.clear();
+
+    global.fetch = answers({ ok: true, data, updated: '2026-08-11T19:02:00.000Z' });
+    await loadGameFromSheet('game_1786043602870_246');
+
+    global.fetch = answers({ ok: true });
+    const result = await saveGameToSheet(gameInstance, dashboardState);
+
+    expect(result.outcome).toBe('unchanged');
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('fails for a game the sheet does not have', async () => {

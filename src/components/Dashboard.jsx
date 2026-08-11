@@ -4,6 +4,7 @@ import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import { buildRemoteLink } from '../services/printer/shareLink.js';
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
+import { toastSheetOutcome } from './ui/toast.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
@@ -49,7 +50,8 @@ export default function Dashboard() {
     setShareError(null);
 
     try {
-      await saveGameToSheet(gameInstance, dashboardState);
+      const { outcome } = await saveGameToSheet(gameInstance, dashboardState);
+      toastSheetOutcome(outcome);
       const resumeLink = buildRemoteLink(window.location.origin, window.location.pathname, gameInstance.id);
       try {
         await navigator.clipboard.writeText(resumeLink);

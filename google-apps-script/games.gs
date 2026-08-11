@@ -48,9 +48,10 @@ function doPost(e) {
     const updated = new Date();
     const row = [body.id, body.ruleset, body.name, body.players, body.created, updated, body.data];
     const rowIndex = findRowIndex(sheet, body.id);
-    if (rowIndex === -1) sheet.appendRow(row);
+    const created = rowIndex === -1;
+    if (created) sheet.appendRow(row);
     else sheet.getRange(rowIndex, 1, 1, HEADERS.length).setValues([row]);
-    return json({ ok: true, id: body.id, updated: updated.toISOString() });
+    return json({ ok: true, id: body.id, updated: updated.toISOString(), created: created });
   } finally {
     lock.releaseLock();
   }

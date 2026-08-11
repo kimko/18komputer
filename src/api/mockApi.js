@@ -1,3 +1,5 @@
+import { forgetSaved, forgetAllSaved } from '../services/remote/savedGames.js';
+
 const STORAGE_KEY = '18komputer_games';
 const USERS_STORAGE_KEY = '18komputer_users';
 
@@ -227,6 +229,7 @@ export function deleteGame(instanceId) {
 
     delete db[instanceId];
     writeStorage(db);
+    forgetSaved(instanceId);
   });
 }
 
@@ -234,6 +237,7 @@ export function deleteAllGames() {
   return enqueue(async () => {
     await delay();
     writeStorage({});
+    forgetAllSaved();
   });
 }
 

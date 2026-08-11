@@ -69,16 +69,41 @@ test('a shared link opens the game on a device that has never seen it', async ({
   await receiver.close();
 });
 
-test('sharing the same game twice updates its row instead of adding one', async ({ page }) => {
+test('sharing a game nobody has touched does not write to the sheet again', async ({ page }) => {
   test.setTimeout(90000);
   const rows = await fakeSheet(page);
   await captureClipboard(page);
 
   await startGame(page);
   const first = await share(page);
+  expect(rows.writes).toBe(1);
+
   const second = await share(page);
 
   expect(second).toBe(first);
+  expect(rows.writes).toBe(1);
+  expect(rows.size).toBe(1);
+});
+
+test('changing a number makes the next share write again, to the same row', async ({ page }) => {
+  test.setTimeout(90000);
+  const rows = await fakeSheet(page);
+  await captureClipboard(page);
+
+  await startGame(page);
+  await share(page);
+  expect(rows.writes).toBe(1);
+
+  await page.getByTestId('cash-btn').first().click();
+  await expect(page.getByText(/Set cash for/)).toBeVisible();
+  for (const digit of '750') {
+    await page.getByRole('button', { name: digit, exact: true }).click();
+  }
+  await page.getByRole('button', { name: 'OK', exact: true }).click();
+
+  await share(page);
+
+  expect(rows.writes).toBe(2);
   expect(rows.size).toBe(1);
 });
 

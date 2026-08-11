@@ -22,6 +22,9 @@ vi.mock('../services/remote/gamesSheet.js', () => ({
 }));
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 
+vi.mock('./ui/toast.js', () => ({ toastSheetOutcome: vi.fn(), toaster: { create: vi.fn() } }));
+import { toastSheetOutcome } from './ui/toast.js';
+
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -180,8 +183,33 @@ describe('Dashboard', () => {
       Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     });
 
+    it('says which of the three things happened to the sheet', async () => {
+      for (const outcome of ['created', 'updated', 'unchanged']) {
+        saveGameToSheet.mockResolvedValue({ outcome });
+        const view = renderWithChakra(<Dashboard />);
+        await screen.findAllByText('Player Holdings');
+
+        fireEvent.click(screen.getAllByRole('button', { name: /Share/ })[0]);
+
+        await waitFor(() => expect(toastSheetOutcome).toHaveBeenCalledWith(outcome));
+        toastSheetOutcome.mockClear();
+        view.unmount();
+      }
+    });
+
+    it('still copies the link when the game was already in the sheet', async () => {
+      saveGameToSheet.mockResolvedValue({ outcome: 'unchanged', updatedAt: null });
+      renderWithChakra(<Dashboard />);
+      await screen.findByText('Player Holdings');
+
+      fireEvent.click(screen.getByRole('button', { name: /Share/ }));
+
+      await waitFor(() => expect(writeText).toHaveBeenCalled());
+      expect(writeText.mock.calls[0][0]).toContain('/resume#remote=test-game-123');
+    });
+
     it('saves the game to the sheet and copies a link that points at it', async () => {
-      saveGameToSheet.mockResolvedValue({ updatedAt: '2026-08-11T19:02:00.000Z' });
+      saveGameToSheet.mockResolvedValue({ outcome: 'created', updatedAt: '2026-08-11T19:02:00.000Z' });
       renderWithChakra(<Dashboard />);
       await screen.findByText('Player Holdings');
 

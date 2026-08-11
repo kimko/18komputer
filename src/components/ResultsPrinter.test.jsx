@@ -10,6 +10,9 @@ vi.mock('../services/printer/PrinterService.js', () => ({ printResults: vi.fn() 
 vi.mock('../services/remote/gamesSheet.js', () => ({ saveGameToSheet: vi.fn() }));
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 
+vi.mock('./ui/toast.js', () => ({ toastSheetOutcome: vi.fn(), toaster: { create: vi.fn() } }));
+import { toastSheetOutcome } from './ui/toast.js';
+
 const gameInstance = {
   id: 'inst_1', gameId: '1817', gameName: '1817 4p Aug-07', players: ['Liam'],
   state: { activeCompanies: [{ shortName: 'UR', totalShares: 5 }], calculatorState: {}, dashboardState: {} }
@@ -31,7 +34,7 @@ describe('ResultsPrinter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     printResults.mockResolvedValue();
-    saveGameToSheet.mockResolvedValue({ updatedAt: '2026-08-11T19:02:00.000Z' });
+    saveGameToSheet.mockResolvedValue({ outcome: 'updated', updatedAt: '2026-08-11T19:02:00.000Z' });
   });
 
   it('offers to pair when nothing is connected', () => {
@@ -74,6 +77,21 @@ describe('ResultsPrinter', () => {
     expect(data.gameName).toBe('1817 4p Aug-07');
     expect(data.players).toEqual(['Liam']);
     expect(data.shareUrl).toContain('/resume#remote=inst_1');
+  });
+
+  it('says what happened to the sheet, and still prints a code when nothing was written', async () => {
+    saveGameToSheet.mockResolvedValue({ outcome: 'unchanged', updatedAt: null });
+    usePrinterConnection.mockReturnValue(bluetooth({
+      isConnected: true, characteristic: {},
+      printer: { id: 'pt210', buildResultsPayloads: vi.fn() }
+    }));
+    renderIt();
+
+    fireEvent.click(screen.getByRole('button', { name: /print results/i }));
+
+    await waitFor(() => expect(printResults).toHaveBeenCalled());
+    expect(toastSheetOutcome).toHaveBeenCalledWith('unchanged');
+    expect(printResults.mock.calls[0][2].shareUrl).toContain('/resume#remote=inst_1');
   });
 
   it('still prints when the sheet is unreachable, but sends no link to put in a code', async () => {
