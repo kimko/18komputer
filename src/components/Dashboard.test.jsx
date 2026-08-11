@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
+import { PrinterConnectionProvider } from '../hooks/PrinterConnectionProvider.jsx';
 import Dashboard from './Dashboard.jsx';
 
 // Mock wouter
@@ -24,7 +25,7 @@ import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
-      {ui}
+      <PrinterConnectionProvider>{ui}</PrinterConnectionProvider>
     </ChakraProvider>
   );
 };

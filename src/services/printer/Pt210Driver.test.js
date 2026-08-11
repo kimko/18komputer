@@ -10,6 +10,7 @@ import {
   headerLines,
   formatReceiptLines,
   generatePt210Payload,
+  appVersionLine,
   generateResultsPayload,
 } from './Pt210Driver.js';
 
@@ -355,7 +356,7 @@ describe('formatReceiptLines', () => {
 const toRaw = (payload) => String.fromCharCode(...payload);
 
 // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
-const CONTROL_CODES = /\x1b@|\x1b[taEdJ].|\x1d!./g;
+const CONTROL_CODES = /\x1b@|\x1b[taEdJM].|\x1d!./g;
 
 const decodeLines = (payload) => {
   const lines = toRaw(payload).replace(CONTROL_CODES, '').split('\n');
@@ -419,7 +420,29 @@ describe('generatePt210Payload', () => {
       '     30%    $87   80%   $232',
       '     40%   $116   90%   $261',
       '     50%   $145  100%   $290',
+      appVersionLine(),
     ]);
+  });
+
+  it('prints the company name, the trains and the total double height, and nothing else', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    // Bold is set independently of size, so it is taken out of the way before reading the sizes.
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const raw = toRaw(payload).replace(/\x1bE./g, '');
+    // oxlint-disable-next-line no-control-regex -- ESC/POS commands are control characters by definition
+    const enlarged = [...raw.matchAll(/\x1d!\x01([^\n]*)\n\x1d!\x00/g)].map((match) => match[1]);
+
+    expect(enlarged).toEqual([
+      ' '.repeat(8) + 'BALTIMORE & OHIO',
+      '4s   $180  40+40+50+50',
+      '3s+  $110  30+30+20+30(P)',
+      'TOTAL' + ' '.repeat(23) + '$290',
+    ]);
+  });
+
+  it('leaves the train lines the full width of the paper, so no route splits', async () => {
+    const [payload] = await generatePt210Payload(twoTrains);
+    expect(toRaw(payload)).not.toContain(String.fromCharCode(0x1d, 0x21, 0x11));
   });
 
   it('draws exactly two separator lines', async () => {
@@ -487,6 +510,7 @@ describe('generatePt210Payload', () => {
       'TOTAL' + ' '.repeat(25) + '$0',
       '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
       'TREASURY' + ' '.repeat(22) + '$0',
+      appVersionLine(),
     ]);
   });
 });
@@ -549,5 +573,32 @@ describe('generateResultsPayload', () => {
     expect(text).toContain('1 LIAM');
     expect(text).toContain('LINK TOO LONG');
     expect(contains(payload, [0x1d, 0x76, 0x30, 0x00])).toBe(false);
+  });
+
+  it('prints the standings but no code at all when the game was never saved', async () => {
+    const [payload] = await generateResultsPayload({ ...resultsData, shareUrl: null });
+    const text = decodeLines(payload).join('\n');
+    expect(text).toContain('1 LIAM');
+    expect(text).toContain('COULD NOT SAVE THE GAME');
+    expect(text).not.toContain('LINK TOO LONG');
+    expect(contains(payload, [0x1d, 0x76, 0x30, 0x00])).toBe(false);
+  });
+});
+
+describe('the version on every receipt', () => {
+  const small = [0x1b, 0x4d, 0x01];
+  const backToNormal = [0x1b, 0x4d, 0x00];
+
+  it('signs off the results slip in the small face', async () => {
+    const [payload] = await generateResultsPayload({ shareUrl: null, players: [] });
+    expect(decodeLines(payload).join('\n')).toMatch(/v\d+\.\d+\.\d+|v\?/);
+    expect(contains(payload, small)).toBe(true);
+    expect(contains(payload, backToNormal)).toBe(true);
+  });
+
+  it('signs off the operating round slip too', async () => {
+    const [payload] = await generatePt210Payload({ companyName: 'UR', trains: [] });
+    expect(decodeLines(payload).join('\n')).toMatch(/v\d+\.\d+\.\d+|v\?/);
+    expect(contains(payload, small)).toBe(true);
   });
 });

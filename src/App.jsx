@@ -7,12 +7,14 @@ import RevenueCalculator from './components/RevenueCalculator.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import ResumeGame from './components/ResumeGame.jsx';
 import ManageUsers from './components/ManageUsers.jsx';
+import { PrinterConnectionProvider } from './hooks/PrinterConnectionProvider.jsx';
 
 const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function App() {
   return (
     <Router base={base}>
+      <PrinterConnectionProvider>
       <GameLayout>
       <Switch>
       <Route path="/" component={MainMenu} />
@@ -27,6 +29,7 @@ function App() {
       </Route>
       </Switch>
       </GameLayout>
+      </PrinterConnectionProvider>
     </Router>
   )
 }

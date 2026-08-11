@@ -11,7 +11,7 @@ try {
 } catch {
   // Fallback if git is not available (e.g. shallow clone without history)
 }
-const appVersion = gitHash ? `${packageJson.version}-${gitHash}` : packageJson.version;
+const appVersion = packageJson.version;
 
 const versionInfo = {
   version: packageJson.version,

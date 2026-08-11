@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
+import { PrinterConnectionProvider } from '../hooks/PrinterConnectionProvider.jsx';
 import RevenueCalculator from './RevenueCalculator.jsx';
 import * as mockApi from '../api/mockApi.js';
 import { useRoute } from 'wouter';
@@ -27,7 +28,7 @@ vi.mock('../data/games/1817.json', () => ({
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
-      {ui}
+      <PrinterConnectionProvider>{ui}</PrinterConnectionProvider>
     </ChakraProvider>
   );
 };

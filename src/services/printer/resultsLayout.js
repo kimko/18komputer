@@ -20,7 +20,7 @@ const positionLine = (rank, name, money) => {
   return spreadLine(`${rank} ${upper(name).slice(0, room)}`, money)[0];
 };
 
-export function buildResultsReceipt({ gameName, players, activeCompanies, dashboardState, maxOr, printedAt }) {
+export function buildResultsReceipt({ gameName, players, activeCompanies, dashboardState, maxOr, printedAt, shareUrl }) {
   const header = [centerText(upper(gameName || 'GAME')), centerText('FINAL RESULTS')];
   const body = [];
   const push = (text, bold = false) => body.push({ text, bold });
@@ -46,7 +46,12 @@ export function buildResultsReceipt({ gameName, players, activeCompanies, dashbo
 
   push(RULE);
   push('');
-  push(centerText('SCAN TO OPEN RESULTS'));
+  if (shareUrl) {
+    push(centerText('SCAN TO OPEN RESULTS'));
+  } else {
+    push(centerText('COULD NOT SAVE THE GAME'));
+    push(centerText('NO LINK TO SCAN'));
+  }
   push(centerText(formatDate(printedAt || new Date())));
 
   return { header, body };

@@ -2,10 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import ResultsPrinter from './ResultsPrinter.jsx';
-import { useWebBluetooth } from '../hooks/useWebBluetooth.js';
+import { usePrinterConnection } from '../hooks/printerConnection.js';
 import { printResults } from '../services/printer/PrinterService.js';
 
-vi.mock('../hooks/useWebBluetooth.js', () => ({ useWebBluetooth: vi.fn() }));
+vi.mock('../hooks/printerConnection.js', () => ({ usePrinterConnection: vi.fn() }));
 vi.mock('../services/printer/PrinterService.js', () => ({ printResults: vi.fn() }));
 vi.mock('../services/remote/gamesSheet.js', () => ({ saveGameToSheet: vi.fn() }));
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
@@ -35,14 +35,14 @@ describe('ResultsPrinter', () => {
   });
 
   it('offers to pair when nothing is connected', () => {
-    useWebBluetooth.mockReturnValue(bluetooth());
+    usePrinterConnection.mockReturnValue(bluetooth());
     renderIt();
     expect(screen.getByRole('button', { name: /pair/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /print results/i })).not.toBeInTheDocument();
   });
 
   it('offers to print once the receipt printer is connected', () => {
-    useWebBluetooth.mockReturnValue(bluetooth({
+    usePrinterConnection.mockReturnValue(bluetooth({
       isConnected: true, characteristic: {}, deviceName: 'PT-210',
       printer: { id: 'pt210', displayName: 'GOOJPRT PT-210', buildResultsPayloads: vi.fn() }
     }));
@@ -51,7 +51,7 @@ describe('ResultsPrinter', () => {
   });
 
   it('says results need the receipt printer when a label printer is connected', () => {
-    useWebBluetooth.mockReturnValue(bluetooth({
+    usePrinterConnection.mockReturnValue(bluetooth({
       isConnected: true, characteristic: {}, deviceName: 'D30',
       printer: { id: 'd30', displayName: 'Phomemo D30' }
     }));
@@ -62,7 +62,7 @@ describe('ResultsPrinter', () => {
 
   it('saves the game, then prints the standings and a code that fetches it back', async () => {
     const printer = { id: 'pt210', displayName: 'GOOJPRT PT-210', buildResultsPayloads: vi.fn() };
-    useWebBluetooth.mockReturnValue(bluetooth({ isConnected: true, characteristic: {}, printer }));
+    usePrinterConnection.mockReturnValue(bluetooth({ isConnected: true, characteristic: {}, printer }));
     renderIt();
 
     fireEvent.click(screen.getByRole('button', { name: /print results/i }));
@@ -76,9 +76,9 @@ describe('ResultsPrinter', () => {
     expect(data.shareUrl).toContain('/resume#remote=inst_1');
   });
 
-  it('still prints when the sheet is unreachable, and says the code only opens the app', async () => {
+  it('still prints when the sheet is unreachable, but sends no link to put in a code', async () => {
     saveGameToSheet.mockRejectedValue(new Error('Could not reach the sheet.'));
-    useWebBluetooth.mockReturnValue(bluetooth({
+    usePrinterConnection.mockReturnValue(bluetooth({
       isConnected: true, characteristic: {},
       printer: { id: 'pt210', buildResultsPayloads: vi.fn() }
     }));
@@ -87,13 +87,13 @@ describe('ResultsPrinter', () => {
     fireEvent.click(screen.getByRole('button', { name: /print results/i }));
 
     await waitFor(() => expect(printResults).toHaveBeenCalled());
-    expect(printResults.mock.calls[0][2].shareUrl).toBe(window.location.origin + window.location.pathname);
-    expect(await screen.findByRole('status')).toHaveTextContent('opens the app, not this game');
+    expect(printResults.mock.calls[0][2].shareUrl).toBeNull();
+    expect(await screen.findByRole('status')).toHaveTextContent('without a code to scan');
   });
 
   it('shows a print failure on screen, not only in the console', async () => {
     printResults.mockRejectedValue(new Error('printer jammed'));
-    useWebBluetooth.mockReturnValue(bluetooth({
+    usePrinterConnection.mockReturnValue(bluetooth({
       isConnected: true, characteristic: {},
       printer: { id: 'pt210', buildResultsPayloads: vi.fn() }
     }));

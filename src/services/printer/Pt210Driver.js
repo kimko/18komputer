@@ -127,13 +127,13 @@ export function splitReceipt(receiptData = {}) {
 
       wrapRoute(train.route || '0', routeWidth).forEach((routeLine, routeIndex) => {
         const indent = routeIndex === 0 ? prefix : ' '.repeat(prefix.length);
-        body.push({ text: indent + routeLine, bold: false });
+        body.push({ text: indent + routeLine, bold: false, big: true });
       });
     });
   }
 
   body.push({ text: separator, bold: false });
-  spreadLine('TOTAL', `$${total}`).forEach((text) => body.push({ text, bold: true }));
+  spreadLine('TOTAL', `$${total}`).forEach((text) => body.push({ text, bold: true, big: true }));
 
   const { perShare, companyKeeps } = calculatePayout(total, receiptData.totalShares, receiptData.isHalfPay);
   const push = (text) => body.push({ text, bold: false });
@@ -170,6 +170,11 @@ const GS_SIZE_DBL_HEIGHT = [0x1d, 0x21, 0x01];
 const GS_SIZE_NORMAL = [0x1d, 0x21, 0x00];
 const LF = [0x0a];
 const ESC_FEED_LINES = (n) => [0x1b, 0x64, n & 0xff];
+const ESC_ALIGN_CENTER = [0x1b, 0x61, 0x01];
+const ESC_FONT_SMALL = [0x1b, 0x4d, 0x01];
+const ESC_FONT_NORMAL = [0x1b, 0x4d, 0x00];
+
+export const appVersionLine = () => `v${import.meta.env.VITE_APP_VERSION || '?'}`;
 
 const FEED_LINES = 5;
 
@@ -190,21 +195,31 @@ export const generatePt210Payload = async (receiptData = {}) => {
   if (PT210_STYLE.useDoubleHeightHeader) push(GS_SIZE_NORMAL);
   push(ESC_BOLD_OFF);
 
-  body.forEach(({ text, bold }) => {
+  // Taller rather than wider: the printer has no half steps, and doubling the width
+  // would cut the line to 21 characters and split routes across two of them.
+  body.forEach(({ text, bold, big }) => {
+    if (big) push(GS_SIZE_DBL_HEIGHT);
     if (bold) push(ESC_BOLD_ON);
     pushLine(text);
     if (bold) push(ESC_BOLD_OFF);
+    if (big) push(GS_SIZE_NORMAL);
   });
 
+  pushVersion(push, pushLine);
   push(ESC_FEED_LINES(FEED_LINES));
   return [new Uint8Array(bytes)];
 };
 
-const ESC_ALIGN_CENTER = [0x1b, 0x61, 0x01];
+// Font B on the smaller of the printer's two faces, so it sits under the slip without shouting.
+function pushVersion(push, pushLine) {
+  push(ESC_ALIGN_CENTER, ESC_FONT_SMALL);
+  pushLine(appVersionLine());
+  push(ESC_FONT_NORMAL, ESC_ALIGN_LEFT);
+}
 
 export const generateResultsPayload = async (resultsData = {}) => {
   const { header, body } = buildResultsReceipt(resultsData);
-  const raster = buildQrRaster(resultsData.shareUrl);
+  const raster = resultsData.shareUrl ? buildQrRaster(resultsData.shareUrl) : null;
   const bytes = [];
   const push = (...sequences) => sequences.forEach((sequence) => bytes.push(...sequence));
   const pushLine = (text) => {
@@ -230,10 +245,11 @@ export const generateResultsPayload = async (resultsData = {}) => {
     push(ESC_ALIGN_CENTER);
     push(raster);
     push(ESC_ALIGN_LEFT, LF);
-  } else {
+  } else if (resultsData.shareUrl) {
     pushLine(centerText('LINK TOO LONG TO PRINT'));
   }
 
+  pushVersion(push, pushLine);
   push(ESC_FEED_LINES(FEED_LINES));
   return [new Uint8Array(bytes)];
 };

@@ -2,11 +2,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import ReceiptPrinter from './ReceiptPrinter.jsx';
-import { useWebBluetooth } from '../../hooks/useWebBluetooth.js';
+import { usePrinterConnection } from '../../hooks/printerConnection.js';
 import { printReceipt } from '../../services/printer/PrinterService.js';
 
-vi.mock('../../hooks/useWebBluetooth.js', () => ({
-  useWebBluetooth: vi.fn(),
+vi.mock('../../hooks/printerConnection.js', () => ({
+  usePrinterConnection: vi.fn(),
 }));
 
 // Without this the D30 driver would reach canvas.getContext, which happy-dom
@@ -57,14 +57,14 @@ describe('ReceiptPrinter when nothing is paired', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('offers to pair', () => {
-    useWebBluetooth.mockReturnValue(hookState());
+    usePrinterConnection.mockReturnValue(hookState());
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.getByRole('button', { name: /Pair Printer/i })).toBeInTheDocument();
   });
 
   it('pairs without the component naming any Bluetooth ids', () => {
     const state = hookState();
-    useWebBluetooth.mockReturnValue(state);
+    usePrinterConnection.mockReturnValue(state);
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Pair Printer/i }));
@@ -74,13 +74,13 @@ describe('ReceiptPrinter when nothing is paired', () => {
   });
 
   it('does not offer to print', () => {
-    useWebBluetooth.mockReturnValue(hookState());
+    usePrinterConnection.mockReturnValue(hookState());
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.queryByRole('button', { name: /Print Receipt/i })).not.toBeInTheDocument();
   });
 
   it('shows a connection problem', () => {
-    useWebBluetooth.mockReturnValue(hookState({ error: 'Web Bluetooth is not available' }));
+    usePrinterConnection.mockReturnValue(hookState({ error: 'Web Bluetooth is not available' }));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.getByText(/Web Bluetooth is not available/)).toBeInTheDocument();
   });
@@ -90,21 +90,21 @@ describe('ReceiptPrinter when a printer is paired', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('names the PT-210 that is connected', () => {
-    useWebBluetooth.mockReturnValue(connectedTo(PT210));
+    usePrinterConnection.mockReturnValue(connectedTo(PT210));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.getByText(/GOOJPRT PT-210/)).toBeInTheDocument();
     expect(screen.getByText(/PT210_8CF0/)).toBeInTheDocument();
   });
 
   it('names the D30 that is connected', () => {
-    useWebBluetooth.mockReturnValue(connectedTo(D30));
+    usePrinterConnection.mockReturnValue(connectedTo(D30));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.getByText(/Phomemo D30/)).toBeInTheDocument();
   });
 
   it('prints the receipt through the connected printer', async () => {
     const state = connectedTo(PT210);
-    useWebBluetooth.mockReturnValue(state);
+    usePrinterConnection.mockReturnValue(state);
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Print Receipt/i }));
@@ -122,7 +122,7 @@ describe('ReceiptPrinter when a printer is paired', () => {
 
   it('shows on screen when a print fails, rather than only in the console', async () => {
     printReceipt.mockRejectedValueOnce(new Error('printer went away'));
-    useWebBluetooth.mockReturnValue(connectedTo(PT210));
+    usePrinterConnection.mockReturnValue(connectedTo(PT210));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Print Receipt/i }));
@@ -132,7 +132,7 @@ describe('ReceiptPrinter when a printer is paired', () => {
 
   it('lets you try printing again after a failure', async () => {
     printReceipt.mockRejectedValueOnce(new Error('printer went away'));
-    useWebBluetooth.mockReturnValue(connectedTo(PT210));
+    usePrinterConnection.mockReturnValue(connectedTo(PT210));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Print Receipt/i }));
@@ -143,7 +143,7 @@ describe('ReceiptPrinter when a printer is paired', () => {
 
   it('clears an old failure when printing again', async () => {
     printReceipt.mockRejectedValueOnce(new Error('printer went away'));
-    useWebBluetooth.mockReturnValue(connectedTo(PT210));
+    usePrinterConnection.mockReturnValue(connectedTo(PT210));
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Print Receipt/i }));
@@ -158,7 +158,7 @@ describe('ReceiptPrinter when a printer is paired', () => {
 
   it('disconnects on request', () => {
     const state = connectedTo(PT210);
-    useWebBluetooth.mockReturnValue(state);
+    usePrinterConnection.mockReturnValue(state);
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Disconnect/i }));
@@ -171,7 +171,7 @@ describe('ReceiptPrinter probing', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('stays out of the way by default, now that the printers are known to work', () => {
-    useWebBluetooth.mockReturnValue(hookState());
+    usePrinterConnection.mockReturnValue(hookState());
     renderWithChakra(<ReceiptPrinter {...receipt} />);
 
     expect(screen.queryByRole('button', { name: /Probe/i })).not.toBeInTheDocument();
@@ -179,7 +179,7 @@ describe('ReceiptPrinter probing', () => {
 
   it('is available when asked for, even with nothing paired', () => {
     const state = hookState();
-    useWebBluetooth.mockReturnValue(state);
+    usePrinterConnection.mockReturnValue(state);
     renderWithChakra(<ReceiptPrinter {...receipt} showProbe />);
 
     fireEvent.click(screen.getByRole('button', { name: /Probe/i }));
@@ -188,7 +188,7 @@ describe('ReceiptPrinter probing', () => {
   });
 
   it('hides a report it already has when the probe is switched off', () => {
-    useWebBluetooth.mockReturnValue(
+    usePrinterConnection.mockReturnValue(
       hookState({
         probeReport: { name: 'PT210_8CF0', id: 'device-1', connected: true, services: [], errors: [] },
       })
@@ -199,7 +199,7 @@ describe('ReceiptPrinter probing', () => {
   });
 
   it('shows the report on screen, since there is no console at a game table', () => {
-    useWebBluetooth.mockReturnValue(
+    usePrinterConnection.mockReturnValue(
       hookState({
         probeReport: {
           name: 'PT210_8CF0',
@@ -227,7 +227,7 @@ describe('ReceiptPrinter probing', () => {
   });
 
   it('shows nothing extra before a probe has run', () => {
-    useWebBluetooth.mockReturnValue(hookState());
+    usePrinterConnection.mockReturnValue(hookState());
     renderWithChakra(<ReceiptPrinter {...receipt} />);
     expect(screen.queryByText(/Connected:/)).not.toBeInTheDocument();
   });

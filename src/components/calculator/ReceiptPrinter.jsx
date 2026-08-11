@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { useWebBluetooth } from '../../hooks/useWebBluetooth.js';
+import { usePrinterConnection } from '../../hooks/printerConnection.js';
 import { printReceipt } from '../../services/printer/PrinterService.js';
 import { formatProbeReport } from '../../services/printer/connectPrinter.js';
 
@@ -18,7 +18,7 @@ export default function ReceiptPrinter({ company, companyName, trains, totalReve
     deviceName,
     printer,
     probeReport,
-  } = useWebBluetooth();
+  } = usePrinterConnection();
   const [isPrinting, setIsPrinting] = useState(false);
   const [printError, setPrintError] = useState(null);
 

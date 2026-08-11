@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { useWebBluetooth } from '../hooks/useWebBluetooth.js';
+import { usePrinterConnection } from '../hooks/printerConnection.js';
 import { printResults } from '../services/printer/PrinterService.js';
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 import { buildRemoteLink } from '../services/printer/shareLink.js';
 
 export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) {
-  const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = useWebBluetooth();
+  const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = usePrinterConnection();
   const [isPrinting, setIsPrinting] = useState(false);
   const [printError, setPrintError] = useState(null);
   const [saveWarning, setSaveWarning] = useState(null);
@@ -18,14 +18,15 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
     setPrintError(null);
     setSaveWarning(null);
 
-    // A printer that already has paper in it should not go idle because the sheet is unreachable.
-    let shareUrl = `${window.location.origin}${window.location.pathname}`;
+    // The standings still print without a link, because a code that goes somewhere
+    // wrong is worse than no code, and a paper record is worth having either way.
+    let shareUrl = null;
     try {
       await saveGameToSheet(gameInstance, dashboardState);
       shareUrl = buildRemoteLink(window.location.origin, window.location.pathname, gameInstance.id);
     } catch (err) {
       console.error('Failed to save the game to the sheet', err);
-      setSaveWarning(`${err.message} The printed code opens the app, not this game.`);
+      setSaveWarning(`${err.message} The receipt prints without a code to scan.`);
     }
 
     try {

@@ -21,7 +21,8 @@ const resultsData = {
       // Kim: 2 R shares ($880), income 20% of 1360
       Kim: { cash: 1923, shares: { R: 20 } }
     }
-  }
+  },
+  shareUrl: 'https://kimko.github.io/18komputer/resume#remote=game_1_2'
 };
 
 const lines = (data = resultsData) => {
@@ -111,6 +112,14 @@ describe('buildResultsReceipt', () => {
   it('closes with an invitation to scan and the date it was printed', () => {
     const all = lines().join('\n');
     expect(all).toContain('SCAN TO OPEN RESULTS');
+    expect(all).toContain('10 AUG 2026');
+  });
+
+  it('says the game was not saved rather than inviting a scan that cannot happen', () => {
+    const all = lines({ ...resultsData, shareUrl: null }).join('\n');
+    expect(all).toContain('COULD NOT SAVE THE GAME');
+    expect(all).toContain('NO LINK TO SCAN');
+    expect(all).not.toContain('SCAN TO OPEN RESULTS');
     expect(all).toContain('10 AUG 2026');
   });
 
