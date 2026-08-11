@@ -420,6 +420,7 @@ describe('generatePt210Payload', () => {
       '     30%    $87   80%   $232',
       '     40%   $116   90%   $261',
       '     50%   $145  100%   $290',
+      '',
       appVersionLine(),
     ]);
   });
@@ -510,6 +511,7 @@ describe('generatePt210Payload', () => {
       'TOTAL' + ' '.repeat(25) + '$0',
       '10-SHARE' + ' '.repeat(16) + 'FULL PAY',
       'TREASURY' + ' '.repeat(22) + '$0',
+      '',
       appVersionLine(),
     ]);
   });
@@ -615,19 +617,32 @@ describe('generateResultsPayload', () => {
 });
 
 describe('the version on every receipt', () => {
-  const small = [0x1b, 0x4d, 0x01];
-  const backToNormal = [0x1b, 0x4d, 0x00];
+  // The PT-210 answers ESC M 1 with a blank line, so asking for its second font prints nothing.
+  const selectFontB = [0x1b, 0x4d, 0x01];
 
-  it('signs off the results slip in the small face', async () => {
+  it('signs off the results slip on the last line', async () => {
     const [payload] = await generateResultsPayload({ shareUrl: null, players: [] });
-    expect(decodeLines(payload).join('\n')).toMatch(/v\d+\.\d+\.\d+|v\?/);
-    expect(contains(payload, small)).toBe(true);
-    expect(contains(payload, backToNormal)).toBe(true);
+    const lines = decodeLines(payload);
+    expect(lines[lines.length - 1]).toBe(appVersionLine());
+    expect(appVersionLine()).toMatch(/^v/);
   });
 
-  it('signs off the operating round slip too', async () => {
+  it('signs off the operating round slip on the last line', async () => {
     const [payload] = await generatePt210Payload({ companyName: 'UR', trains: [] });
-    expect(decodeLines(payload).join('\n')).toMatch(/v\d+\.\d+\.\d+|v\?/);
-    expect(contains(payload, small)).toBe(true);
+    const lines = decodeLines(payload);
+    expect(lines[lines.length - 1]).toBe(appVersionLine());
+  });
+
+  it('never asks for the font this printer cannot render', async () => {
+    const [results] = await generateResultsPayload({ shareUrl: null, players: [] });
+    const [or] = await generatePt210Payload({ companyName: 'UR', trains: [] });
+    expect(contains(results, selectFontB)).toBe(false);
+    expect(contains(or, selectFontB)).toBe(false);
+  });
+
+  it('sets the version apart with a blank line', async () => {
+    const [payload] = await generatePt210Payload({ companyName: 'UR', trains: [] });
+    const lines = decodeLines(payload);
+    expect(lines[lines.length - 2]).toBe('');
   });
 });

@@ -171,8 +171,6 @@ const GS_SIZE_NORMAL = [0x1d, 0x21, 0x00];
 const LF = [0x0a];
 const ESC_FEED_LINES = (n) => [0x1b, 0x64, n & 0xff];
 const ESC_ALIGN_CENTER = [0x1b, 0x61, 0x01];
-const ESC_FONT_SMALL = [0x1b, 0x4d, 0x01];
-const ESC_FONT_NORMAL = [0x1b, 0x4d, 0x00];
 
 export const appVersionLine = () => `v${import.meta.env.VITE_APP_VERSION || '?'}`;
 
@@ -213,11 +211,13 @@ function pushBody(body, push, pushLine) {
   });
 }
 
-// Font B on the smaller of the printer's two faces, so it sits under the slip without shouting.
+// The PT-210 accepts ESC M 1 and then prints nothing, having no Font B glyphs, so this stays in
+// the normal face. A blank line above it keeps it reading as a footer rather than as another value.
 function pushVersion(push, pushLine) {
-  push(ESC_ALIGN_CENTER, ESC_FONT_SMALL);
+  pushLine('');
+  push(ESC_ALIGN_CENTER);
   pushLine(appVersionLine());
-  push(ESC_FONT_NORMAL, ESC_ALIGN_LEFT);
+  push(ESC_ALIGN_LEFT);
 }
 
 export const generateResultsPayload = async (resultsData = {}) => {
