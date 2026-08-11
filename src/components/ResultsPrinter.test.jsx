@@ -7,6 +7,8 @@ import { printResults } from '../services/printer/PrinterService.js';
 
 vi.mock('../hooks/useWebBluetooth.js', () => ({ useWebBluetooth: vi.fn() }));
 vi.mock('../services/printer/PrinterService.js', () => ({ printResults: vi.fn() }));
+vi.mock('../services/remote/gamesSheet.js', () => ({ saveGameToSheet: vi.fn() }));
+import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 
 const gameInstance = {
   id: 'inst_1', gameId: '1817', gameName: '1817 4p Aug-07', players: ['Liam'],
@@ -26,7 +28,11 @@ const renderIt = () => render(
 );
 
 describe('ResultsPrinter', () => {
-  beforeEach(() => { vi.clearAllMocks(); printResults.mockResolvedValue(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    printResults.mockResolvedValue();
+    saveGameToSheet.mockResolvedValue({ updatedAt: '2026-08-11T19:02:00.000Z' });
+  });
 
   it('offers to pair when nothing is connected', () => {
     useWebBluetooth.mockReturnValue(bluetooth());
@@ -54,7 +60,7 @@ describe('ResultsPrinter', () => {
     expect(screen.queryByRole('button', { name: /print results/i })).not.toBeInTheDocument();
   });
 
-  it('prints the standings and a link to the game', async () => {
+  it('saves the game, then prints the standings and a code that fetches it back', async () => {
     const printer = { id: 'pt210', displayName: 'GOOJPRT PT-210', buildResultsPayloads: vi.fn() };
     useWebBluetooth.mockReturnValue(bluetooth({ isConnected: true, characteristic: {}, printer }));
     renderIt();
@@ -62,11 +68,27 @@ describe('ResultsPrinter', () => {
     fireEvent.click(screen.getByRole('button', { name: /print results/i }));
 
     await waitFor(() => expect(printResults).toHaveBeenCalled());
+    expect(saveGameToSheet).toHaveBeenCalledWith(gameInstance, dashboardState);
     const [, sentPrinter, data] = printResults.mock.calls[0];
     expect(sentPrinter).toBe(printer);
     expect(data.gameName).toBe('1817 4p Aug-07');
     expect(data.players).toEqual(['Liam']);
-    expect(data.shareUrl).toBe(window.location.origin + window.location.pathname);
+    expect(data.shareUrl).toContain('/resume#remote=inst_1');
+  });
+
+  it('still prints when the sheet is unreachable, and says the code only opens the app', async () => {
+    saveGameToSheet.mockRejectedValue(new Error('Could not reach the sheet.'));
+    useWebBluetooth.mockReturnValue(bluetooth({
+      isConnected: true, characteristic: {},
+      printer: { id: 'pt210', buildResultsPayloads: vi.fn() }
+    }));
+    renderIt();
+
+    fireEvent.click(screen.getByRole('button', { name: /print results/i }));
+
+    await waitFor(() => expect(printResults).toHaveBeenCalled());
+    expect(printResults.mock.calls[0][2].shareUrl).toBe(window.location.origin + window.location.pathname);
+    expect(await screen.findByRole('status')).toHaveTextContent('opens the app, not this game');
   });
 
   it('shows a print failure on screen, not only in the console', async () => {

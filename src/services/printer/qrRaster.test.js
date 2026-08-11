@@ -4,6 +4,7 @@ import { buildQrRaster, PRINT_WIDTH_DOTS, MIN_DOTS_PER_MODULE } from './qrRaster
 const SHORT = 'https://kimko.github.io/18komputer/';
 const GAME_URL = 'https://kimko.github.io/18komputer/game/game_1786043602870_246/dashboard';
 const MAGIC_LINK = 'https://kimko.github.io/18komputer/resume#import=' + 'A'.repeat(700);
+const REMOTE_LINK = 'https://kimko.github.io/18komputer/resume#remote=game_1786043602870_246';
 const header = (raster) => Array.from(raster.slice(0, 8));
 
 // The corner finder square is exactly 7 modules wide, so its first solid run gives the scale.
@@ -64,8 +65,14 @@ describe('buildQrRaster', () => {
     expect(Array.from(raster.slice(8)).some((b) => b !== 0)).toBe(true);
   });
 
+  it('prints a readable code for a link that fetches the game from the sheet', () => {
+    const raster = buildQrRaster(REMOTE_LINK);
+    expect(raster).not.toBeNull();
+    expect(Array.from(raster.slice(8)).some((b) => b !== 0)).toBe(true);
+  });
+
   it('keeps squares at or above the 0.75mm that scans off thermal paper', () => {
-    [SHORT, GAME_URL].forEach((text) => {
+    [SHORT, GAME_URL, REMOTE_LINK].forEach((text) => {
       expect(measureDotsPerModule(buildQrRaster(text))).toBeGreaterThanOrEqual(MIN_DOTS_PER_MODULE);
     });
   });

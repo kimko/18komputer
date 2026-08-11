@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
+import { fakeSheet } from './fakeSheet.js';
 
 // Use production URL or local URL based on TEST_ENV
 const APP_URL = process.env.TEST_ENV === 'local' 
@@ -12,7 +13,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   test.setTimeout(120000); // This test is very long
   // Listen for browser console logs
   page.on('console', msg => {
-    if (msg.text().includes('MAGIC_LINK') || msg.type() === 'error') {
+    if (msg.type() === 'error') {
       console.log(`BROWSER CONSOLE [${msg.type()}]:`, msg.text());
     }
   });
@@ -25,6 +26,8 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
       return Promise.resolve();
     };
   });
+
+  await fakeSheet(page);
 
   // Start test
   console.log('--- STARTING CHAOS MONKEY E2E TEST ---');
@@ -316,25 +319,29 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
     expect(g.inAssets).toBe(false);
   }
 
-  // --- 6. MAGIC LINK SHARE ---
+  // --- 6. SHARE VIA THE SHEET ---
   // Wait for the final debounced state updates to flush to gameInstance
   await page.waitForTimeout(600);
   await page.getByRole('button', { name: '📤 Share' }).click();
-  await expect(page.getByText('Magic Link copied!')).toBeVisible();
+  await expect(page.getByText('Link copied!')).toBeVisible();
 
   const clipboardText = await page.evaluate(() => window.__clipboardText);
-  expect(clipboardText).toContain('#import=');
+  expect(clipboardText).toContain('#remote=');
 
-  // Output the magic link for manual inspection
+  // Output the link for manual inspection
   console.log('\n\n======================================================');
-  console.log('✨ MAGIC LINK FOR TEST INSPECTION ✨');
+  console.log('✨ SHARE LINK FOR TEST INSPECTION ✨');
   console.log(clipboardText);
   console.log('======================================================\n\n');
 
   // --- 7. OPEN SHARED GAME ---
-  console.log('Importing game from magic link...');
+  // This browser still holds the game it just shared, so the two copies have to be reconciled.
+  console.log('Fetching the game back from the sheet...');
   await page.goto('about:blank');
   await page.goto(clipboardText);
+
+  await expect(page.getByRole('heading', { name: 'You already have this game' })).toBeVisible({ timeout: 20000 });
+  await page.getByRole('button', { name: 'Use the shared one' }).click();
 
   // We should be redirected to the dashboard automatically
   await expect(page).toHaveURL(/.*\/dashboard/);

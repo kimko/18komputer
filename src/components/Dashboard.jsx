@@ -2,7 +2,8 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Box, Center, Spinner, Flex, Button, Text, Tabs } from '@chakra-ui/react';
 import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
-import { buildShareToken, buildShareLink } from '../services/printer/shareLink.js';
+import { buildRemoteLink } from '../services/printer/shareLink.js';
+import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
@@ -21,6 +22,8 @@ export default function Dashboard() {
   
   const [activePopup, setActivePopup] = useState(null);
   const [shareMessage, setShareMessage] = useState(null);
+  const [shareError, setShareError] = useState(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [companyFlash, setCompanyFlash] = useState(null);
   const flashTimer = useRef(null);
 
@@ -41,19 +44,26 @@ export default function Dashboard() {
   const handleShare = useCallback(async () => {
     if (!gameInstance) return;
 
-    console.log('MAGIC_LINK_DASHBOARD_STATE', JSON.stringify(dashboardState));
-    const token = buildShareToken(gameInstance, dashboardState);
-    const resumeLink = buildShareLink(window.location.origin, window.location.pathname, token);
+    setIsSharing(true);
+    setShareMessage(null);
+    setShareError(null);
 
-    // Copy resume link to clipboard
     try {
-      await navigator.clipboard.writeText(resumeLink);
-      setShareMessage('Magic Link copied! Anyone with this link can open the game.');
-    } catch {
-      setShareMessage('Exported! Could not copy link automatically.');
+      await saveGameToSheet(gameInstance, dashboardState);
+      const resumeLink = buildRemoteLink(window.location.origin, window.location.pathname, gameInstance.id);
+      try {
+        await navigator.clipboard.writeText(resumeLink);
+        setShareMessage('Link copied! Anyone with it can open this game.');
+      } catch {
+        setShareMessage('Saved to the sheet, but the link could not be copied.');
+      }
+      setTimeout(() => setShareMessage(null), 3000);
+    } catch (err) {
+      console.error('Failed to save the game to the sheet', err);
+      setShareError(err.message);
+    } finally {
+      setIsSharing(false);
     }
-
-    setTimeout(() => setShareMessage(null), 3000);
   }, [gameInstance, dashboardState]);
 
   if (!match) return null;
@@ -83,6 +93,11 @@ export default function Dashboard() {
             {shareMessage}
           </Text>
         )}
+        {shareError && (
+          <Text fontSize="sm" color="red.300" role="alert">
+            {shareError}
+          </Text>
+        )}
         <Button
           size="sm"
           variant="outline"
@@ -90,6 +105,8 @@ export default function Dashboard() {
           borderColor="whiteAlpha.400"
           _hover={{ bg: 'whiteAlpha.200' }}
           onClick={handleShare}
+          loading={isSharing}
+          loadingText="Saving"
         >
           📤 Share
         </Button>

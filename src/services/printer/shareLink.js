@@ -132,8 +132,16 @@ export async function readShareToken(token) {
   };
 }
 
-export function buildShareLink(origin, pathname, token) {
+function resumeUrl(origin, pathname) {
   const segments = pathname.split('/').filter(Boolean);
   const root = segments.length > 0 && segments[0] !== 'game' ? `/${segments[0]}` : '';
-  return `${origin}${root}/resume#import=${token}`;
+  return `${origin}${root}/resume`;
+}
+
+export function buildShareLink(origin, pathname, token) {
+  return `${resumeUrl(origin, pathname)}#import=${token}`;
+}
+
+export function buildRemoteLink(origin, pathname, gameId) {
+  return `${resumeUrl(origin, pathname)}#remote=${gameId}`;
 }

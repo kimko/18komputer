@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { Box, Button, Heading, Text, Center, Flex, Spinner, SimpleGrid, Input, VStack, Textarea } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
-import { getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
+import { getGame, getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
 import { readShareToken } from '../services/printer/shareLink.js';
+import { loadGameFromSheet } from '../services/remote/gamesSheet.js';
 import ModalBackdrop from './ui/ModalBackdrop.jsx';
+import RemoteImportDialog from './RemoteImportDialog.jsx';
 
 export default function ResumeGame() {
   const [, navigate] = useLocation();
@@ -16,6 +18,8 @@ export default function ResumeGame() {
   const modalRef = useRef(null);
   const [isImportModalOpen, setImportModalOpen] = useState(false);
   const [importToken, setImportToken] = useState('');
+  const [fetchingRemote, setFetchingRemote] = useState(false);
+  const [remoteConflict, setRemoteConflict] = useState(null);
 
   async function loadGames() {
     try {
@@ -48,7 +52,37 @@ export default function ResumeGame() {
         }
       })();
     }
+
+    // A link that carries only the game id, so the game itself comes from the Google Sheet.
+    if (hash.startsWith('#remote=')) {
+      (async () => {
+        setFetchingRemote(true);
+        try {
+          const { game, updatedAt } = await loadGameFromSheet(hash.replace('#remote=', ''));
+          window.location.hash = '';
+          const local = await getGame(game.id).catch(() => null);
+          if (local) {
+            setRemoteConflict({ local, remote: game, remoteUpdatedAt: updatedAt });
+            return;
+          }
+          await importGame(game);
+          navigate(`/game/${game.id}/dashboard`);
+        } catch (err) {
+          console.error('Failed to fetch the shared game', err);
+          setImportError(err.message);
+        } finally {
+          setFetchingRemote(false);
+        }
+      })();
+    }
   }, [navigate]);
+
+  const useSharedCopy = async () => {
+    const incoming = remoteConflict.remote;
+    setRemoteConflict(null);
+    await importGame(incoming);
+    navigate(`/game/${incoming.id}/dashboard`);
+  };
 
   const handleImportJson = (event) => {
     const file = event.target.files[0];
@@ -163,7 +197,12 @@ export default function ResumeGame() {
     }
   };
 
-  if (loading) return <Center h="100vh" bg="gray.900"><Spinner color="orange.400" size="xl" /></Center>;
+  if (loading || fetchingRemote) return (
+    <Center h="100vh" bg="gray.900" flexDirection="column" gap="4">
+      <Spinner color="orange.400" size="xl" />
+      {fetchingRemote && <Text color="gray.400">Fetching the shared game...</Text>}
+    </Center>
+  );
 
   if (error) return (
     <Center h="100vh" bg="gray.900" flexDirection="column" gap="4">
@@ -329,6 +368,16 @@ export default function ResumeGame() {
             </Flex>
         </ModalBackdrop>
       )}
+      {remoteConflict && (
+        <RemoteImportDialog
+          localGame={remoteConflict.local}
+          remoteGame={remoteConflict.remote}
+          remoteUpdatedAt={remoteConflict.remoteUpdatedAt}
+          onKeepMine={() => setRemoteConflict(null)}
+          onUseShared={useSharedCopy}
+        />
+      )}
+
       {/* Import Token Modal */}
       {isImportModalOpen && (
         <ModalBackdrop onClose={() => setImportModalOpen(false)}>

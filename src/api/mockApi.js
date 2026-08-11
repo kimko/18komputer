@@ -181,7 +181,8 @@ export function updateGameState(instanceId, updates) {
     
     // Merge the new state updates into the existing state
     db[instanceId].state = deepMerge(db[instanceId].state, updates);
-    
+    db[instanceId].updatedAt = new Date().toISOString();
+
     writeStorage(db);
     
     return db[instanceId];

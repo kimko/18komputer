@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import LZString from 'lz-string';
-import { buildShareToken, buildShareLink, readShareToken } from './shareLink.js';
+import { buildShareToken, buildShareLink, buildRemoteLink, readShareToken } from './shareLink.js';
 
 const gameInstance = {
   id: 'inst_1',
@@ -166,5 +166,17 @@ describe('buildShareLink', () => {
   it('uses the site root when the app is served from it', () => {
     expect(buildShareLink('http://localhost:5173', '/game/inst_1/dashboard', 'TOKEN'))
       .toBe('http://localhost:5173/resume#import=TOKEN');
+  });
+});
+
+describe('buildRemoteLink', () => {
+  it('carries the game id instead of the game', () => {
+    expect(buildRemoteLink('https://kimko.github.io', '/18komputer/game/game_1_2/dashboard', 'game_1_2'))
+      .toBe('https://kimko.github.io/18komputer/resume#remote=game_1_2');
+  });
+
+  it('uses the site root when the app is served from it', () => {
+    expect(buildRemoteLink('http://localhost:5173', '/game/game_1_2/dashboard', 'game_1_2'))
+      .toBe('http://localhost:5173/resume#remote=game_1_2');
   });
 });

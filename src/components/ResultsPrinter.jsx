@@ -2,17 +2,32 @@ import { useState } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { useWebBluetooth } from '../hooks/useWebBluetooth.js';
 import { printResults } from '../services/printer/PrinterService.js';
+import { saveGameToSheet } from '../services/remote/gamesSheet.js';
+import { buildRemoteLink } from '../services/printer/shareLink.js';
 
 export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) {
   const { connect, disconnect, isConnected, isConnecting, error, characteristic, deviceName, printer } = useWebBluetooth();
   const [isPrinting, setIsPrinting] = useState(false);
   const [printError, setPrintError] = useState(null);
+  const [saveWarning, setSaveWarning] = useState(null);
 
   const canPrintResults = Boolean(printer?.buildResultsPayloads);
 
   const handlePrint = async () => {
     setIsPrinting(true);
     setPrintError(null);
+    setSaveWarning(null);
+
+    // A printer that already has paper in it should not go idle because the sheet is unreachable.
+    let shareUrl = `${window.location.origin}${window.location.pathname}`;
+    try {
+      await saveGameToSheet(gameInstance, dashboardState);
+      shareUrl = buildRemoteLink(window.location.origin, window.location.pathname, gameInstance.id);
+    } catch (err) {
+      console.error('Failed to save the game to the sheet', err);
+      setSaveWarning(`${err.message} The printed code opens the app, not this game.`);
+    }
+
     try {
       await printResults(characteristic, printer, {
         gameName: gameInstance.gameName,
@@ -21,8 +36,7 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
         dashboardState,
         maxOr,
         printedAt: new Date(),
-        // Only the game's own address fits at a size that scans off thermal paper.
-        shareUrl: `${window.location.origin}${window.location.pathname}`
+        shareUrl
       });
     } catch (err) {
       console.error('Print failed:', err);
@@ -59,6 +73,7 @@ export default function ResultsPrinter({ gameInstance, dashboardState, maxOr }) 
         </Flex>
       )}
 
+      {saveWarning && <Text fontSize="sm" color="orange.300" role="status">{saveWarning}</Text>}
       {error && <Text fontSize="sm" color="red.300">{error}</Text>}
       {printError && <Box><Text fontSize="sm" color="red.300">{printError}</Text></Box>}
     </Flex>

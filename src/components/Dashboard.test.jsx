@@ -16,6 +16,11 @@ vi.mock('../api/mockApi.js', () => ({
 }));
 import { getGame, updateGameState } from '../api/mockApi.js';
 
+vi.mock('../services/remote/gamesSheet.js', () => ({
+  saveGameToSheet: vi.fn()
+}));
+import { saveGameToSheet } from '../services/remote/gamesSheet.js';
+
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -164,5 +169,41 @@ describe('Dashboard', () => {
     renderWithChakra(<Dashboard />);
     await screen.findByText('Player Holdings');
     expect(screen.getByText('Results Receipt')).toBeInTheDocument();
+  });
+
+  describe('sharing', () => {
+    const writeText = vi.fn();
+
+    beforeEach(() => {
+      writeText.mockReset().mockResolvedValue();
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    });
+
+    it('saves the game to the sheet and copies a link that points at it', async () => {
+      saveGameToSheet.mockResolvedValue({ updatedAt: '2026-08-11T19:02:00.000Z' });
+      renderWithChakra(<Dashboard />);
+      await screen.findByText('Player Holdings');
+
+      fireEvent.click(screen.getByRole('button', { name: /Share/ }));
+
+      await waitFor(() => expect(writeText).toHaveBeenCalled());
+      expect(saveGameToSheet).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-game-123' }),
+        expect.objectContaining({ ors: expect.anything() })
+      );
+      expect(writeText.mock.calls[0][0]).toContain('/resume#remote=test-game-123');
+      expect(await screen.findByText(/Link copied/)).toBeInTheDocument();
+    });
+
+    it('shows the reason and copies nothing when the sheet cannot be written', async () => {
+      saveGameToSheet.mockRejectedValue(new Error('Could not reach the sheet. Check your connection.'));
+      renderWithChakra(<Dashboard />);
+      await screen.findByText('Player Holdings');
+
+      fireEvent.click(screen.getByRole('button', { name: /Share/ }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Could not reach the sheet');
+      expect(writeText).not.toHaveBeenCalled();
+    });
   });
 });
