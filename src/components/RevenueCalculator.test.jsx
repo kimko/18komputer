@@ -22,7 +22,7 @@ vi.mock('../data/games/1830.json', () => ({
 }));
 
 vi.mock('../data/games/1817.json', () => ({
-  default: { id: '1817', name: '1817', corporateStructures: [0, 1, 2], maxPlayerHolding: 60 }
+  default: { id: '1817', name: '1817', corporateStructures: [0, 1, 2], maxPlayerHolding: 60, allowsHalfPay: true }
 }));
 
 const renderWithChakra = (ui) => {
@@ -32,6 +32,19 @@ const renderWithChakra = (ui) => {
     </ChakraProvider>
   );
 };
+
+// 1817 is one of the titles with a half pay rule; 1830 is not.
+const halfPayGame = () => ({
+  id: 'inst_123',
+  gameId: '1817',
+  players: ['Alice', 'Bob'],
+  state: {
+    activeCompanies: [
+      { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
+    ],
+    companyORs: []
+  }
+});
 
 describe('RevenueCalculator Component', () => {
   beforeEach(() => {
@@ -155,6 +168,7 @@ describe('RevenueCalculator Component', () => {
   });
 
   it('should render a payout table and submit the operating decision', async () => {
+    mockApi.getGame.mockResolvedValue(halfPayGame());
     renderWithChakra(<RevenueCalculator />);
     await screen.findByText(/Grand Total/i);
     
@@ -176,6 +190,7 @@ describe('RevenueCalculator Component', () => {
   });
 
   it('rounds a 10-share half pay up to the next whole dollar per share', async () => {
+    mockApi.getGame.mockResolvedValue(halfPayGame());
     renderWithChakra(<RevenueCalculator />);
     await screen.findByText(/Grand Total/i);
 
@@ -190,6 +205,50 @@ describe('RevenueCalculator Component', () => {
 
     expect(screen.getByText('$10')).toBeInTheDocument();
     expect(screen.getByText(/\$10 per share .* \$90 stays with the company/)).toBeInTheDocument();
+  });
+
+  describe('titles with no half pay rule', () => {
+    it('offers no pay choice at all on 1830', async () => {
+      renderWithChakra(<RevenueCalculator />);
+      await screen.findByText(/Grand Total/i);
+      fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+      fireEvent.click(screen.getByRole('button', { name: '100' }));
+
+      expect(screen.queryByRole('button', { name: 'Half Pay' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Full Pay' })).not.toBeInTheDocument();
+      expect(screen.getByText(/\$10 per share/)).toBeInTheDocument();
+    });
+
+    it('offers the choice on 1817, whose rules allow it', async () => {
+      mockApi.getGame.mockResolvedValue(halfPayGame());
+      renderWithChakra(<RevenueCalculator />);
+      await screen.findByText(/Grand Total/i);
+      fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+
+      expect(screen.getByRole('button', { name: 'Half Pay' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Full Pay' })).toBeInTheDocument();
+    });
+
+    it('pays a saved half pay run out in full when the title never allowed it', async () => {
+      mockApi.getGame.mockResolvedValue({
+        id: 'inst_123',
+        gameId: '1830',
+        players: ['Alice', 'Bob'],
+        state: {
+          activeCompanies: [
+            { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
+          ],
+          calculatorState: { PRR: { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: true } },
+          companyORs: []
+        }
+      });
+      renderWithChakra(<RevenueCalculator />);
+      await screen.findByText(/Grand Total/i);
+      fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+      fireEvent.click(screen.getByRole('button', { name: '100' }));
+
+      expect(screen.getByText(/\$10 per share .* \$0 stays with the company/)).toBeInTheDocument();
+    });
   });
 
   it('shows one column per share for a 5-share company', async () => {

@@ -26,9 +26,11 @@
       the payload bytes are the same either way.
 
 ## Phase 1: Rules still to flesh out
-- [ ] **Half pay is not legal in every title.** The Full Pay / Half Pay toggle is currently shown for
-      every game. 1817 allows half pay, so it is right for the title we are working on, but the
-      option should come from the game's own rules the way the corporate structure now does.
+- [x] **Half pay is not legal in every title.** Each game's JSON now carries `allowsHalfPay`, taken
+      from the `payout:` line in the source `.txt`, and the Full Pay / Half Pay toggle only appears
+      on the 32 titles that have a half pay rule. Withholding is a separate operation, allowed almost
+      everywhere, and needs no button because it pays nothing per share. The three 1840 variants are marked `Custom` in the
+      source and were given the option deliberately; check that against the rules if it looks wrong.
 - [ ] **Corporate structures are only mapped correctly for the 1817 family.** The ids in each game's
       `corporateStructures` are read through one table in `src/utils/corporateStructures.js`, and
       those ids mean different things in different titles. Reading the real structures needs

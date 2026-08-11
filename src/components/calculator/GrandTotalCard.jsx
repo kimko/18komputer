@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Text, Center, Button, SimpleGrid } from '@chakra-ui/react';
 import { calculatePayout } from '../../utils/payoutMath.js';
 
-export default function GrandTotalCard({ grandTotal, isHalfPay, onSetHalfPay, totalShares = 10, onSetTotalShares, structures = [] }) {
+export default function GrandTotalCard({ grandTotal, isHalfPay, canHalfPay = false, onSetHalfPay, totalShares = 10, onSetTotalShares, structures = [] }) {
   const shares = totalShares || 10;
   const { perShare, distributed, companyKeeps } = calculatePayout(grandTotal, shares, isHalfPay);
   const columns = Array.from({ length: shares }, (_, i) => i + 1);
@@ -38,26 +38,28 @@ export default function GrandTotalCard({ grandTotal, isHalfPay, onSetHalfPay, to
               ))}
             </Flex>
           )}
-          <Flex>
-            <Button
-              size="sm"
-              variant={!isHalfPay ? "solid" : "outline"}
-              colorPalette="orange"
-              onClick={() => onSetHalfPay(false)}
-              borderRightRadius={0}
-            >
-              Full Pay
-            </Button>
-            <Button
-              size="sm"
-              variant={isHalfPay ? "solid" : "outline"}
-              colorPalette="orange"
-              onClick={() => onSetHalfPay(true)}
-              borderLeftRadius={0}
-            >
-              Half Pay
-            </Button>
-          </Flex>
+          {canHalfPay && (
+            <Flex>
+              <Button
+                size="sm"
+                variant={!isHalfPay ? "solid" : "outline"}
+                colorPalette="orange"
+                onClick={() => onSetHalfPay(false)}
+                borderRightRadius={0}
+              >
+                Full Pay
+              </Button>
+              <Button
+                size="sm"
+                variant={isHalfPay ? "solid" : "outline"}
+                colorPalette="orange"
+                onClick={() => onSetHalfPay(true)}
+                borderLeftRadius={0}
+              >
+                Half Pay
+              </Button>
+            </Flex>
+          )}
         </Flex>
       </Flex>
 

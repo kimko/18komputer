@@ -1,5 +1,24 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePayout } from './payoutMath.js';
+import { calculatePayout, allowsHalfPay } from './payoutMath.js';
+
+describe('allowsHalfPay', () => {
+  it('lets a title through only when its rules say so', () => {
+    expect(allowsHalfPay({ allowsHalfPay: true })).toBe(true);
+  });
+
+  it('keeps every other title on full pay', () => {
+    expect(allowsHalfPay({ allowsHalfPay: false })).toBe(false);
+    expect(allowsHalfPay({ id: '1830' })).toBe(false);
+    expect(allowsHalfPay({})).toBe(false);
+    expect(allowsHalfPay(undefined)).toBe(false);
+    expect(allowsHalfPay(null)).toBe(false);
+  });
+
+  it('does not take a near miss for a yes', () => {
+    expect(allowsHalfPay({ allowsHalfPay: 'true' })).toBe(false);
+    expect(allowsHalfPay({ allowsHalfPay: 1 })).toBe(false);
+  });
+});
 
 describe('calculatePayout', () => {
   describe('a $190 run', () => {

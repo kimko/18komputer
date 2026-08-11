@@ -2,6 +2,7 @@
   "name": "18 Hiawatha",
   "bggId": 343142,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     20,
     30,

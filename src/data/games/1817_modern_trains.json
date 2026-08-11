@@ -2,6 +2,7 @@
   "name": "1817 (Modern trains)",
   "bggId": 63170,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     20,
     30,

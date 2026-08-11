@@ -2,6 +2,7 @@
   "name": "1861: The Railways of the Russian Empire",
   "bggId": 23817,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

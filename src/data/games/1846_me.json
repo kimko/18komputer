@@ -2,6 +2,7 @@
   "name": "1846: The Race for the Midwest (Mini expansion)",
   "bggId": 17405,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

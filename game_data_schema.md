@@ -20,6 +20,7 @@ interface GameData {
   trains: Train[];
   revenueBonuses: RevenueBonus[];
   hasPullmans?: boolean;  // Injected for 1822 family games
+  allowsHalfPay?: boolean; // true when "payout:" is not PayoutOption.Full; absent means the title has no half pay
   // Other properties like assets, corporateStructures can be added as needed.
 }
 
@@ -81,5 +82,6 @@ To ensure we understand how the parsed JSON data drives the frontend application
 | `stockPrices` | **A) Raise Funds** & **C) Results** | Used to set the initial/current market value of an active company's shares. Used to calculate Player Net Worth in the Results dashboard. |
 | `parValues` | **A) Raise Funds** | Used to set the initial par value when a company is floated/activated. |
 | `trains` | **C) Results** | Used to track company train rosters and their associated costs (if train purchasing is eventually tracked). |
+| `allowsHalfPay` | **B) Revenue Calculator** | Shows the Full Pay / Half Pay buttons. Absent means the title has no half pay rule, so the buttons are hidden. Withholding is a separate operation and has no button either way, since it pays nothing per share. |
 | `maxOr` | **C) Results** | Determines the number of Operating Round columns (e.g., OR1, OR2, OR3) displayed in the Company ORs Table. |
 | `ownership` | **A) Raise Funds** & **C) Results** | Used to validate or distribute share percentages when assigning ownership in the Player Assets table. |

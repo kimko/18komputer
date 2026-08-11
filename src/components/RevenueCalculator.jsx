@@ -9,6 +9,7 @@ import ReceiptPrinter from './calculator/ReceiptPrinter.jsx';
 import { getContrastColor } from '../utils/colorUtils.js';
 import { getStructures, canUseStructure, DEFAULT_TOTAL_SHARES } from '../utils/corporateStructures.js';
 import { getCompanyHoldings } from '../utils/dashboardMath.js';
+import { allowsHalfPay } from '../utils/payoutMath.js';
 import { toReceiptTrain } from '../services/printer/receiptLayout.js';
 
 export default function RevenueCalculator() {
@@ -33,7 +34,10 @@ export default function RevenueCalculator() {
   
   const currentCompanyState = calculatorState[selectedCompanyId] || { trains: [{ id: 1, stops: [], bonusStops: [] }], isHalfPay: false };
   const trains = currentCompanyState.trains || [{ id: 1, stops: [], bonusStops: [] }];
-  const isHalfPay = currentCompanyState.isHalfPay || false;
+  // A game imported or started before the rule was known can carry the flag anyway, so it is
+  // read through the title's rules rather than trusted on its own.
+  const canHalfPay = allowsHalfPay(gameInstance.staticConfig);
+  const isHalfPay = canHalfPay && Boolean(currentCompanyState.isHalfPay);
 
   const selectedCompany = activeCompanies.find(c => c.shortName === selectedCompanyId);
   const totalShares = selectedCompany?.totalShares || DEFAULT_TOTAL_SHARES;
@@ -147,6 +151,7 @@ export default function RevenueCalculator() {
         <GrandTotalCard
           grandTotal={grandTotal}
           isHalfPay={isHalfPay}
+          canHalfPay={canHalfPay}
           onSetHalfPay={(val) => updateCompanyState({ isHalfPay: val })}
           totalShares={totalShares}
           onSetTotalShares={setTotalShares}

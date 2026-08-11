@@ -20,6 +20,9 @@ function validate(file, data) {
   if ('bggId' in data && typeof data.bggId !== 'number') fail('bggId is not a number');
   if ('maxOr' in data && typeof data.maxOr !== 'number') fail('maxOr is not a number');
 
+  // Absent means the title has no half pay rule, so the flag only ever turns it on.
+  if ('allowsHalfPay' in data && data.allowsHalfPay !== true) fail('allowsHalfPay must be true or absent');
+
   if (!isNumberArray(data.revenueStops)) fail('revenueStops must be an array of numbers');
   if (data.parValues && !isNumberArray(data.parValues)) fail('parValues must be an array of numbers');
   if (data.sharePrices && !isNumberArray(data.sharePrices)) fail('sharePrices must be an array of numbers');
@@ -93,6 +96,37 @@ describe('Game Data Schema Validation', () => {
         companies: [{ name: 'A', shortName: 'A', color: 'red' }]
       });
       expect(problems).toContain('x.json: company 0 colour "red" is not a hex value');
+    });
+
+    it('catches a half pay flag written as anything other than true', () => {
+      const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+      expect(validate('x.json', { ...game, allowsHalfPay: false }))
+        .toContain('x.json: allowsHalfPay must be true or absent');
+      expect(validate('x.json', { ...game, allowsHalfPay: 'yes' }))
+        .toContain('x.json: allowsHalfPay must be true or absent');
+      expect(validate('x.json', game)).toEqual([]);
+    });
+  });
+
+  describe('which titles allow half pay', () => {
+    const read = (id) => JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
+    const allows = (id) => read(id).allowsHalfPay === true;
+
+    it('allows it across the 1817 and 1822 series', () => {
+      const series = files
+        .map((f) => f.replace(/\.json$/, ''))
+        .filter((id) => id.startsWith('1817') || id.startsWith('1822'));
+
+      expect(series.length).toBeGreaterThan(1);
+      expect(series.filter((id) => !allows(id))).toEqual([]);
+    });
+
+    it('allows it for 1840, whose rules the source data does not classify either way', () => {
+      ['1840', '1840_2p', '1840_3p'].forEach((id) => expect(allows(id)).toBe(true));
+    });
+
+    it('leaves it off titles with no half pay rule', () => {
+      ['1830', '1889', '18FL', '18Chesapeake'].forEach((id) => expect(allows(id)).toBe(false));
     });
   });
 });

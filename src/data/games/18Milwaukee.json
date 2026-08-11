@@ -2,6 +2,7 @@
   "name": "18 Milwaukee",
   "bggId": 343143,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     20,
     30,

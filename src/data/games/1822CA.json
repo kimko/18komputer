@@ -2,6 +2,7 @@
   "name": "1822CA: The Railways of Canada",
   "bggId": 253607,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

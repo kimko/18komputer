@@ -2,6 +2,7 @@
   "name": "18Texas",
   "bggId": 407694,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

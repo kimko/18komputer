@@ -2,6 +2,7 @@
   "name": "1822PNW: The Railways of the Pacific Northwest",
   "bggId": 360242,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

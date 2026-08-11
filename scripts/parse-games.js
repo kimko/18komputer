@@ -14,6 +14,10 @@ export function parseGameFile(content) {
   const maxOrMatch = content.match(/max or:\s*(\d+)/);
   if (maxOrMatch) result.maxOr = parseInt(maxOrMatch[1], 10);
 
+  // Full is the only option that rules half pay out; Custom titles are treated as allowing it.
+  const payoutMatch = content.match(/payout:\s*PayoutOption\.(\w+)/);
+  if (payoutMatch && payoutMatch[1] !== 'Full') result.allowsHalfPay = true;
+
   // 2. Parse arrays
   const parseArray = (key) => {
     const regex = new RegExp(key + ':\\s*\\[(.*?)\\]');

@@ -2,6 +2,7 @@
   "name": "18IN: Railways Across Indiana",
   "bggId": 273586,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

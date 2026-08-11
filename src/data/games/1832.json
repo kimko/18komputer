@@ -2,6 +2,7 @@
   "name": "1832: The South",
   "bggId": 23421,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

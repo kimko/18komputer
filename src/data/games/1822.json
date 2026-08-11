@@ -2,6 +2,7 @@
   "name": "1822: The Railways of Great Britain",
   "bggId": 193867,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

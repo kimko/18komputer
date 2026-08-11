@@ -2,6 +2,7 @@
   "name": "18USA",
   "bggId": 219717,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     20,
     30,

@@ -2,6 +2,7 @@
   "name": "18NewEngland",
   "bggId": 286205,
   "maxOr": 2,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

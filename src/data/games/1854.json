@@ -2,6 +2,7 @@
   "name": "1854: Austria",
   "bggId": 183308,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

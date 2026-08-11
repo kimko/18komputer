@@ -14,6 +14,26 @@ max or: 3
     expect(result.maxOr).toBe(3);
   });
 
+  describe('the payout rule', () => {
+    const payout = (line) => parseGameFile(`\nName: 'x'\n${line}\n`).allowsHalfPay;
+
+    it('gives a Partial title the half pay rule', () => {
+      expect(payout('payout: PayoutOption.Partial')).toBe(true);
+    });
+
+    it('gives a Custom title the half pay rule, since the source does not say otherwise', () => {
+      expect(payout('payout: PayoutOption.Custom')).toBe(true);
+    });
+
+    it('leaves a Full title without the half pay rule', () => {
+      expect(payout('payout: PayoutOption.Full')).toBeUndefined();
+    });
+
+    it('leaves a title with no payout line without the half pay rule', () => {
+      expect(payout('max or: 3')).toBeUndefined();
+    });
+  });
+
   it('should parse arrays of numbers', () => {
     const mockContent = `
 revenue stops: [10, 20, 30]

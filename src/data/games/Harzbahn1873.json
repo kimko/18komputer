@@ -2,6 +2,7 @@
   "name": "Harzbahn 1873",
   "bggId": 28944,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

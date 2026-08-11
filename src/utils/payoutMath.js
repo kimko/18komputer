@@ -1,3 +1,7 @@
+// Half pay is a rule most titles do not have. It is not the same as withholding, which pays the
+// company everything and needs no calculating.
+export const allowsHalfPay = (staticConfig) => staticConfig?.allowsHalfPay === true;
+
 // Half pay rounds the shareholders up; the company keeps whatever is left over.
 export const calculatePayout = (revenue, totalShares = 10, isHalfPay = false) => {
   const shares = totalShares || 10;

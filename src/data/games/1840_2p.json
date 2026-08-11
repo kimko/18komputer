@@ -2,6 +2,7 @@
   "name": "1840: Vienna Tramways (2P)",
   "bggId": 300127,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,

@@ -2,6 +2,7 @@
   "name": "1824: Austrian-Hungarian Railway (Cisleithania - 3p)",
   "bggId": 277030,
   "maxOr": 3,
+  "allowsHalfPay": true,
   "revenueStops": [
     10,
     20,
