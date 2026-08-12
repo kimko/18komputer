@@ -192,5 +192,36 @@
         "50y"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1,
+      "custom": "the reference decides this in code rather than a setting (g_18_chesapeake/round/stock.rb)"
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": 1
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": "down",
+      "squares": "perShare"
+    },
+    "sharesInPool": {
+      "move": null,
+      "squares": 0
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

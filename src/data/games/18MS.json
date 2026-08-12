@@ -132,5 +132,35 @@
         "60y"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": 1
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": "down",
+      "squares": "perShare"
+    },
+    "sharesInPool": {
+      "move": null,
+      "squares": 0
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

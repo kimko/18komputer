@@ -182,5 +182,38 @@
     490,
     540
   ],
-  "maxPlayerHolding": 60
+  "maxPlayerHolding": 60,
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1,
+      "custom": "the reference decides this in code rather than a setting (g_1867/round/stock.rb)"
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": 1,
+      "custom": "the payout rule is not one of the shapes we read (g_1861/step/dividend.rb)"
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1,
+      "custom": "the withhold rule is not one of the shapes we read (g_1861/step/dividend.rb)"
+    },
+    "sharesSold": {
+      "move": "down",
+      "squares": "perSaleIfPresident"
+    },
+    "sharesInPool": {
+      "move": null,
+      "squares": 0
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
+  }
 }

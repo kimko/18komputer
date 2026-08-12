@@ -50,6 +50,24 @@
         and 1832, which builds its grid in code from two halves.
       - **Titles the reference repo does not have** (18DO, 18IN, 18Korea, 18Milwaukee, 1899 DAIHAN,
         Railways of the Lost Atlas, Harzbahn 1873), which need their grids entering by hand.
+- [x] **Nothing recorded what makes a price move.** Each title's JSON now carries `priceMovement`,
+      imported by `scripts/import-price-movement.js`: what a sold out company does, what paying and
+      withholding a dividend do, what selling shares does, and what shares left in the bank pool do.
+      64 of the 70 titles have it. The other six (18DO, 18IN, 18Korea, 18 Milwaukee, 1899 DAIHAN,
+      Railways of the Lost Atlas) are not in the reference repository at all. Nothing reads this
+      data yet.
+- [ ] **53 of those 64 titles carry at least one `custom` note**, meaning the reference decides
+      that rule in code rather than with a setting, so what we recorded is the headline behaviour
+      and not the whole story. By trigger: 36 `dividendPaid`, 34 `soldOut`, 19 `sharesSold`,
+      9 `dividendWithheld`, 2 `presidentBankrupt`. Each note names the reference file to read. The
+      ones most worth a hand pass are the titles whose payout steps carry extra conditions (1846
+      needs $165 before the third square, 1840 keys its steps to bands of absolute revenue) and the
+      11 titles that replace the share-selling rule wholesale.
+- [ ] **The rarer price triggers are not recorded at all.** Beyond the seven in `priceMovement`, the
+      reference moves prices for taking and repaying loans, buying trains, going trainless,
+      nationalisation, mergers, and a handful of private company powers. There are around a hundred
+      of these spread across per-title code with no shared pattern, so they were left out rather
+      than half captured.
 - [ ] **A price that arrives without a square has to be guessed.** Games saved before the grid
       existed, links shared from an older copy, and the CSV import all carry only the money value.
       The picker finds the first square holding that value, which is right unless the title has the

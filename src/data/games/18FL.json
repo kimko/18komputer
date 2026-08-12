@@ -108,5 +108,37 @@
         "400"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": null,
+      "squares": 0
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": "perMultipleOfPrice",
+      "maxSquares": 2,
+      "custom": "minors do not move (g_18_fl/step/dividend.rb)"
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": "left",
+      "squares": "perSale"
+    },
+    "sharesInPool": {
+      "move": null,
+      "squares": 0
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

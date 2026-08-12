@@ -136,5 +136,38 @@
         "550"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": "perMultipleOfPrice",
+      "maxSquares": 3,
+      "custom": "minors do not move; square 3 needs a price of $165 or more; a small payout moves left, and a middling one moves nothing; the payout steps carry extra conditions (g_1846/step/dividend.rb)"
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": "left",
+      "squares": "perSaleIfPresident"
+    },
+    "sharesInPool": {
+      "move": "down",
+      "squares": "perSale"
+    },
+    "presidentBankrupt": {
+      "move": "left",
+      "squares": "perShare",
+      "custom": "the company issues as many shares as it can first (g_1846/step/bankrupt.rb:19)"
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

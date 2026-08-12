@@ -54,6 +54,35 @@ function validate(file, data) {
     }
   }
 
+  // Absent means we have no reference for the title, which is not the same as "nothing moves".
+  if ('priceMovement' in data) {
+    const TRIGGERS = ['soldOut', 'dividendPaid', 'dividendWithheld', 'sharesSold',
+      'sharesInPool', 'presidentBankrupt', 'corporationCloses'];
+    const MOVES = ['up', 'down', 'left', 'right', null];
+    const COUNTS = ['perShare', 'per10Percent', 'perSale', 'perShareIfPresident',
+      'perSaleIfPresident', 'per10PercentIfPresidentElseOne', 'perMultipleOfPrice',
+      'perHalfMultipleOfPrice', 'perRevenueBand'];
+
+    Object.entries(data.priceMovement).forEach(([trigger, rule]) => {
+      if (!TRIGGERS.includes(trigger)) return fail(`priceMovement has an unknown trigger "${trigger}"`);
+      if (!rule || typeof rule !== 'object') return fail(`priceMovement.${trigger} is not an object`);
+
+      if (!MOVES.includes(rule.move ?? null)) fail(`priceMovement.${trigger} move "${rule.move}" is not a direction`);
+      if (typeof rule.squares !== 'number' && !COUNTS.includes(rule.squares)) {
+        fail(`priceMovement.${trigger} squares "${rule.squares}" is not a count`);
+      }
+      // A direction of null means the trigger moves nothing, so a count would contradict it.
+      if (rule.move == null && rule.squares !== 0) fail(`priceMovement.${trigger} moves nowhere but counts squares`);
+      if ('maxSquares' in rule && typeof rule.squares === 'number') {
+        fail(`priceMovement.${trigger} caps a fixed number of squares`);
+      }
+      if ('maxSquares' in rule && !(rule.maxSquares > 1)) {
+        fail(`priceMovement.${trigger} maxSquares must be more than one`);
+      }
+      if ('custom' in rule && typeof rule.custom !== 'string') fail(`priceMovement.${trigger} custom is not a string`);
+    });
+  }
+
   if (!Array.isArray(data.companies) || data.companies.length === 0) {
     fail('companies must be a non-empty array');
   } else {
@@ -149,6 +178,25 @@ describe('Game Data Schema Validation', () => {
         stockMarket: { type: '1d', grid: [['10', '20y']] }
       });
       expect(problems).toContain('x.json: stockMarket has no par square, so a company has nowhere to start');
+    });
+
+    it('catches price movement that contradicts itself', () => {
+      const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+      const movement = (rule) => validate('x.json', { ...game, priceMovement: { soldOut: rule } });
+
+      expect(movement({ move: 'sideways', squares: 1 }))
+        .toContain('x.json: priceMovement.soldOut move "sideways" is not a direction');
+      expect(movement({ move: null, squares: 2 }))
+        .toContain('x.json: priceMovement.soldOut moves nowhere but counts squares');
+      expect(movement({ move: 'up', squares: 1, maxSquares: 3 }))
+        .toContain('x.json: priceMovement.soldOut caps a fixed number of squares');
+      expect(movement({ move: 'up', squares: 'perFortnight' }))
+        .toContain('x.json: priceMovement.soldOut squares "perFortnight" is not a count');
+      expect(validate('x.json', { ...game, priceMovement: { whenever: { move: 'up', squares: 1 } } }))
+        .toContain('x.json: priceMovement has an unknown trigger "whenever"');
+
+      expect(movement({ move: 'up', squares: 1 })).toEqual([]);
+      expect(movement({ move: 'right', squares: 'perMultipleOfPrice', maxSquares: 3, custom: 'why' })).toEqual([]);
     });
 
     it('catches a half pay flag written as anything other than true', () => {

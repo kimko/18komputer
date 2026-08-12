@@ -22,6 +22,7 @@ interface GameData {
   hasPullmans?: boolean;  // Injected for 1822 family games
   allowsHalfPay?: boolean; // true when "payout:" is not PayoutOption.Full; absent means the title has no half pay
   stockMarket?: StockMarket; // absent means the title has no grid, so sharePrices is the whole market
+  priceMovement?: PriceMovement; // absent means we have no reference for the title
   // Other properties like assets, corporateStructures can be added as needed.
 }
 
@@ -29,6 +30,33 @@ interface StockMarket {
   type: '1d' | '2d';
   grid: string[][];       // rows top down, so row 0 holds the highest prices
 }
+
+// What moves a company's price, and which way. Descriptive only; no code reads it yet.
+type PriceMovement = Partial<Record<Trigger, Rule>>;
+
+type Trigger =
+  | 'soldOut'            // every share in players' hands at the end of a stock round
+  | 'dividendPaid'
+  | 'dividendWithheld'
+  | 'sharesSold'         // players selling shares
+  | 'sharesInPool'       // shares left sitting in the bank pool at the end of a stock round
+  | 'presidentBankrupt'
+  | 'corporationCloses';
+
+interface Rule {
+  move: 'up' | 'down' | 'left' | 'right' | null;  // null means this trigger moves nothing
+  squares: number | Count;
+  maxSquares?: number;   // ceiling on a Count, never on a fixed number
+  custom?: string;       // what the reference does that we have not captured, and where it lives
+}
+
+// Counts that depend on the sale or the payout rather than being a fixed number.
+type Count =
+  | 'perShare' | 'per10Percent' | 'perSale'
+  | 'perShareIfPresident' | 'perSaleIfPresident' | 'per10PercentIfPresidentElseOne'
+  | 'perMultipleOfPrice'      // one more square per whole multiple of the share price paid out
+  | 'perHalfMultipleOfPrice'  // as above, but every half multiple
+  | 'perRevenueBand';         // steps keyed to bands of absolute revenue, not to the price
 
 interface Company {
   name: string;
@@ -86,6 +114,7 @@ To ensure we understand how the parsed JSON data drives the frontend application
 | `revenueBonuses` | **B) Revenue Calculator** | Generates the special bonus rows (e.g., "Bridge", "Coal") below the standard revenue stops. |
 | `companies` (`name`, `shortName`, `color`) | **A) Raise Funds** & **C) Results** | Populates the list of companies available to activate in Raise Funds. Provides the UI styling (color) and headers for the Company ORs and Player Assets tables. |
 | `sharePrices` | **A) Raise Funds** & **C) Results** | Used to set the initial/current market value of an active company's shares. Used to calculate Player Net Worth in the Results dashboard. |
+| `priceMovement` | **C) Results** | What makes a company's price move and which way, written by `scripts/import-price-movement.js`. Nothing reads it yet; it is there so a later change can offer "paid a dividend" or "sold out" instead of bare arrows. A `custom` note on a rule means the reference implementation does something we have not captured, so the rest of that rule is the headline behaviour rather than the whole story. |
 | `stockMarket` | **C) Results** | The real shape of the market, written by `scripts/import-markets.js`. Each cell is a price followed by optional flag letters: `p` marks a par square, `y`/`o`/`b` are the colour zones, and `""` means no cell. A `2d` grid drives the up, down, left and right arrows in the "Set final price for" modal; a `1d` grid, or no `stockMarket` at all, leaves the modal on left and right only. |
 | `parValues` | **A) Raise Funds** | Used to set the initial par value when a company is floated/activated. |
 | `trains` | **C) Results** | Used to track company train rosters and their associated costs (if train purchasing is eventually tracked). |

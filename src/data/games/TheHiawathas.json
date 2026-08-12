@@ -115,5 +115,38 @@
         "490"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1,
+      "custom": "the reference decides this in code rather than a setting (g_1817/round/stock.rb)"
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": "perMultipleOfPrice",
+      "maxSquares": 2
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": null,
+      "squares": 0,
+      "custom": "the reference decides this in code rather than a setting (g_1817/game.rb)"
+    },
+    "sharesInPool": {
+      "move": "down",
+      "squares": "perShare"
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

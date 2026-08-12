@@ -162,5 +162,36 @@
         "65"
       ]
     ]
+  },
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": 1,
+      "custom": "a small payout moves left, and a middling one moves nothing (g_18_texas/step/dividend.rb)"
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": "down",
+      "squares": "perShare"
+    },
+    "sharesInPool": {
+      "move": null,
+      "squares": 0
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
   }
 }

@@ -153,5 +153,37 @@
     275,
     300
   ],
-  "maxPlayerHolding": 60
+  "maxPlayerHolding": 60,
+  "priceMovement": {
+    "soldOut": {
+      "move": "up",
+      "squares": 1,
+      "custom": "the reference decides this in code rather than a setting (g_1854/round/stock.rb)"
+    },
+    "dividendPaid": {
+      "move": "right",
+      "squares": 1
+    },
+    "dividendWithheld": {
+      "move": "left",
+      "squares": 1
+    },
+    "sharesSold": {
+      "move": null,
+      "squares": 0,
+      "custom": "the reference uses down_left_hex_share, which its own engine does not implement (g_1854/game.rb)"
+    },
+    "sharesInPool": {
+      "move": "left",
+      "squares": "perSale"
+    },
+    "presidentBankrupt": {
+      "move": null,
+      "squares": 0
+    },
+    "corporationCloses": {
+      "move": null,
+      "squares": 0
+    }
+  }
 }
