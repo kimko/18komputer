@@ -91,17 +91,31 @@ describe('buildShareToken', () => {
     expect((await roundTrip(auto)).gameName).toBe('1817 2p Aug-07');
   });
 
-  it('leaves out values that are zero or blank, which read back as zero anyway', async () => {
+  it('leaves out holdings that are zero or blank, which read back as zero anyway', async () => {
     const sparse = {
-      ors: { 'A&A': { or1: 410, or2: 0, or3: '' } },
+      ors: { 'A&A': { or1: 410 } },
       shareValues: { 'A&A': 440 },
       playerAssets: { Liam: { cash: 0, shares: { 'A&A': 60, 'B&A': 0 } } }
     };
     const wire = decode(buildShareToken(gameInstance, sparse));
-    expect(wire.state.dashboardState.ors['A&A']).toEqual({ or1: 410 });
     expect(wire.state.dashboardState.playerAssets.Liam.shares).toEqual({ 'A&A': 60 });
     expect(wire.state.dashboardState.playerAssets.Liam.cash).toBeUndefined();
     expect((await roundTrip(gameInstance, sparse)).state.dashboardState.playerAssets.Liam).toBeDefined();
+  });
+
+  // A withheld round is a real result that moves the price, unlike a round nobody played.
+  it('keeps an operating round recorded as zero, and still drops one left blank', async () => {
+    const withheld = {
+      ors: { 'A&A': { or1: 410, or2: 0, or3: '' } },
+      shareValues: { 'A&A': 440 },
+      playerAssets: {}
+    };
+    const wire = decode(buildShareToken(gameInstance, withheld));
+    expect(wire.state.dashboardState.ors['A&A']).toEqual({ or1: 410, or2: 0 });
+
+    const back = (await roundTrip(gameInstance, withheld)).state.dashboardState.ors['A&A'];
+    expect(back.or2).toBe(0);
+    expect(back.or3).toBeUndefined();
   });
 
   it('leaves out a share price that is just the par value, and puts it back', async () => {

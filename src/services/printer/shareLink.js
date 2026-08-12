@@ -11,6 +11,10 @@ const isZero = (value) => isBlank(value) || Number(value) === 0;
 const dropZeros = (map = {}) =>
   Object.fromEntries(Object.entries(map).filter(([, value]) => !isZero(value)));
 
+// A round recorded as zero means the company withheld, which moves its price, so it has to travel.
+const dropBlanks = (map = {}) =>
+  Object.fromEntries(Object.entries(map).filter(([, value]) => !isBlank(value)));
+
 // Named the same day it was created, so a title nobody has touched can be rebuilt on arrival.
 const isAutomaticName = (game) =>
   game.gameName === generateGameName(game.gameId, (game.players || []).length, parseDay(game.createdAt));
@@ -42,7 +46,7 @@ function compactDashboard(dashboardState = {}, companies = [], staticMaxOr) {
     ...(maxOr && Number(maxOr) !== Number(staticMaxOr) ? { maxOr } : {}),
     ors: Object.fromEntries(
       Object.entries(ors)
-        .map(([shortName, revenue]) => [shortName, dropZeros(revenue)])
+        .map(([shortName, revenue]) => [shortName, dropBlanks(revenue)])
         .filter(([, revenue]) => Object.keys(revenue).length > 0)
     ),
     shareValues: Object.fromEntries(

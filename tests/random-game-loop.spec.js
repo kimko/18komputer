@@ -401,6 +401,16 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
     }
   }
 
+  console.log('Verifying Analysis tab with populated data...');
+  await page.getByRole('tab', { name: 'Analysis' }).click();
+  await expect(page.getByRole('heading', { name: 'Return per share' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'How each company did' })).toBeVisible();
+  await expect(page.getByTestId('company-return-chart')).toBeVisible();
+  await expect(page.getByTestId('player-return-chart')).toBeVisible();
+  await expect(page.getByTestId('player-worth-chart')).toBeVisible();
+  // Every company earns a sentence, so the stories are the quickest check that the model ran.
+  await expect(page.getByText(/operating round/).first()).toBeVisible();
+
   console.log('Returning to Data Grids tab before deleting...');
   await page.getByRole('tab', { name: 'Data Grids' }).click();
 

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import fs from 'fs'
 import { execSync } from 'child_process'
+import devGameEndpoint from './scripts/devGameEndpoint.js'
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 let gitHash = '';
@@ -32,6 +33,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    devGameEndpoint(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],

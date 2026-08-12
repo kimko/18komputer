@@ -63,6 +63,15 @@
       ones most worth a hand pass are the titles whose payout steps carry extra conditions (1846
       needs $165 before the third square, 1840 keys its steps to bands of absolute revenue) and the
       11 titles that replace the share-selling rule wholesale.
+- [x] **Nothing said what the recorded rounds were worth.** The Analysis tab now works the price
+      backwards from the operating rounds and splits what a share earned into dividends and price
+      movement, per company and per player, in `src/utils/roundReturn.js`. It is the first thing to
+      read `priceMovement`.
+- [ ] **The derived baseline is only as good as what gets recorded.** Shares traded during a share
+      round move a price and are not recorded, so some companies come out approximate (several
+      starting squares reach the same price) or unexplained (none do). Recording share dealing would
+      close that gap. A player is also assumed to have held their shares for the whole stretch,
+      because when they bought is not recorded either.
 - [ ] **The rarer price triggers are not recorded at all.** Beyond the seven in `priceMovement`, the
       reference moves prices for taking and repaying loans, buying trains, going trainless,
       nationalisation, mergers, and a handful of private company powers. There are around a hundred

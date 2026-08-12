@@ -12,6 +12,7 @@ import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
 import ResultsPrinter from './ResultsPrinter.jsx';
 import CompanyCharts from './charts/CompanyCharts.jsx';
 import PlayerCharts from './charts/PlayerCharts.jsx';
+import AnalysisTab from './charts/AnalysisTab.jsx';
 import {
   getRevenueTrajectoryData,
   getCompanyYieldAndDominanceData
@@ -125,6 +126,7 @@ export default function Dashboard() {
           <Tabs.Trigger value="grids" _selected={{ bg: 'teal.500', color: 'white' }}>Data Grids</Tabs.Trigger>
           <Tabs.Trigger value="companies" _selected={{ bg: 'teal.500', color: 'white' }}>Company Charts</Tabs.Trigger>
           <Tabs.Trigger value="players" _selected={{ bg: 'teal.500', color: 'white' }}>Player Charts</Tabs.Trigger>
+          <Tabs.Trigger value="analysis" _selected={{ bg: 'teal.500', color: 'white' }}>Analysis</Tabs.Trigger>
         </Tabs.List>
 
         <Tabs.Content value="grids">
@@ -163,8 +165,18 @@ export default function Dashboard() {
         </Tabs.Content>
 
         <Tabs.Content value="players">
-          <PlayerCharts 
+          <PlayerCharts
             dashboardState={dashboardState}
+            maxOr={maxOr}
+            players={players}
+            activeCompanies={activeCompanies}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="analysis">
+          <AnalysisTab
+            dashboardState={dashboardState}
+            staticConfig={gameInstance.staticConfig}
             maxOr={maxOr}
             players={players}
             activeCompanies={activeCompanies}

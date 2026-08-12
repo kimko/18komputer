@@ -93,7 +93,28 @@ const readStorage = () => {
 // Helper to save all games to local storage
 const writeStorage = (data) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  mirrorForDebugging(data);
 };
+
+// Dev only: nothing outside the browser can read localStorage, so hand a copy to the dev server
+// where `curl /__debug/game/<id>` can reach it. Never runs in a build.
+function mirrorForDebugging(data) {
+  if (!import.meta.env?.DEV || typeof fetch === 'undefined') return;
+  fetch('/__debug/games', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+// Opening the app is enough to make every game it already has reachable from the command line.
+if (import.meta.env?.DEV && typeof localStorage !== 'undefined') {
+  try {
+    mirrorForDebugging(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
+  } catch {
+    // A corrupt store is the app's problem to report, not the debugging mirror's.
+  }
+}
 
 // Helper for deep merging objects
 function deepMerge(target, source) {
