@@ -12,7 +12,9 @@ export default function DashboardPopups({
   players,
   gameInstance,
   updateDashboardField,
-  sharePriceOptions
+  updateDashboardFields,
+  sharePriceOptions,
+  stockMarket
 }) {
   if (!activePopup) return null;
 
@@ -22,9 +24,15 @@ export default function DashboardPopups({
         <PricePickerPopup
           company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
           value={getShareValue(dashboardState, activeCompanies, activePopup.companyId)}
+          position={dashboardState.sharePositions?.[activePopup.companyId] || null}
+          parValue={activeCompanies.find(c => c.shortName === activePopup.companyId)?.parValue}
           options={sharePriceOptions}
-          onChange={(val) => {
-            updateDashboardField('shareValues', prev => ({ ...prev, [activePopup.companyId]: val }));
+          market={stockMarket}
+          onChange={(val, position) => {
+            updateDashboardFields({
+              shareValues: prev => ({ ...prev, [activePopup.companyId]: val }),
+              sharePositions: prev => ({ ...prev, [activePopup.companyId]: position })
+            });
           }}
           onClose={() => setActivePopup(null)}
         />

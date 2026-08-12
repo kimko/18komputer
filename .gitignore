@@ -32,3 +32,6 @@ tmp/
 /playwright/.cache/
 /playwright/.auth/
 public/version.json
+
+/18xx
+.playwright-mcp/

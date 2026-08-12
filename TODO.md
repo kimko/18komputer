@@ -36,7 +36,24 @@
       those ids mean different things in different titles. Reading the real structures needs
       `scripts/parse-games.js` to parse the game-level `corporate structures:` block (its
       `common stock` fraction is the share count) and a way to regenerate the JSON without losing
-      the hand-added `sharePrices`, `maxPlayerHolding` and `hasPullmans`.
+      the hand-added `sharePrices`, `maxPlayerHolding`, `hasPullmans` and `stockMarket`.
+- [x] **Stock markets are a grid, not a list.** Each title's JSON now carries `stockMarket`, imported
+      from the reference implementation by `scripts/import-markets.js`, and the price picker moves a
+      company around that grid by the real rules. 36 titles are two dimensional, 15 are flat.
+- [ ] **19 titles still have no grid.** Four kinds of gap, none of them affecting how those titles
+      behave today, since they fall back to the flat `sharePrices` list:
+      - **Zigzag markets** (1860, 1862, 18Cuba, 18España and the three 18CZ cuts). One row drawn as
+        two staggered rows: up and down move one cell, left and right move two, and running off
+        either end either clamps to the last cell or cancels the move depending on the title.
+      - **The hex market** (1854), an offset grid where moves run diagonally.
+      - **Markets chosen at run time** (1861, 1867), which pick between two grids by player count,
+        and 1832, which builds its grid in code from two halves.
+      - **Titles the reference repo does not have** (18DO, 18IN, 18Korea, 18Milwaukee, 1899 DAIHAN,
+        Railways of the Lost Atlas, Harzbahn 1873), which need their grids entering by hand.
+- [ ] **A price that arrives without a square has to be guessed.** Games saved before the grid
+      existed, links shared from an older copy, and the CSV import all carry only the money value.
+      The picker finds the first square holding that value, which is right unless the title has the
+      same value in two places; tapping the correct square fixes it for good.
 
 ## Phase 2: Backend Integration (Future)
 - [ ] Setup Elixir Phoenix backend.

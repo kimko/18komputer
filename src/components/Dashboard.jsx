@@ -82,10 +82,16 @@ export default function Dashboard() {
     updateGameStateDebounced({ dashboardState: { ...dashboardState, maxOr: newMax } });
   };
 
-  const updateDashboardField = (field, updater) => {
-    const nextFieldState = typeof updater === 'function' ? updater(dashboardState[field] || {}) : updater;
-    updateGameStateDebounced({ dashboardState: { ...dashboardState, [field]: nextFieldState } });
+  // Takes every field at once, because two separate calls would each start from the same stale state.
+  const updateDashboardFields = (updates) => {
+    const next = { ...dashboardState };
+    Object.entries(updates).forEach(([field, updater]) => {
+      next[field] = typeof updater === 'function' ? updater(dashboardState[field] || {}) : updater;
+    });
+    updateGameStateDebounced({ dashboardState: next });
   };
+
+  const updateDashboardField = (field, updater) => updateDashboardFields({ [field]: updater });
 
   return (
     <Box p="2" pb="24" maxW="100%" overflowX="hidden">
@@ -198,7 +204,9 @@ export default function Dashboard() {
         players={players}
         gameInstance={gameInstance}
         updateDashboardField={updateDashboardField}
+        updateDashboardFields={updateDashboardFields}
         sharePriceOptions={sharePriceOptions}
+        stockMarket={gameInstance.staticConfig?.stockMarket}
       />
     </Box>
   );

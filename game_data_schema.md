@@ -13,7 +13,7 @@ interface GameData {
   revenueStops: number[]; // From "revenue stops: [...]"
   maxOr: number;          // From "max or: ..."
   ownership: number[];    // From "ownership: [...]"
-  stockPrices: number[];  // From "stock prices: [...]"
+  sharePrices: number[];  // Every price in the market, flattened and sorted
   parValues: number[];    // From "par values: [...]"
   
   companies: Company[];
@@ -21,7 +21,13 @@ interface GameData {
   revenueBonuses: RevenueBonus[];
   hasPullmans?: boolean;  // Injected for 1822 family games
   allowsHalfPay?: boolean; // true when "payout:" is not PayoutOption.Full; absent means the title has no half pay
+  stockMarket?: StockMarket; // absent means the title has no grid, so sharePrices is the whole market
   // Other properties like assets, corporateStructures can be added as needed.
+}
+
+interface StockMarket {
+  type: '1d' | '2d';
+  grid: string[][];       // rows top down, so row 0 holds the highest prices
 }
 
 interface Company {
@@ -79,7 +85,8 @@ To ensure we understand how the parsed JSON data drives the frontend application
 | `revenueStops` | **B) Revenue Calculator** | Generates the dynamic vertical list of rows (e.g., 20, 30, 40) for calculating train run revenue. |
 | `revenueBonuses` | **B) Revenue Calculator** | Generates the special bonus rows (e.g., "Bridge", "Coal") below the standard revenue stops. |
 | `companies` (`name`, `shortName`, `color`) | **A) Raise Funds** & **C) Results** | Populates the list of companies available to activate in Raise Funds. Provides the UI styling (color) and headers for the Company ORs and Player Assets tables. |
-| `stockPrices` | **A) Raise Funds** & **C) Results** | Used to set the initial/current market value of an active company's shares. Used to calculate Player Net Worth in the Results dashboard. |
+| `sharePrices` | **A) Raise Funds** & **C) Results** | Used to set the initial/current market value of an active company's shares. Used to calculate Player Net Worth in the Results dashboard. |
+| `stockMarket` | **C) Results** | The real shape of the market, written by `scripts/import-markets.js`. Each cell is a price followed by optional flag letters: `p` marks a par square, `y`/`o`/`b` are the colour zones, and `""` means no cell. A `2d` grid drives the up, down, left and right arrows in the "Set final price for" modal; a `1d` grid, or no `stockMarket` at all, leaves the modal on left and right only. |
 | `parValues` | **A) Raise Funds** | Used to set the initial par value when a company is floated/activated. |
 | `trains` | **C) Results** | Used to track company train rosters and their associated costs (if train purchasing is eventually tracked). |
 | `allowsHalfPay` | **B) Revenue Calculator** | Shows the Full Pay / Half Pay buttons. Absent means the title has no half pay rule, so the buttons are hidden. Withholding is a separate operation and has no button either way, since it pays nothing per share. |

@@ -146,7 +146,8 @@ describe('Dashboard', () => {
     const shareValBtn = screen.getAllByRole('button', { name: '$50' })[0]; // First 50 is share value, second is cash
     fireEvent.click(shareValBtn);
     expect(screen.getByText('Set final price for')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '67' }));
+    // 1830 has a grid market, so a price is a cell on the chart rather than an entry in a list
+    fireEvent.click(screen.getByTestId('market-cell-0-1'));
     
     // 2. OR Popup
     fireEvent.click(screen.getByText('$100'));

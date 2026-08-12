@@ -27,6 +27,33 @@ function validate(file, data) {
   if (data.parValues && !isNumberArray(data.parValues)) fail('parValues must be an array of numbers');
   if (data.sharePrices && !isNumberArray(data.sharePrices)) fail('sharePrices must be an array of numbers');
 
+  // Absent means the title has no grid, and the flat sharePrices list is the whole market.
+  if ('stockMarket' in data) {
+    const { type, grid } = data.stockMarket;
+    if (type !== '1d' && type !== '2d') fail(`stockMarket type "${type}" must be 1d or 2d`);
+    if (!Array.isArray(grid) || grid.length === 0) {
+      fail('stockMarket grid must be a non-empty array of rows');
+    } else {
+      if (type === '2d' && grid.length < 2) fail('a 2d stockMarket needs more than one row');
+      if (type === '1d' && grid.length > 1) fail('a 1d stockMarket needs exactly one row');
+      grid.forEach((row, r) => {
+        if (!Array.isArray(row) || row.length === 0) {
+          fail(`stockMarket row ${r} is not a non-empty array`);
+        } else {
+          row.forEach((cell, c) => {
+            if (typeof cell !== 'string') fail(`stockMarket cell ${r},${c} is not a string`);
+            else if (cell !== '' && !/^\d+[a-zA-Z]*$/.test(cell)) {
+              fail(`stockMarket cell ${r},${c} "${cell}" is not a price`);
+            }
+          });
+        }
+      });
+      if (!grid.flat().some(cell => /^\d+[a-zA-Z]*[pPxzw]/.test(cell))) {
+        fail('stockMarket has no par square, so a company has nowhere to start');
+      }
+    }
+  }
+
   if (!Array.isArray(data.companies) || data.companies.length === 0) {
     fail('companies must be a non-empty array');
   } else {
@@ -96,6 +123,32 @@ describe('Game Data Schema Validation', () => {
         companies: [{ name: 'A', shortName: 'A', color: 'red' }]
       });
       expect(problems).toContain('x.json: company 0 colour "red" is not a hex value');
+    });
+
+    it('catches a stock market grid that does not match its type', () => {
+      const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+      expect(validate('x.json', { ...game, stockMarket: { type: '2d', grid: [['10p', '20']] } }))
+        .toContain('x.json: a 2d stockMarket needs more than one row');
+      expect(validate('x.json', { ...game, stockMarket: { type: 'flat', grid: [['10p']] } }))
+        .toContain('x.json: stockMarket type "flat" must be 1d or 2d');
+    });
+
+    it('catches a stock market cell that is not a price', () => {
+      const problems = validate('x.json', {
+        id: 'x', name: 'x', revenueStops: [10],
+        companies: [{ name: 'A', shortName: 'A' }],
+        stockMarket: { type: '1d', grid: [['10p', 'free']] }
+      });
+      expect(problems).toContain('x.json: stockMarket cell 0,1 "free" is not a price');
+    });
+
+    it('catches a stock market with nowhere for a company to start', () => {
+      const problems = validate('x.json', {
+        id: 'x', name: 'x', revenueStops: [10],
+        companies: [{ name: 'A', shortName: 'A' }],
+        stockMarket: { type: '1d', grid: [['10', '20y']] }
+      });
+      expect(problems).toContain('x.json: stockMarket has no par square, so a company has nowhere to start');
     });
 
     it('catches a half pay flag written as anything other than true', () => {
