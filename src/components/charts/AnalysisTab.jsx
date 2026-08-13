@@ -24,21 +24,38 @@ const CERTAINTY_NOTE = {
   unexplained: { label: 'unexplained', color: INK.warning }
 };
 
-const Cell = ({ children, ...props }) => (
+const Cell = ({ children, bold, color = 'gray.200', ...props }) => (
   <GridItem py="2" {...props}>
-    <Text fontSize="sm" color="gray.200" fontVariantNumeric="tabular-nums">{children}</Text>
+    <Text
+      fontSize="sm"
+      color={bold ? 'white' : color}
+      fontWeight={bold ? 'bold' : undefined}
+      fontVariantNumeric="tabular-nums"
+    >
+      {children}
+    </Text>
   </GridItem>
 );
 
+const SORTED_BY = 'Total /sh';
+
 function CompanyTable({ companies }) {
-  const headings = ['', 'In bank', 'Before', 'Now', 'Dividends /sh', 'Price /sh', 'Total /sh', 'Return'];
+  const headings = ['', 'In bank', 'Before', 'Now', 'Dividends /sh', 'Price /sh', SORTED_BY, 'Return'];
 
   return (
     <Box overflowX="auto">
       <Grid templateColumns="90px repeat(7, minmax(88px, 1fr))" gap="2" alignItems="center" minW="740px">
         {headings.map((heading) => (
           <GridItem key={heading} pb="2" borderBottom="1px solid" borderColor="gray.800">
-            <Text fontSize="xs" color="gray.500" textTransform="uppercase" letterSpacing="wide">{heading}</Text>
+            <Text
+              fontSize="xs"
+              color={heading === SORTED_BY ? 'gray.300' : 'gray.500'}
+              fontWeight={heading === SORTED_BY ? 'bold' : undefined}
+              textTransform="uppercase"
+              letterSpacing="wide"
+            >
+              {heading}
+            </Text>
           </GridItem>
         ))}
 
@@ -55,7 +72,7 @@ function CompanyTable({ companies }) {
               <Cell color={unknown ? 'gray.500' : 'gray.200'}>
                 {unknown ? '—' : money(company.stockReturnPerShare)}
               </Cell>
-              <Cell>{unknown ? '—' : money(company.totalReturnPerShare)}</Cell>
+              <Cell bold>{unknown ? '—' : money(company.totalReturnPerShare)}</Cell>
               <GridItem py="2">
                 <Text fontSize="sm" color="gray.200" fontVariantNumeric="tabular-nums">
                   {company.returnOnBaseline === null ? '—' : `${Math.round(company.returnOnBaseline * 100)}%`}
@@ -80,9 +97,8 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
     return <Text color="gray.500" mt="6">Activate a company to see how the last few rounds went.</Text>;
   }
 
-  // The chart reads best with its bars in length order; the table is ranked by return instead.
+  // A company whose price we could not explain has no total, so it sorts to the bottom.
   const byEarnings = [...companies].sort((a, b) => (b.totalReturnPerShare ?? -Infinity) - (a.totalReturnPerShare ?? -Infinity));
-  const byReturn = [...companies].sort((a, b) => (b.returnOnBaseline ?? -Infinity) - (a.returnOnBaseline ?? -Infinity));
 
   const companyBars = byEarnings.map((company) => ({
     name: company.shortName,
@@ -122,8 +138,8 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
           <ReturnBreakdownChart data={companyBars} series={RETURN_SERIES} height={chartHeight(companyBars.length)} testId="company-return-chart" />
         </ChartCard>
 
-        <ChartCard title="How each company did" subtitle="Best return first" gridColumn={['1', null, '1 / span 2']}>
-          <CompanyTable companies={byReturn} />
+        <ChartCard title="How each company did" subtitle="Most earned per share first" gridColumn={['1', null, '1 / span 2']}>
+          <CompanyTable companies={byEarnings} />
         </ChartCard>
 
         <ChartCard title="Return by player" subtitle="What each player's shares earned">
@@ -136,7 +152,7 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
 
         <ChartCard title="What happened" subtitle="The same numbers, in words" gridColumn={['1', null, '1 / span 2']}>
           <Flex direction="column" gap="3">
-            {byReturn.map((company) => (
+            {byEarnings.map((company) => (
               <Flex key={company.shortName} gap="3" align="flex-start">
                 <Box w="10px" h="10px" mt="6px" borderRadius="full" bg={company.color || 'gray.600'} flexShrink="0" />
                 <Text fontSize="sm" color="gray.300">{describeCompany(company)}</Text>
