@@ -33,6 +33,30 @@ const answers = (payload, { status = 200 } = {}) =>
 
 const postedBody = (fetchMock) => JSON.parse(fetchMock.mock.calls[0][1].body);
 
+const stalls = (signal) => new Promise((_resolve, reject) => {
+  signal.addEventListener('abort', () => {
+    const aborted = new Error('aborted');
+    aborted.name = 'AbortError';
+    reject(aborted);
+  });
+});
+
+const sheetHolds = (data, updated) => Promise.resolve({
+  ok: true,
+  status: 200,
+  json: async () => ({ ok: true, data, updated })
+});
+
+// Written out longhand on purpose: if this and hashOf in games.gs ever disagree, the tests should
+// notice rather than agree with a shared mistake.
+const fnv1a = (text) => {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
+  }
+  return (hash >>> 0).toString(16);
+};
+
 beforeEach(() => {
   localStorage.clear();
   global.fetch = vi.fn();
@@ -149,20 +173,96 @@ describe('saveGameToSheet', () => {
     await expect(saveGameToSheet(gameInstance, dashboardState)).rejects.toThrow(/Could not reach/);
   });
 
-  it('gives up when the sheet never answers', async () => {
+  it('gives up when the sheet never answers, and cannot confirm the game landed', async () => {
     vi.useFakeTimers();
-    global.fetch = vi.fn((_url, options) => new Promise((_resolve, reject) => {
-      options.signal.addEventListener('abort', () => {
-        const aborted = new Error('aborted');
-        aborted.name = 'AbortError';
-        reject(aborted);
-      });
-    }));
+    global.fetch = vi.fn((_url, options) => stalls(options.signal));
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
-    vi.advanceTimersByTime(15000);
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(15000);
 
-    await expect(pending).rejects.toThrow(/took too long/);
+    await rejects;
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('confirms a stalled save from a hash, without pulling the whole game back', async () => {
+    vi.useFakeTimers();
+    let sent;
+    global.fetch = vi.fn((url, options) => {
+      if (options.method !== 'POST') {
+        expect(url).toContain('hash=1');
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ ok: true, hash: fnv1a(sent), length: sent.length, updated: 'then' })
+        });
+      }
+      sent = JSON.parse(options.body).data;
+      return stalls(options.signal);
+    });
+
+    const pending = saveGameToSheet(gameInstance, dashboardState);
+    await vi.advanceTimersByTimeAsync(15000);
+
+    await expect(pending).resolves.toMatchObject({ outcome: 'created', updatedAt: 'then' });
+  });
+
+  it('does not accept a hash that belongs to a different game', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn((_url, options) => (
+      options.method === 'POST'
+        ? stalls(options.signal)
+        : Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ ok: true, hash: fnv1a('a different game'), length: 16, updated: 'then' })
+        })
+    ));
+
+    const pending = saveGameToSheet(gameInstance, dashboardState);
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+    await vi.advanceTimersByTimeAsync(15000);
+
+    await rejects;
+  });
+
+  it('falls back to the whole game for deployments that predate the hash flag', async () => {
+    vi.useFakeTimers();
+    let sent;
+    global.fetch = vi.fn((_url, options) => {
+      if (options.method !== 'POST') return sheetHolds(sent, '2026-08-13T21:19:29.597Z');
+      sent = JSON.parse(options.body).data;
+      return stalls(options.signal);
+    });
+
+    const pending = saveGameToSheet(gameInstance, dashboardState);
+    await vi.advanceTimersByTimeAsync(15000);
+
+    await expect(pending).resolves.toMatchObject({
+      outcome: 'created',
+      updatedAt: '2026-08-13T21:19:29.597Z'
+    });
+  });
+
+  it('still fails when the sheet holds a different game than the one just sent', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn((_url, options) => (
+      options.method === 'POST' ? stalls(options.signal) : sheetHolds('an older version', 'whenever')
+    ));
+
+    const pending = saveGameToSheet(gameInstance, dashboardState);
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+    await vi.advanceTimersByTimeAsync(15000);
+
+    await rejects;
+  });
+
+  it('does not go looking when the sheet gave a clear answer', async () => {
+    global.fetch = answers({ ok: false, error: 'bad_id' });
+
+    await expect(saveGameToSheet(gameInstance, dashboardState)).rejects.toThrow(/refused/);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -16,6 +16,14 @@ function doGet(e) {
     if (rowIndex === -1) return json({ ok: false, error: 'not_found' });
 
     const row = sheet.getRange(rowIndex, 1, 1, HEADERS.length).getValues()[0];
+
+    // Confirming a stalled save only needs to know the stored game matches, not carry it back over
+    // a connection that is already struggling.
+    if (e.parameter.hash) {
+      const stored = String(row[6] || '');
+      return json({ ok: true, id: row[0], hash: hashOf(stored), length: stored.length, updated: toIso(row[5]) });
+    }
+
     return json({
       ok: true,
       id: row[0],
@@ -113,6 +121,17 @@ function findRowIndex(sheet, id) {
 
 function toIso(value) {
   return value instanceof Date ? value.toISOString() : String(value || '');
+}
+
+// FNV-1a. Must stay identical to hashOf in src/services/remote/gamesSheet.js or a save that worked
+// will be reported as lost.
+function hashOf(text) {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
 }
 
 function json(payload) {

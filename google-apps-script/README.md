@@ -76,6 +76,7 @@ place with a real stand-in is the Playwright suite, which answers for the script
 | Call | Meaning |
 | --- | --- |
 | `GET  ?id=game_123_4` | Return that row, or `{ ok: false, error: 'not_found' }`. An id that fails the check below gets `bad_id` instead |
+| `GET  ?id=…&hash=1` | The same lookup, but answers with a hash and character count of the stored game instead of the game itself. This is how a save that timed out gets confirmed without pulling everything back |
 | `POST` a game as JSON | Update the row with that id, or add one. Answers with `created: true` when it added one, so the app can say "Game saved" rather than "Game updated" |
 
 The app has a third answer, "No changes", for pressing Share twice on a game you have not touched.
@@ -94,6 +95,21 @@ Two refusals are reported as warnings rather than errors, because they mean some
 happen: `busy`, when the sheet stayed locked for 15 seconds, and `too_large`. The refusals that come
 from a stranger poking the public URL, `bad_id`, `bad_json`, `bad_body` and `missing_fields`, are
 deliberately not reported, or the noise would bury the real problems.
+
+**A save that times out has often already happened.** `/exec` answers through a redirect to
+`script.googleusercontent.com`, and that second leg sometimes stalls long after the row was written.
+Measured on a live deployment: the write finished in one second and the browser was still waiting
+fifteen seconds later. So `gamesSheet.js` no longer believes a timeout on its own. It asks for the
+stored game's hash and length, compares them against what it just sent, and only calls it a failure
+when they disagree. Without that, the app reports a lost game that is sitting safely in the
+spreadsheet, and Sentry fills up with failures that never happened.
+
+The hash is deliberately not a stored column. The script has to read the row to answer anyway, so it
+hashes it there and then, which keeps the `games` tab at seven columns and leaves the rows already
+in it alone. The catch is that `hashOf` exists twice, here and in `gamesSheet.js`, and the two must
+stay identical. If they ever drift, every timed-out save gets reported as lost. An app talking to a
+deployment older than the `hash` flag falls back to comparing the whole game, so the two can be
+updated in either order.
 
 Reporting can never break a save: it runs inside its own try/catch, so a Sentry outage does nothing.
 The browser reports separately, tagged `browser` rather than `apps-script`, which is how you see the

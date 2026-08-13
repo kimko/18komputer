@@ -17,7 +17,7 @@ const NOT_SET_UP = 'The Google Sheet is not set up yet. See google-apps-script/R
 
 // The request is attempted rather than refused up front, so a test can stand in for the sheet.
 // A placeholder endpoint only shows up as a failure to connect, which is what NOT_SET_UP explains.
-async function call(url, options = {}) {
+async function call(url, options = {}, { silent = false } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -29,7 +29,9 @@ async function call(url, options = {}) {
     const problem = err.name === 'AbortError'
       ? new Error('The sheet took too long to answer.')
       : new Error('Could not reach the sheet. Check your connection.');
-    reportProblem(problem, { stage: 'reaching the sheet', cause: err.name });
+    // Nothing came back either way, so a write may still have happened.
+    problem.unanswered = true;
+    if (!silent) reportProblem(problem, { stage: 'reaching the sheet', cause: err.name });
     throw problem;
   } finally {
     clearTimeout(timer);
@@ -38,7 +40,7 @@ async function call(url, options = {}) {
   if (!response.ok) {
     if (!isSheetConfigured()) throw new Error(NOT_SET_UP);
     const problem = new Error(`The sheet answered with an error (${response.status}).`);
-    reportProblem(problem, { stage: 'answer', status: response.status });
+    if (!silent) reportProblem(problem, { stage: 'answer', status: response.status });
     throw problem;
   }
 
@@ -48,12 +50,38 @@ async function call(url, options = {}) {
   if (!body?.ok) {
     const problem = new Error(MESSAGES[body?.error] || 'The sheet refused the request.');
     // Asking for a game that is not in the sheet is a normal thing to do, not a fault.
-    if (body?.error !== 'not_found') {
+    if (!silent && body?.error !== 'not_found') {
       reportProblem(problem, { stage: 'refused', code: body?.error ?? 'unreadable answer' });
     }
     throw problem;
   }
   return body;
+}
+
+// FNV-1a. Must stay identical to hashOf in google-apps-script/games.gs or a save that worked will
+// be reported as lost.
+function hashOf(text) {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+// The script answers through a redirect that sometimes stalls long after the row was written, so
+// a save that never came back is not proof the game failed to land.
+async function landedAnyway(gameId, data) {
+  try {
+    const body = await call(`${SHEET_ENDPOINT}?id=${encodeURIComponent(gameId)}&hash=1`, {}, { silent: true });
+    // Deployments older than the hash flag answer with the whole game instead.
+    const matches = body.hash === undefined
+      ? body.data === data
+      : body.hash === hashOf(data) && body.length === data.length;
+    return matches ? body : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveGameToSheet(gameInstance, dashboardState) {
@@ -69,19 +97,30 @@ export async function saveGameToSheet(gameInstance, dashboardState) {
   // Older deployments of the script do not say which they did, so fall back to what we know.
   const seenBefore = hasSavedGame(gameInstance.id);
 
-  const body = await call(SHEET_ENDPOINT, {
-    method: 'POST',
-    // Not application/json: that makes the browser ask permission first, which Apps Script ignores.
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-      id: gameInstance.id,
-      ruleset: gameInstance.gameId,
-      name: gameInstance.gameName || '',
-      players: (gameInstance.players || []).join(', '),
-      created: gameInstance.createdAt ? new Date(gameInstance.createdAt).toISOString().slice(0, 10) : '',
-      data
-    })
-  });
+  let body;
+  try {
+    body = await call(SHEET_ENDPOINT, {
+      method: 'POST',
+      // Not application/json: that makes the browser ask permission first, which Apps Script ignores.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        id: gameInstance.id,
+        ruleset: gameInstance.gameId,
+        name: gameInstance.gameName || '',
+        players: (gameInstance.players || []).join(', '),
+        created: gameInstance.createdAt ? new Date(gameInstance.createdAt).toISOString().slice(0, 10) : '',
+        data
+      })
+    }, { silent: true });
+  } catch (err) {
+    const landed = err.unanswered ? await landedAnyway(gameInstance.id, data) : null;
+    if (!landed) {
+      reportProblem(err, { stage: 'saving', id: gameInstance.id, answered: err.unanswered ? 'no' : 'yes' });
+      throw err;
+    }
+    rememberSaved(gameInstance.id, data);
+    return { outcome: seenBefore ? 'updated' : 'created', updatedAt: landed.updated };
+  }
 
   rememberSaved(gameInstance.id, data);
   const created = body.created === undefined ? !seenBefore : Boolean(body.created);
