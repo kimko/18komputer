@@ -67,6 +67,13 @@
       backwards from the operating rounds and splits what a share earned into dividends and price
       movement, per company and per player, in `src/utils/roundReturn.js`. It is the first thing to
       read `priceMovement`.
+- [x] **A title that named no price rules got no analysis at all.** A missing rule was read as "the
+      price does not move", so the five titles carrying no `priceMovement` (1899 DAIHAN, 18DO, 18IN,
+      18Korea, 18 Milwaukee) reported every company as unexplained, and any title missing just
+      `dividendPaid` silently froze its paying companies. Absent rules now fall back to what the
+      reference engine does by default: right one square on a payout, left one on a withhold, up one
+      when sold out. A rule written down as moving nothing is still honoured, which six titles rely
+      on.
 - [ ] **The derived baseline is only as good as what gets recorded.** Shares traded during a share
       round move a price and are not recorded, so some companies come out approximate (several
       starting squares reach the same price) or unexplained (none do). Recording share dealing would

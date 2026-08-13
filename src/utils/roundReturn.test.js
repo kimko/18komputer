@@ -377,3 +377,75 @@ describe('what a player is worth', () => {
     expect(kim.netWorth).toBe(getPlayerNetWorth(args.dashboardState, companies, args.maxOr, 'Kim'));
   });
 });
+
+describe('rules a title does not spell out', () => {
+  const company = { shortName: 'PRR', name: 'Pennsylvania', parValue: 90, totalShares: 10 };
+  const flatPrices = [80, 90, 100, 110, 120];
+
+  const run = (staticConfig, ors, priceNow, shares = 50) => getCompanyReturn(company, {
+    dashboardState: {
+      ors: { PRR: ors },
+      shareValues: { PRR: priceNow },
+      sharePositions: {},
+      playerAssets: { Kim: { cash: 0, shares: { PRR: shares } } }
+    },
+    staticConfig,
+    maxOr: 2,
+    players: ['Kim']
+  });
+
+  // The reference moves right one on any payout unless a title says otherwise.
+  it('moves right one square on a payout when the title names no rule', () => {
+    const result = run({ sharePrices: flatPrices, priceMovement: { dividendWithheld: { move: 'left', squares: 1 } } },
+      { or1: 500 }, 100);
+
+    expect(result.baseline.price).toBe(90);
+    expect(result.stockReturnPerShare).toBe(10);
+  });
+
+  it('moves left one square on a withheld round when the title names no rule', () => {
+    const result = run({ sharePrices: flatPrices, priceMovement: { dividendPaid: { move: 'right', squares: 1 } } },
+      { or1: 0 }, 90);
+
+    expect(result.baseline.price).toBe(100);
+    expect(result.stockReturnPerShare).toBe(-10);
+  });
+
+  it('works at all for a title carrying no price rules whatsoever', () => {
+    const result = run({ sharePrices: flatPrices }, { or1: 500 }, 100);
+
+    expect(result.baseline.certainty).toBe('exact');
+    expect(result.baseline.price).toBe(90);
+  });
+
+  // A rule that is written down as moving nothing is a rule, not an absence.
+  it('leaves a company still when the title says sold out moves nothing', () => {
+    const rules = {
+      soldOut: { move: null, squares: 0 },
+      dividendPaid: { move: 'right', squares: 1 },
+      dividendWithheld: { move: 'left', squares: 1 }
+    };
+    const result = run({ sharePrices: flatPrices, priceMovement: rules }, { or1: 500 }, 100, 100);
+
+    expect(result.soldOut).toBe(true);
+    expect(result.baseline.price).toBe(90);
+    expect(result.steps.every((step) => step.reason !== 'soldOut')).toBe(true);
+  });
+
+  it('still takes the sold out move up when the title leaves the rule out', () => {
+    const result = run({ sharePrices: flatPrices, priceMovement: { dividendPaid: { move: 'right', squares: 1 } } },
+      { or1: 500 }, 110, 100);
+
+    expect(result.soldOut).toBe(true);
+    expect(result.steps[0]).toMatchObject({ reason: 'soldOut', move: 'up' });
+    expect(result.baseline.price).toBe(90);
+  });
+
+  it('leaves a small payout alone where the title counts multiples of the price', () => {
+    const rules = { dividendPaid: { move: 'right', squares: 'perMultipleOfPrice', maxSquares: 2 } };
+    const result = run({ sharePrices: flatPrices, priceMovement: rules }, { or1: 10 }, 100);
+
+    expect(result.baseline.price).toBe(100);
+    expect(result.stockReturnPerShare).toBe(0);
+  });
+});

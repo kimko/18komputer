@@ -60,10 +60,14 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   const lastNames = ['Montgomery', 'Harrington', 'Fitzgerald', 'Kensington', 'Winchester', 'Carmichael'];
   
   const numPlayers = Math.floor(Math.random() * 4) + 3; // 3 to 6 players
-  for (let i = 0; i < numPlayers; i++) {
+  // Names must be distinct: the app refuses a duplicate, which would leave this list claiming a
+  // player the game never had, and the removal check below would then be about the wrong person.
+  while (playerNames.length < numPlayers) {
     const first = firstNames[Math.floor(Math.random() * firstNames.length)];
     const last = lastNames[Math.floor(Math.random() * lastNames.length)];
     const pName = `${first} ${last}`;
+    if (playerNames.includes(pName)) continue;
+
     playerNames.push(pName);
     await page.getByPlaceholder('New player name...').fill(pName);
     await page.getByRole('button', { name: '+ Add' }).click();
@@ -345,7 +349,8 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
 
   // We should be redirected to the dashboard automatically
   await expect(page).toHaveURL(/.*\/dashboard/);
-  await expect(page.getByText(playerNames[0], { exact: true })).toBeVisible();
+  // Scoped to the grids, because player names also appear in the Analysis tab's chart legends.
+  await expect(page.getByLabel('Data Grids').getByText(playerNames[0], { exact: true }).first()).toBeVisible();
 
   // Assert that state persisted
   // We skip strict assertion here because ORs are randomly generated. 
@@ -408,6 +413,8 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   await expect(page.getByTestId('company-return-chart')).toBeVisible();
   await expect(page.getByTestId('player-return-chart')).toBeVisible();
   await expect(page.getByTestId('player-worth-chart')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Projected Game State' })).toBeVisible();
+  await expect(page.getByTestId('projection-chart')).toBeVisible();
   // Every company earns a sentence, so the stories are the quickest check that the model ran.
   await expect(page.getByText(/operating round/).first()).toBeVisible();
 

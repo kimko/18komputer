@@ -15,6 +15,16 @@ export function readRounds(dashboardState, maxOr, shortName) {
   });
 }
 
+// What the reference engine does when a title names no rule of its own.
+const DEFAULT_RULES = {
+  soldOut: { move: 'up', squares: 1 },
+  dividendPaid: { move: 'right', squares: 1 },
+  dividendWithheld: { move: 'left', squares: 1 }
+};
+
+// Absent means the title never said. A rule written down as moving nothing is a rule, and is kept.
+const ruleFor = (rules, name) => (rules && name in rules ? rules[name] : DEFAULT_RULES[name]);
+
 // A payout worth less than the share price earns nothing, which is what the reference ladder does.
 function squaresFor(rule, revenue, price) {
   if (typeof rule.squares === 'number') return rule.squares;
@@ -47,15 +57,21 @@ export function walk(market, start, { rounds, soldOut, rules }) {
     position = step.to;
   };
 
-  if (soldOut) record(applyRule(market, position, rules?.soldOut, 0, 'soldOut'));
+  if (soldOut) record(applyRule(market, position, ruleFor(rules, 'soldOut'), 0, 'soldOut'));
 
   rounds.forEach((revenue, index) => {
     if (revenue === null) return;
-    const rule = revenue > 0 ? rules?.dividendPaid : rules?.dividendWithheld;
+    const rule = ruleFor(rules, revenue > 0 ? 'dividendPaid' : 'dividendWithheld');
     record(applyRule(market, position, rule, revenue, `or${index + 1}`));
   });
 
   return { position, steps };
+}
+
+// One round at a time, for callers stepping a game forward rather than walking a whole window.
+export function stepPrice(market, position, rules, name, revenue) {
+  const step = applyRule(market, position, ruleFor(rules, name), revenue, name);
+  return step ? step.to : position;
 }
 
 const samePosition = (a, b) => a?.[0] === b?.[0] && a?.[1] === b?.[1];
@@ -117,7 +133,7 @@ export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr,
     baseline: { certainty: 'unexplained', price: null, position: null, range: null }
   };
 
-  if (!market || !rules) return empty;
+  if (!market) return empty;
 
   const endPosition = dashboardState?.sharePositions?.[shortName]
     || findStartCell(market, company.parValue, priceNow);

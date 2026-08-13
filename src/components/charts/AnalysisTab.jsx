@@ -3,9 +3,11 @@ import { Box, Flex, Grid, GridItem, SimpleGrid, Text } from '@chakra-ui/react';
 import ChartCard from './ChartCard.jsx';
 import ReturnBreakdownChart from './ReturnBreakdownChart.jsx';
 import StackedTotalChart from './StackedTotalChart.jsx';
+import ProjectionChart from './ProjectionChart.jsx';
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import { SERIES, INK, money } from './chartTheme.js';
 import { getCompanyReturns, getPlayerReturns, describeCompany, describePlayer } from '../../utils/roundReturn.js';
+import { projectNetWorth } from '../../utils/gameProjection.js';
 
 const RETURN_SERIES = [
   { key: 'income', label: 'Dividends', color: SERIES.income },
@@ -88,9 +90,13 @@ function CompanyTable({ companies }) {
 }
 
 export default function AnalysisTab({ dashboardState, staticConfig, maxOr, players, activeCompanies }) {
-  const { companies, playerReturns } = useMemo(() => {
+  const { companies, playerReturns, projection } = useMemo(() => {
     const args = { dashboardState, staticConfig, maxOr, players, activeCompanies };
-    return { companies: getCompanyReturns(args), playerReturns: getPlayerReturns(args) };
+    return {
+      companies: getCompanyReturns(args),
+      playerReturns: getPlayerReturns(args),
+      projection: projectNetWorth(args)
+    };
   }, [dashboardState, staticConfig, maxOr, players, activeCompanies]);
 
   if (!activeCompanies.length) {
@@ -149,6 +155,24 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
         <ChartCard title="What each player is worth" subtitle="Cash, plus these rounds' dividends, plus shares">
           <StackedTotalChart data={worthBars} series={WORTH_SERIES} height={chartHeight(worthBars.length)} testId="player-worth-chart" />
         </ChartCard>
+
+        {projection.length > 0 && (
+          <ChartCard
+            title="Projected Game State"
+            subtitle="Where net worth goes if these rounds keep repeating"
+            gridColumn={['1', null, '1 / span 2']}
+          >
+            <ProjectionChart points={projection} players={players} testId="projection-chart" />
+            <Text fontSize="xs" color="gray.500" mt="3">
+              Solid to the left of <strong>now</strong> is what the recorded rounds produced; dashed to the right
+              repeats the last operating round over and over. Cash is left exactly as entered, since it describes
+              the position before those rounds. Nobody buys or sells, so a sold out company keeps taking its rise
+              at every share round.
+              {projection[0].unexplained.length > 0
+                && ` ${projection[0].unexplained.join(', ')} could not be placed on the chart, so ${projection[0].unexplained.length === 1 ? 'its price is held' : 'their prices are held'} flat.`}
+            </Text>
+          </ChartCard>
+        )}
 
         <ChartCard title="What happened" subtitle="The same numbers, in words" gridColumn={['1', null, '1 / span 2']}>
           <Flex direction="column" gap="3">
