@@ -108,3 +108,36 @@ describe('NewGame Component', () => {
     expect(startBtn).not.toBeDisabled();
   });
 });
+
+describe('a name already at the table', () => {
+  it('says why the name was not added, rather than doing nothing', () => {
+    renderWithChakra(<NewGame />);
+    const input = screen.getByPlaceholderText(/New player name/i);
+    const add = screen.getByRole('button', { name: /\+ Add/i });
+
+    fireEvent.change(input, { target: { value: 'Alice' } });
+    fireEvent.click(add);
+
+    fireEvent.change(input, { target: { value: 'alice' } });
+    fireEvent.click(add);
+
+    expect(screen.getByText('alice is already playing.')).toBeInTheDocument();
+    expect(screen.getAllByText(/^alice$/i)).toHaveLength(1);
+  });
+
+  it('clears the complaint once a different name is added', () => {
+    renderWithChakra(<NewGame />);
+    const input = screen.getByPlaceholderText(/New player name/i);
+    const add = screen.getByRole('button', { name: /\+ Add/i });
+
+    fireEvent.change(input, { target: { value: 'Alice' } });
+    fireEvent.click(add);
+    fireEvent.change(input, { target: { value: 'Alice' } });
+    fireEvent.click(add);
+    expect(screen.getByText('Alice is already playing.')).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: 'Bob' } });
+    fireEvent.click(add);
+    expect(screen.queryByText('Alice is already playing.')).not.toBeInTheDocument();
+  });
+});

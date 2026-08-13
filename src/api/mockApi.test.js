@@ -309,3 +309,39 @@ describe('Mock API (LocalStorage)', () => {
     });
   });
 });
+
+describe('two players cannot share a name', () => {
+  beforeEach(() => localStorage.clear());
+
+  // createGame checks its arguments up front, the way it already does for a bad game id.
+  it('refuses to create a game with the same name twice', () => {
+    expect(() => createGame('1830', ['Alice', 'Bob', 'Alice'])).toThrow(/same name/i);
+  });
+
+  // Everything a player owns is keyed by their name, so two Alices would share one pile.
+  it('refuses names that differ only by case or spacing', () => {
+    expect(() => createGame('1830', ['Alice', 'alice'])).toThrow(/same name/i);
+    expect(() => createGame('1830', ['Alice', 'Alice '])).toThrow(/same name/i);
+  });
+
+  it('still creates a game when the names are distinct', async () => {
+    const game = await createGame('1830', ['Alice', 'Bob']);
+    expect(game.players).toEqual(['Alice', 'Bob']);
+  });
+
+  it('refuses to add a duplicate to a game already under way', async () => {
+    const game = await createGame('1830', ['Alice', 'Bob']);
+
+    await expect(updateGamePlayers(game.id, ['Alice', 'Bob', 'alice']))
+      .rejects.toThrow(/same name/i);
+
+    expect((await getGame(game.id)).players).toEqual(['Alice', 'Bob']);
+  });
+
+  it('lets an unrelated change to the player list through', async () => {
+    const game = await createGame('1830', ['Alice', 'Bob']);
+    const updated = await updateGamePlayers(game.id, ['Alice', 'Bob', 'Cara']);
+
+    expect(updated.players).toEqual(['Alice', 'Bob', 'Cara']);
+  });
+});

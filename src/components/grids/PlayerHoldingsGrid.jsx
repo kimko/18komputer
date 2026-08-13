@@ -16,6 +16,7 @@ import {
 const formatShareCount = (count) => Number(Number(count).toFixed(1));
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import { saveUsers } from '../../api/mockApi.js';
+import { isTaken } from '../../utils/players.js';
 
 function PlayerGridRow({ label, players, getValue, valueProps = {}, endNode = null, testId }) {
   return (
@@ -43,15 +44,22 @@ export default function PlayerHoldingsGrid({
   const [showDetails, setShowDetails] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [pendingRemoval, setPendingRemoval] = useState(null);
+  const [nameError, setNameError] = useState(null);
 
   const handleAddPlayer = (e) => {
     e.preventDefault();
     const name = newPlayerName.trim();
-    if (name && !players.includes(name)) {
-      updatePlayers([...players, name]);
-      saveUsers([name]);
-      setNewPlayerName('');
+    if (!name) return;
+
+    if (isTaken(players, name)) {
+      setNameError(`${name} is already playing.`);
+      return;
     }
+
+    setNameError(null);
+    updatePlayers([...players, name]);
+    saveUsers([name]);
+    setNewPlayerName('');
   };
 
   const removePlayer = (playerToRemove) => {
@@ -159,6 +167,7 @@ export default function PlayerHoldingsGrid({
             <Input size="sm" w="120px" placeholder="New player..." value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} bg="gray.700" border="none" color="white"/>
             <Button size="sm" type="submit" colorPalette="teal">Add</Button>
           </Flex>
+          {nameError && <Text mt="1" fontSize="xs" color="orange.300">{nameError}</Text>}
         </form>
       </Flex>
       

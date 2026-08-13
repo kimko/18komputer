@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Box, Button, VStack, Heading, Text, Center, Input, Flex, IconButton } from '@chakra-ui/react';
 import { useLocation } from 'wouter';
 import { createGame, getUsers, saveUsers } from '../api/mockApi.js';
+import { isTaken } from '../utils/players.js';
 import gameIndex from '../data/gamesIndex.json';
 
 export default function NewGame() {
@@ -11,12 +12,17 @@ export default function NewGame() {
   const [playerName, setPlayerName] = useState('');
   const [roster, setRoster] = useState(() => getUsers());
   const [players, setPlayers] = useState([]);
+  const [nameError, setNameError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggleUser = (name) => {
     if (players.includes(name)) {
       setPlayers(players.filter(p => p !== name));
+      setNameError(null);
+    } else if (isTaken(players, name)) {
+      setNameError(`${name} is already playing.`);
     } else {
+      setNameError(null);
       setPlayers([...players, name]);
     }
   };
@@ -24,12 +30,18 @@ export default function NewGame() {
   const handleAddPlayer = (e) => {
     e.preventDefault();
     const name = playerName.trim();
-    if (name && !players.includes(name)) {
-      setPlayers([...players, name]);
-      saveUsers([name]);
-      setRoster(getUsers());
-      setPlayerName('');
+    if (!name) return;
+
+    if (isTaken(players, name)) {
+      setNameError(`${name} is already playing.`);
+      return;
     }
+
+    setNameError(null);
+    setPlayers([...players, name]);
+    saveUsers([name]);
+    setRoster(getUsers());
+    setPlayerName('');
   };
 
   const filteredGames = useMemo(() => {
@@ -158,6 +170,7 @@ export default function NewGame() {
                 />
                 <Button type="submit" colorPalette="orange">+ Add</Button>
               </Flex>
+              {nameError && <Text mt="2" fontSize="sm" color="orange.300">{nameError}</Text>}
             </form>
           </Box>
 

@@ -1,5 +1,7 @@
 import { forgetSaved, forgetAllSaved } from '../services/remote/savedGames.js';
 
+import { findDuplicateName } from '../utils/players.js';
+
 const STORAGE_KEY = '18komputer_games';
 const USERS_STORAGE_KEY = '18komputer_users';
 
@@ -141,9 +143,15 @@ export function generateGameName(gameId, playerCount, date) {
   return `${gameId} ${playerCount}p ${MONTH_NAMES[date.getMonth()]}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
+function rejectDuplicates(players) {
+  const duplicate = findDuplicateName(players);
+  if (duplicate) throw new Error(`Two players cannot have the same name: ${duplicate}`);
+}
+
 export function createGame(gameId, players) {
   if (!gameId || typeof gameId !== 'string') throw new Error('Invalid gameId');
   if (!Array.isArray(players) || players.length < 2) throw new Error('Invalid players array');
+  rejectDuplicates(players);
   return enqueue(async () => {
     await delay();
     const db = readStorage();
@@ -215,6 +223,7 @@ export function updateGameState(instanceId, updates) {
 export function updateGamePlayers(instanceId, players) {
   return enqueue(async () => {
     await delay();
+    rejectDuplicates(players);
     const db = readStorage();
 
     if (!db[instanceId]) {
