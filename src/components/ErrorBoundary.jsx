@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heading, Text, Button, Center } from '@chakra-ui/react';
+import { reportProblem } from '../services/monitoring/monitoring.js';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,6 +14,7 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error', error, errorInfo);
+    reportProblem(error, { componentStack: errorInfo?.componentStack });
   }
 
   render() {

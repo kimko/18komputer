@@ -7,53 +7,78 @@ const MAX_DATA_LENGTH = 45000;
 const ID_PATTERN = /^game_[A-Za-z0-9_-]{1,60}$/;
 
 function doGet(e) {
-  const id = (e && e.parameter && e.parameter.id) || '';
-  if (!ID_PATTERN.test(id)) return json({ ok: false, error: 'bad_id' });
+  try {
+    const id = (e && e.parameter && e.parameter.id) || '';
+    if (!ID_PATTERN.test(id)) return json({ ok: false, error: 'bad_id' });
 
-  const sheet = getSheet();
-  const rowIndex = findRowIndex(sheet, id);
-  if (rowIndex === -1) return json({ ok: false, error: 'not_found' });
+    const sheet = getSheet();
+    const rowIndex = findRowIndex(sheet, id);
+    if (rowIndex === -1) return json({ ok: false, error: 'not_found' });
 
-  const row = sheet.getRange(rowIndex, 1, 1, HEADERS.length).getValues()[0];
-  return json({
-    ok: true,
-    id: row[0],
-    name: row[2],
-    players: row[3],
-    updated: toIso(row[5]),
-    data: row[6]
-  });
+    const row = sheet.getRange(rowIndex, 1, 1, HEADERS.length).getValues()[0];
+    return json({
+      ok: true,
+      id: row[0],
+      name: row[2],
+      players: row[3],
+      updated: toIso(row[5]),
+      data: row[6]
+    });
+  } catch (err) {
+    // Without this the caller gets an HTML error page it cannot parse.
+    report('error', err, { handler: 'doGet' });
+    return json({ ok: false, error: 'server_error' });
+  }
 }
 
 function doPost(e) {
-  let body;
   try {
-    body = JSON.parse(e.postData.contents);
+    let body;
+    try {
+      body = JSON.parse(e.postData.contents);
+    } catch (err) {
+      return json({ ok: false, error: 'bad_json' });
+    }
+
+    const invalid = validate(body);
+    if (invalid) {
+      // Only the refusals that mean somebody lost a save; the rest is strangers poking a public URL.
+      if (invalid === 'too_large') {
+        report('warning', 'A save was refused: the game is too big for the sheet', {
+          handler: 'doPost',
+          id: String(body.id || ''),
+          length: String(body.data).length
+        });
+      }
+      return json({ ok: false, error: invalid });
+    }
+
+    const lock = LockService.getScriptLock();
+    try {
+      lock.waitLock(15000);
+    } catch (err) {
+      report('warning', 'A save was refused: the sheet stayed locked', {
+        handler: 'doPost',
+        id: String(body.id)
+      });
+      return json({ ok: false, error: 'busy' });
+    }
+
+    try {
+      const sheet = getSheet();
+      const updated = new Date();
+      const row = [body.id, body.ruleset, body.name, body.players, body.created, updated, body.data];
+      const rowIndex = findRowIndex(sheet, body.id);
+      const created = rowIndex === -1;
+      if (created) sheet.appendRow(row);
+      else sheet.getRange(rowIndex, 1, 1, HEADERS.length).setValues([row]);
+      return json({ ok: true, id: body.id, updated: updated.toISOString(), created: created });
+    } finally {
+      lock.releaseLock();
+    }
   } catch (err) {
-    return json({ ok: false, error: 'bad_json' });
-  }
-
-  const invalid = validate(body);
-  if (invalid) return json({ ok: false, error: invalid });
-
-  const lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(15000);
-  } catch (err) {
-    return json({ ok: false, error: 'busy' });
-  }
-
-  try {
-    const sheet = getSheet();
-    const updated = new Date();
-    const row = [body.id, body.ruleset, body.name, body.players, body.created, updated, body.data];
-    const rowIndex = findRowIndex(sheet, body.id);
-    const created = rowIndex === -1;
-    if (created) sheet.appendRow(row);
-    else sheet.getRange(rowIndex, 1, 1, HEADERS.length).setValues([row]);
-    return json({ ok: true, id: body.id, updated: updated.toISOString(), created: created });
-  } finally {
-    lock.releaseLock();
+    report('error', err, { handler: 'doPost' });
+    return json({ ok: false, error: 'server_error' });
   }
 }
 
@@ -93,4 +118,65 @@ function toIso(value) {
 function json(payload) {
   return ContentService.createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Set SENTRY_DSN under Project Settings -> Script Properties. Unset means reporting is off, which
+// is what a copy of this public repo running under someone else's account should do.
+function report(level, problem, context) {
+  try {
+    const dsn = PropertiesService.getScriptProperties().getProperty('SENTRY_DSN') || '';
+    const parts = dsn.match(/^https:\/\/([^@]+)@([^/]+)\/(.+)$/);
+    if (!parts) return;
+
+    const key = parts[1];
+    const host = parts[2];
+    const projectId = parts[3];
+    const eventId = Utilities.getUuid().replace(/-/g, '');
+    const extra = context || {};
+
+    const event = {
+      event_id: eventId,
+      timestamp: new Date().toISOString(),
+      platform: 'javascript',
+      level: level,
+      logger: 'games.gs',
+      server_name: 'apps-script',
+      environment: 'production',
+      tags: { source: 'apps-script', handler: extra.handler || 'unknown' },
+      extra: extra
+    };
+
+    if (typeof problem === 'string') {
+      event.message = { formatted: problem };
+    } else {
+      event.exception = {
+        values: [{ type: (problem && problem.name) || 'Error', value: String((problem && problem.message) || problem) }]
+      };
+      if (problem && problem.stack) event.extra = Object.assign({}, extra, { stack: String(problem.stack) });
+    }
+
+    // No `length` in the item header: this counts characters and Sentry counts bytes, and an
+    // accented player name would make the two disagree.
+    const envelope = [
+      JSON.stringify({ event_id: eventId, sent_at: new Date().toISOString() }),
+      JSON.stringify({ type: 'event' }),
+      JSON.stringify(event)
+    ].join('\n');
+
+    const response = UrlFetchApp.fetch('https://' + host + '/api/' + projectId + '/envelope/', {
+      method: 'post',
+      contentType: 'application/x-sentry-envelope',
+      headers: {
+        'X-Sentry-Auth': 'Sentry sentry_version=7, sentry_key=' + key + ', sentry_client=18komputer-appsscript/1.0'
+      },
+      payload: envelope,
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() >= 300) {
+      console.error('Sentry refused the report', response.getResponseCode(), response.getContentText().slice(0, 200));
+    }
+  } catch (err) {
+    // Never breaks a save, but must stay findable in Executions: usually a missing oauth scope.
+    console.error('Could not report to Sentry', err);
+  }
 }
