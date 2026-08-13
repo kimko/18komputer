@@ -4,14 +4,17 @@ import { INK, BAR_SIZE, TOOLTIP_STYLE, money } from './chartTheme.js';
 import { segmentPath } from './segmentGeometry.js';
 
 // Every part of these totals is money a player has, so nothing here is ever negative.
+const DIMMED = 0.18;
+
 const makeSegment = (isLast) => {
-  const Segment = ({ fill, ...geometry }) => {
+  const Segment = ({ fill, payload, ...geometry }) => {
     const path = segmentPath({
       ...geometry,
       side: isLast ? 'right' : 'none',
       gapSide: isLast ? null : 'right'
     });
-    return path ? <path d={path} fill={fill} /> : null;
+    if (!path) return null;
+    return <path d={path} fill={fill} fillOpacity={payload?.faded ? DIMMED : 1} />;
   };
   Segment.displayName = 'StackSegment';
   return Segment;
@@ -33,8 +36,9 @@ function Breakdown({ active, payload, series }) {
   );
 }
 
-export default function StackedTotalChart({ data, series, height = 280, testId }) {
+export default function StackedTotalChart({ data, series, height = 280, testId, onFocus }) {
   if (!data.length) return null;
+  const axisWidth = Math.min(150, Math.max(68, Math.max(...data.map((row) => String(row.name).length)) * 8));
 
   return (
     <Box data-testid={testId}>
@@ -43,7 +47,7 @@ export default function StackedTotalChart({ data, series, height = 280, testId }
           <BarChart data={data} layout="vertical" margin={{ top: 8, right: 28, bottom: 8, left: 8 }} barSize={BAR_SIZE}>
             <CartesianGrid horizontal={false} stroke={INK.grid} />
             <XAxis type="number" stroke={INK.muted} tick={{ fill: INK.muted, fontSize: 12 }} tickFormatter={money} />
-            <YAxis type="category" dataKey="name" width={68} stroke={INK.muted} tick={{ fill: INK.secondary, fontSize: 12 }} />
+            <YAxis type="category" dataKey="name" width={axisWidth} stroke={INK.muted} tick={{ fill: INK.secondary, fontSize: 12 }} />
             <Tooltip cursor={TOOLTIP_STYLE.cursor} content={<Breakdown series={series} />} />
             {series.map((entry, index) => {
               const Shape = makeSegment(index === series.length - 1);
@@ -55,6 +59,7 @@ export default function StackedTotalChart({ data, series, height = 280, testId }
                   fill={entry.color}
                   shape={<Shape />}
                   isAnimationActive={false}
+                  onClick={(bar) => onFocus?.(bar?.payload?.name)}
                 />
               );
             })}

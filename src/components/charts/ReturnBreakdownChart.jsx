@@ -5,9 +5,12 @@ import {
 import { INK, BAR_SIZE, TOOLTIP_STYLE, money } from './chartTheme.js';
 import { segmentPath } from './segmentGeometry.js';
 
-const Segment = ({ fill, ...geometry }) => {
+const DIMMED = 0.18;
+
+const Segment = ({ fill, payload, ...geometry }) => {
   const path = segmentPath(geometry);
-  return path ? <path d={path} fill={fill} /> : null;
+  if (!path) return null;
+  return <path d={path} fill={fill} fillOpacity={payload?.faded ? DIMMED : 1} />;
 };
 
 const FirstSegment = (props) => (
@@ -31,7 +34,7 @@ function Breakdown({ active, payload, series }) {
   );
 }
 
-export default function ReturnBreakdownChart({ data, series, height = 280, testId }) {
+export default function ReturnBreakdownChart({ data, series, height = 280, testId, onFocus }) {
   if (!data.length) return null;
 
   const [first, second] = series;
@@ -39,11 +42,13 @@ export default function ReturnBreakdownChart({ data, series, height = 280, testI
   // directions are separate series and sign stacking grows each one away from zero.
   const rows = data.map((row) => ({
     name: row.name,
+    faded: row.faded,
     first: row[first.key],
     second: row[second.key],
     secondUp: Math.max(0, row[second.key]),
     secondDown: Math.min(0, row[second.key])
   }));
+  const axisWidth = Math.min(150, Math.max(68, Math.max(...rows.map((row) => String(row.name).length)) * 8));
 
   return (
     <Box data-testid={testId}>
@@ -52,12 +57,12 @@ export default function ReturnBreakdownChart({ data, series, height = 280, testI
           <BarChart data={rows} layout="vertical" stackOffset="sign" margin={{ top: 8, right: 28, bottom: 8, left: 8 }} barSize={BAR_SIZE}>
             <CartesianGrid horizontal={false} stroke={INK.grid} />
             <XAxis type="number" stroke={INK.muted} tick={{ fill: INK.muted, fontSize: 12 }} tickFormatter={money} />
-            <YAxis type="category" dataKey="name" width={68} stroke={INK.muted} tick={{ fill: INK.secondary, fontSize: 12 }} />
+            <YAxis type="category" dataKey="name" width={axisWidth} stroke={INK.muted} tick={{ fill: INK.secondary, fontSize: 12 }} />
             <Tooltip cursor={TOOLTIP_STYLE.cursor} content={<Breakdown series={series} />} />
             <ReferenceLine x={0} stroke={INK.muted} />
-            <Bar dataKey="first" stackId="split" fill={first.color} shape={<FirstSegment />} isAnimationActive={false} />
-            <Bar dataKey="secondUp" stackId="split" fill={second.color} shape={<UpSegment />} isAnimationActive={false} />
-            <Bar dataKey="secondDown" stackId="split" fill={second.color} shape={<DownSegment />} isAnimationActive={false} />
+            <Bar dataKey="first" stackId="split" fill={first.color} shape={<FirstSegment />} isAnimationActive={false} onClick={(bar) => onFocus?.(bar?.payload?.name)} />
+            <Bar dataKey="secondUp" stackId="split" fill={second.color} shape={<UpSegment />} isAnimationActive={false} onClick={(bar) => onFocus?.(bar?.payload?.name)} />
+            <Bar dataKey="secondDown" stackId="split" fill={second.color} shape={<DownSegment />} isAnimationActive={false} onClick={(bar) => onFocus?.(bar?.payload?.name)} />
           </BarChart>
         </ResponsiveContainer>
       </Box>

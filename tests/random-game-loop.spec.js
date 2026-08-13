@@ -368,6 +368,19 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   await expect(page.getByTestId('player-worth-chart')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Projected Game State' })).toBeVisible();
   await expect(page.getByTestId('projection-chart')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The board' })).toBeVisible();
+  await expect(page.getByTestId('board-treemap')).toBeVisible();
+  await expect(page.getByTestId('worth-by-company-chart')).toBeVisible();
+
+  // Following a player should dim the rest without changing a single colour.
+  const chip = page.getByTestId('focus-chip').first();
+  await chip.click();
+  await page.waitForTimeout(300);
+  const dimmed = await page.evaluate(() => [...document.querySelectorAll('[data-testid="board-treemap"] rect')]
+    .filter((r) => r.getAttribute('fill-opacity') === '0.18').length);
+  expect(dimmed).toBeGreaterThan(0);
+  await chip.click();
+  await page.waitForTimeout(300);
   // Every company earns a sentence, so the stories are the quickest check that the model ran.
   await expect(page.getByText(/operating round/).first()).toBeVisible();
 

@@ -4,6 +4,8 @@ import {
 } from 'recharts';
 import { SURFACE, INK, TOOLTIP_STYLE, money, playerColor } from './chartTheme.js';
 
+const DIMMED = 0.18;
+
 const compact = (value) => (Math.abs(value) >= 1000 ? `$${Math.round(value / 100) / 10}k` : money(value));
 
 function Standings({ active, payload, players }) {
@@ -27,7 +29,7 @@ function Standings({ active, payload, players }) {
   );
 }
 
-export default function ProjectionChart({ points, players, height = 340, testId }) {
+export default function ProjectionChart({ points, players, height = 340, testId, focus, onFocus }) {
   if (!points.length || !players.length) return null;
 
   const boundary = points.reduce((last, point, index) => (point.recorded ? index : last), 0);
@@ -68,13 +70,16 @@ export default function ProjectionChart({ points, players, height = 340, testId 
               stroke={INK.muted}
               label={{ value: 'now', position: 'top', fill: INK.muted, fontSize: 11 }}
             />
-            {players.map((player, seat) => [
+            {players.map((player, seat) => {
+              const lit = !focus || focus === player;
+              return [
               <Line
                 key={`r${seat}`}
                 dataKey={`r${seat}`}
                 name={player}
                 stroke={playerColor(seat)}
                 strokeWidth={2}
+                strokeOpacity={lit ? 1 : DIMMED}
                 dot={<Marker />}
                 activeDot={{ r: 4 }}
                 isAnimationActive={false}
@@ -85,19 +90,28 @@ export default function ProjectionChart({ points, players, height = 340, testId 
                 name={player}
                 stroke={playerColor(seat)}
                 strokeWidth={2}
+                strokeOpacity={lit ? 1 : DIMMED}
                 strokeDasharray="5 4"
                 dot={false}
                 activeDot={{ r: 4 }}
                 isAnimationActive={false}
               />
-            ])}
+              ];
+            })}
           </LineChart>
         </ResponsiveContainer>
       </Box>
 
       <Flex justify="center" gap="5" mt="2" wrap="wrap">
         {players.map((player, seat) => (
-          <Flex key={player} align="center" gap="2">
+          <Flex
+            key={player}
+            align="center"
+            gap="2"
+            cursor="pointer"
+            opacity={!focus || focus === player ? 1 : 0.5}
+            onClick={() => onFocus?.(player)}
+          >
             <Box w="10px" h="10px" borderRadius="2px" bg={playerColor(seat)} />
             <Text fontSize="xs" color={INK.secondary}>{player}</Text>
           </Flex>
