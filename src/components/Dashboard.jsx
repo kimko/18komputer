@@ -10,13 +10,8 @@ import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
 import PlayerHoldingsGrid from './grids/PlayerHoldingsGrid.jsx';
 import ResultsPrinter from './ResultsPrinter.jsx';
-import CompanyCharts from './charts/CompanyCharts.jsx';
-import PlayerCharts from './charts/PlayerCharts.jsx';
+// CompanyCharts and PlayerCharts are still here but no longer reachable; see TODO.md.
 import AnalysisTab from './charts/AnalysisTab.jsx';
-import {
-  getRevenueTrajectoryData,
-  getCompanyYieldAndDominanceData
-} from '../utils/chartDataSelectors.js';
 
 export default function Dashboard() {
   const [match, params] = useRoute('/game/:id/dashboard');
@@ -124,8 +119,6 @@ export default function Dashboard() {
       <Tabs.Root defaultValue="grids" variant="enclosed" mt="4">
         <Tabs.List bg="gray.800" borderRadius="md" p="1">
           <Tabs.Trigger value="grids" _selected={{ bg: 'teal.500', color: 'white' }}>Data Grids</Tabs.Trigger>
-          <Tabs.Trigger value="companies" _selected={{ bg: 'teal.500', color: 'white' }}>Company Charts</Tabs.Trigger>
-          <Tabs.Trigger value="players" _selected={{ bg: 'teal.500', color: 'white' }}>Player Charts</Tabs.Trigger>
           <Tabs.Trigger value="analysis" _selected={{ bg: 'teal.500', color: 'white' }}>Analysis</Tabs.Trigger>
         </Tabs.List>
 
@@ -153,23 +146,6 @@ export default function Dashboard() {
             gameInstance={gameInstance}
             dashboardState={dashboardState}
             maxOr={maxOr}
-          />
-        </Tabs.Content>
-
-        <Tabs.Content value="companies">
-          <CompanyCharts 
-            trajectoryData={getRevenueTrajectoryData(dashboardState, activeCompanies, maxOr)}
-            yieldData={getCompanyYieldAndDominanceData(dashboardState, activeCompanies, maxOr)}
-            activeCompanies={activeCompanies}
-          />
-        </Tabs.Content>
-
-        <Tabs.Content value="players">
-          <PlayerCharts
-            dashboardState={dashboardState}
-            maxOr={maxOr}
-            players={players}
-            activeCompanies={activeCompanies}
           />
         </Tabs.Content>
 

@@ -74,6 +74,17 @@
       reference engine does by default: right one square on a payout, left one on a withhold, up one
       when sold out. A rule written down as moving nothing is still honoured, which six titles rely
       on.
+- [ ] **The Company Charts and Player Charts tabs are hidden.** Their buttons were removed from the
+      dashboard, so neither view is reachable. Nothing was deleted: `src/components/charts/
+      CompanyCharts.jsx` and `PlayerCharts.jsx` are still there, along with the three selectors that
+      feed them in `src/utils/chartDataSelectors.js` and their tests. Bringing either back is one
+      `Tabs.Trigger` and one `Tabs.Content` in `src/components/Dashboard.jsx`, plus the imports.
+      Worth deciding whether they earn their place beside the Analysis tab, which now covers a lot
+      of the same ground: Revenue Trajectory overlaps the per-round figures, and Market Dominance
+      overlaps what each player is worth. Two things to fix if they do come back — the old charts
+      predate `chartTheme.js` and carry their own hardcoded colours and dashed gridlines, and
+      `getRevenueTrajectoryData` drops a withheld round exactly like an unplayed one, which the rest
+      of the app no longer does.
 - [ ] **The derived baseline is only as good as what gets recorded.** Shares traded during a share
       round move a price and are not recorded, so some companies come out approximate (several
       starting squares reach the same price) or unexplained (none do). Recording share dealing would

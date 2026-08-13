@@ -357,54 +357,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   // We've already printed the MAGIC LINK for inspection, which serves as our E2E proof!
 
   // --- 7b. VERIFY CHARTS RENDER WITH DATA ---
-  console.log('Verifying Company Charts tab with populated data...');
-  await page.getByRole('tab', { name: 'Company Charts' }).click();
-  await expect(page.getByRole('heading', { name: 'Revenue Trajectory' })).toBeVisible().catch(() => {});
-  await expect(page.getByRole('heading', { name: 'Dividend Yield & Market Dominance' })).toBeVisible().catch(() => {});
-
-  console.log('Verifying Player Charts tab with populated data...');
-  await page.getByRole('tab', { name: 'Player Charts' }).click();
-  await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible();
-
-  console.log('Permutating Player Chart UI controls...');
-  const metricSelect = page.locator('select');
-  const flipBtn = page.getByRole('button', { name: '⇄ Flip Axes' });
-
-  // Simplify permutations to avoid 30s test timeout on slow CI runners
-  // We don't need all 24 combinations. A few key ones are enough.
-  const permutations = [
-    { cash: true, total: false, axis: 'value', metric: 'totalValue' },
-    { cash: false, total: true, axis: 'shares', metric: 'shareValue' },
-    { cash: true, total: true, axis: 'value', metric: 'opIncome' }
-  ];
-
-  for (const p of permutations) {
-    if (p.cash) {
-      await page.locator('#include-cash-checkbox').check({ force: true });
-    } else {
-      await page.locator('#include-cash-checkbox').uncheck({ force: true });
-    }
-
-    if (p.total) {
-      await page.locator('#include-total-checkbox').check({ force: true });
-    } else {
-      await page.locator('#include-total-checkbox').uncheck({ force: true });
-    }
-
-    if (p.axis === 'value') {
-       await flipBtn.click();
-    }
-
-    await metricSelect.selectOption(p.metric);
-    // Let the animation render
-    await page.waitForTimeout(200);
-    // Verify app didn't crash
-    await expect(page.getByRole('heading', { name: 'Market Power Grid' })).toBeVisible();
-
-    if (p.axis === 'value') {
-       await flipBtn.click(); // Flip back for next iteration
-    }
-  }
+  // The Company Charts and Player Charts tabs are hidden for now; see TODO.md.
 
   console.log('Verifying Analysis tab with populated data...');
   await page.getByRole('tab', { name: 'Analysis' }).click();
