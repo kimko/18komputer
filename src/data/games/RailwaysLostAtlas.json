@@ -156,6 +156,31 @@
       "name": "Orange Company",
       "shortName": "Orange",
       "color": "#e8998d"
+    },
+    {
+      "name": "Unlimited",
+      "shortName": "UNL",
+      "color": "#e8998d"
+    },
+    {
+      "name": "Experiment",
+      "shortName": "Ex",
+      "color": "#8b5e83"
+    },
+    {
+      "name": "Federation",
+      "shortName": "Fed",
+      "color": "#4a7c59"
+    },
+    {
+      "name": "Consortium",
+      "shortName": "Con",
+      "color": "#c24d4d"
+    },
+    {
+      "name": "Syndicate",
+      "shortName": "Syn",
+      "color": "#e8c547"
     }
   ],
   "id": "RailwaysLostAtlas",
