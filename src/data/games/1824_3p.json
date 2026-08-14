@@ -56,6 +56,14 @@
       "color": "#650065"
     }
   ],
+  "revenueBonuses": [
+    {
+      "label": "Coal",
+      "adds": [
+        10
+      ]
+    }
+  ],
   "id": "1824_3p",
   "sharePrices": [
     40,
