@@ -130,7 +130,11 @@ export async function saveGameToSheet(gameInstance, dashboardState) {
 export async function loadGameFromSheet(gameId) {
   const body = await call(`${SHEET_ENDPOINT}?id=${encodeURIComponent(gameId)}`);
   const game = await readShareToken(body.data);
-  if (!game) throw new Error('The game in the sheet could not be read.');
+  if (!game) {
+    const problem = new Error('The game in the sheet could not be read.');
+    reportProblem(problem, { stage: 'loading shared game', id: gameId, code: 'invalid_data' });
+    throw problem;
+  }
 
   // What just came out of the sheet is by definition what is in the sheet.
   rememberSaved(gameId, body.data);

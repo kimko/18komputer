@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { saveGameToSheet, loadGameFromSheet } from './gamesSheet.js';
+import { reportProblem } from '../monitoring/monitoring.js';
 
 const ENDPOINT = 'https://script.google.com/macros/s/TEST/exec';
 
 vi.mock('./sheetConfig.js', () => ({
   SHEET_ENDPOINT: 'https://script.google.com/macros/s/TEST/exec',
   isSheetConfigured: () => true
+}));
+
+vi.mock('../monitoring/monitoring.js', () => ({
+  reportProblem: vi.fn()
 }));
 
 const gameInstance = {
@@ -60,6 +65,7 @@ const fnv1a = (text) => {
 beforeEach(() => {
   localStorage.clear();
   global.fetch = vi.fn();
+  reportProblem.mockReset();
 });
 
 afterEach(() => {
@@ -306,11 +312,16 @@ describe('loadGameFromSheet', () => {
     global.fetch = answers({ ok: false, error: 'not_found' });
 
     await expect(loadGameFromSheet('game_1_2')).rejects.toThrow(/not in the sheet/);
+    expect(reportProblem).not.toHaveBeenCalled();
   });
 
   it('fails when the cell holds something unreadable', async () => {
     global.fetch = answers({ ok: true, data: 'not-a-token' });
 
     await expect(loadGameFromSheet('game_1_2')).rejects.toThrow(/could not be read/);
+    expect(reportProblem).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ stage: 'loading shared game', id: 'game_1_2', code: 'invalid_data' })
+    );
   });
 });
