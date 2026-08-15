@@ -4,6 +4,7 @@ import { useRoute } from 'wouter';
 import { useGameData } from '../hooks/useGameData.js';
 import { buildRemoteLink } from '../services/printer/shareLink.js';
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
+import { reportProblem } from '../services/monitoring/monitoring.js';
 import { toastSheetOutcome } from './ui/toast.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
@@ -52,11 +53,13 @@ export default function Dashboard() {
       try {
         await navigator.clipboard.writeText(resumeLink);
         setShareMessage('Link copied! Anyone with it can open this game.');
-      } catch {
+      } catch (err) {
+        reportProblem(err, { level: 'warning', stage: 'sharing', id: gameInstance.id, action: 'copy-link' });
         setShareMessage('Saved to the sheet, but the link could not be copied.');
       }
       setTimeout(() => setShareMessage(null), 3000);
     } catch (err) {
+      reportProblem(err, { stage: 'sharing', id: gameInstance.id, action: 'save-to-sheet' });
       console.error('Failed to save the game to the sheet', err);
       setShareError(err.message);
     } finally {

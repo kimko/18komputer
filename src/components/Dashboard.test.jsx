@@ -25,6 +25,11 @@ import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 vi.mock('./ui/toast.js', () => ({ toastSheetOutcome: vi.fn(), toaster: { create: vi.fn() } }));
 import { toastSheetOutcome } from './ui/toast.js';
 
+vi.mock('../services/monitoring/monitoring.js', () => ({
+  reportProblem: vi.fn()
+}));
+import { reportProblem } from '../services/monitoring/monitoring.js';
+
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -182,6 +187,7 @@ describe('Dashboard', () => {
     beforeEach(() => {
       writeText.mockReset().mockResolvedValue();
       Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+      reportProblem.mockClear();
     });
 
     it('says which of the three things happened to the sheet', async () => {
@@ -225,6 +231,21 @@ describe('Dashboard', () => {
       expect(await screen.findByText(/Link copied/)).toBeInTheDocument();
     });
 
+    it('reports a warning when the sheet save worked but clipboard copy failed', async () => {
+      saveGameToSheet.mockResolvedValue({ outcome: 'created', updatedAt: '2026-08-11T19:02:00.000Z' });
+      writeText.mockRejectedValue(new Error('Clipboard denied'));
+      renderWithChakra(<Dashboard />);
+      await screen.findByText('Player Holdings');
+
+      fireEvent.click(screen.getByRole('button', { name: /Share/ }));
+
+      expect(await screen.findByText(/could not be copied/)).toBeInTheDocument();
+      expect(reportProblem).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ level: 'warning', stage: 'sharing', action: 'copy-link', id: 'test-game-123' })
+      );
+    });
+
     it('shows the reason and copies nothing when the sheet cannot be written', async () => {
       saveGameToSheet.mockRejectedValue(new Error('Could not reach the sheet. Check your connection.'));
       renderWithChakra(<Dashboard />);
@@ -234,6 +255,10 @@ describe('Dashboard', () => {
 
       expect(await screen.findByRole('alert')).toHaveTextContent('Could not reach the sheet');
       expect(writeText).not.toHaveBeenCalled();
+      expect(reportProblem).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ stage: 'sharing', action: 'save-to-sheet', id: 'test-game-123' })
+      );
     });
   });
 });
