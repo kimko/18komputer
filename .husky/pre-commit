@@ -1,10 +1,2 @@
 npx lint-staged
-
-# Work in progress on a feature branch stays cheap: only the squashed commit that
-# lands on main pays for the Playwright suite and takes a version number.
-if [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ]; then
-  npm run test:e2e:local
-
-  npm version patch --no-git-tag-version
-  git add package.json package-lock.json
-fi
+npm test
