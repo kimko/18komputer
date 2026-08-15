@@ -52,6 +52,14 @@
     }
   ],
   "id": "1824_2p",
+  "revenueBonuses": [
+    {
+      "label": "Coal",
+      "adds": [
+        10
+      ]
+    }
+  ],
   "sharePrices": [
     40,
     50,
