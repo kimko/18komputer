@@ -54,6 +54,12 @@
   "id": "1824_2p",
   "revenueBonuses": [
     {
+      "label": "Bukovina",
+      "adds": [
+        50
+      ]
+    },
+    {
       "label": "Coal",
       "adds": [
         10
