@@ -182,14 +182,7 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
   const hasCompanies = await companyValuesHeading.count() > 0;
   
   if (hasCompanies) {
-      // The grid has headers, then data. We can find the buttons by their actual context.
-      // Easiest is to locate the row for the first company. We know the shortName.
-      // But we don't have the shortName saved.
-      // Let's just find the first button that opens the share price popup by its click handler or position.
-      // The `- OR` and `+ OR` buttons are size="xs". The grid buttons are size="md" (default).
-      const gridButtons = companyValuesHeading.locator('..').locator('..').locator('button').filter({ hasNotText: 'OR' });
-      
-      const sharePriceBtn = gridButtons.first();
+      const sharePriceBtn = page.getByTestId('share-price-btn').first();
       if (await sharePriceBtn.count() > 0) {
           await sharePriceBtn.click();
           
@@ -273,8 +266,8 @@ test('Randomized core game loop (Chaos Monkey)', async ({ page }) => {
 
   // D. Player Shares Observe
   console.log('Assigning random shares to ALL players for ALL companies...');
-  await page.getByRole('button', { name: 'Details' }).click();
-  await expect(page.getByRole('button', { name: 'Hide Details' })).toBeVisible();
+  await page.getByTestId('player-details-toggle').click();
+  await expect(page.getByTestId('player-details-toggle')).toHaveText('Hide Details');
 
   // Assign random shares to all players
   if (hasCompanies) {
