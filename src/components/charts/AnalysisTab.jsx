@@ -24,11 +24,6 @@ const WORTH_SERIES = [
   { key: 'shares', label: 'Shares', color: SERIES.shares }
 ];
 
-const CERTAINTY_NOTE = {
-  approximate: { label: 'approximate', color: INK.warning },
-  unexplained: { label: 'unexplained', color: INK.warning }
-};
-
 const Cell = ({ children, bold, color = 'gray.200', ...props }) => (
   <GridItem py="2" {...props}>
     <Text
@@ -65,14 +60,13 @@ function CompanyTable({ companies, faded }) {
         ))}
 
         {companies.map((company) => {
-          const note = CERTAINTY_NOTE[company.baseline.certainty];
-          const unknown = company.stockReturnPerShare === null;
+          const unknown = company.start.price === null;
           const dim = faded?.(company.shortName) ? 0.35 : 1;
           return (
             <Fragment key={company.shortName}>
               <GridItem py="2" opacity={dim}><CompanyBadge company={company} fontSize="sm" /></GridItem>
               <Cell opacity={dim}>{company.bankShares === 0 ? 'sold out' : `${company.bankShares}%`}</Cell>
-              <Cell opacity={dim}>{company.baseline.price === null ? '—' : money(company.baseline.price)}</Cell>
+              <Cell opacity={dim}>{unknown ? '—' : money(company.start.price)}</Cell>
               <Cell opacity={dim}>{money(company.priceNow)}</Cell>
               <Cell opacity={dim}>{money(company.orIncomePerShare)}</Cell>
               <Cell opacity={dim} color={unknown ? 'gray.500' : 'gray.200'}>
@@ -81,9 +75,9 @@ function CompanyTable({ companies, faded }) {
               <Cell opacity={dim} bold>{unknown ? '—' : money(company.totalReturnPerShare)}</Cell>
               <GridItem py="2" opacity={dim}>
                 <Text fontSize="sm" color="gray.200" fontVariantNumeric="tabular-nums">
-                  {company.returnOnBaseline === null ? '—' : `${Math.round(company.returnOnBaseline * 100)}%`}
+                  {company.returnOnStart === null ? '—' : `${Math.round(company.returnOnStart * 100)}%`}
                 </Text>
-                {note && <Text fontSize="xs" color={note.color}>{note.label}</Text>}
+                {unknown && <Text fontSize="xs" color={INK.warning}>not recorded</Text>}
               </GridItem>
             </Fragment>
           );
@@ -116,7 +110,7 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
   const heldByFocus = (shortName) => !focus
     || Number(dashboardState?.playerAssets?.[focus]?.shares?.[shortName] || 0) > 0;
 
-  // A company whose price we could not explain has no total, so it sorts to the bottom.
+  // A company with no starting price recorded has no total, so it sorts to the bottom.
   const byEarnings = [...companies].sort((a, b) => (b.totalReturnPerShare ?? -Infinity) - (a.totalReturnPerShare ?? -Infinity));
 
   const companyBars = byEarnings.map((company) => ({
@@ -146,8 +140,8 @@ export default function AnalysisTab({ dashboardState, staticConfig, maxOr, playe
     <Box mt="6">
       <Text fontSize="sm" color="gray.500" mb="4">
         Worked out from the operating rounds you recorded, assuming each player held their shares throughout.
-        Shares traded during the share round also move a price and are not recorded, so a figure marked
-        approximate or unexplained is where that shows up.
+        A price gain is measured against the SP start you recorded for each company, so a company still
+        marked not recorded needs that value set under Details.
       </Text>
 
       <Flex gap="2" mb="5" wrap="wrap" align="center">

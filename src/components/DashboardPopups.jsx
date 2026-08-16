@@ -31,7 +31,28 @@ export default function DashboardPopups({
           onChange={(val, position) => {
             updateDashboardFields({
               shareValues: prev => ({ ...prev, [activePopup.companyId]: val }),
-              sharePositions: prev => ({ ...prev, [activePopup.companyId]: position })
+              sharePositions: prev => ({ ...prev, [activePopup.companyId]: position }),
+              startValues: prev => ({ ...prev, [activePopup.companyId]: val }),
+              startPositions: prev => ({ ...prev, [activePopup.companyId]: position })
+            });
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {activePopup.type === 'startValue' && (
+        <PricePickerPopup
+          title="Set SP start for"
+          company={activeCompanies.find(c => c.shortName === activePopup.companyId)}
+          value={dashboardState.startValues?.[activePopup.companyId]}
+          position={dashboardState.startPositions?.[activePopup.companyId] || null}
+          parValue={activeCompanies.find(c => c.shortName === activePopup.companyId)?.parValue}
+          options={sharePriceOptions}
+          market={stockMarket}
+          onChange={(val, position) => {
+            updateDashboardFields({
+              startValues: prev => ({ ...prev, [activePopup.companyId]: val }),
+              startPositions: prev => ({ ...prev, [activePopup.companyId]: position })
             });
           }}
           onClose={() => setActivePopup(null)}

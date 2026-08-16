@@ -43,7 +43,7 @@ function readCompanies({ dashboardState, staticConfig, maxOr, players, activeCom
     const { shortName } = company;
     const derived = getCompanyReturn(company, { dashboardState, staticConfig, maxOr, players });
     const rounds = readRounds(dashboardState, maxOr, shortName);
-    const placed = market && derived.baseline.position;
+    const placed = market && derived.start.position;
 
     return {
       shortName,
@@ -52,7 +52,7 @@ function readCompanies({ dashboardState, staticConfig, maxOr, players, activeCom
       rounds,
       // Every projected round repeats whatever the last recorded one did.
       repeatRevenue: lastRecorded(rounds),
-      position: placed ? derived.baseline.position : null,
+      position: placed ? derived.start.position : null,
       // With nowhere to stand on the chart, a price can only be held where it was recorded.
       flatPrice: placed ? null : getShareValue(dashboardState, activeCompanies, shortName)
     };

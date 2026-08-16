@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  marketFor, readRounds, walk, findBaselines,
+  marketFor, readRounds, walk,
   getCompanyReturn, getPlayerReturns, describeCompany, describePlayer
 } from './roundReturn';
 import { getPlayerNetWorth } from './dashboardMath';
@@ -86,29 +86,14 @@ describe('walk', () => {
   });
 });
 
-describe('findBaselines', () => {
-  it('finds the one square the rounds could have started from', () => {
-    expect(findBaselines(market, [1, 9], context([100, 200, 300]))).toEqual([PAR_90]);
-  });
-
-  it('finds several when the moves run into the top of the market', () => {
-    // Right from 350 stays at 350, so both 325 and 350 end there.
-    const found = findBaselines(market, [0, 18], context([100]));
-    expect(found).toContainEqual([0, 17]);
-    expect(found).toContainEqual([0, 18]);
-  });
-
-  it('finds none when no square could have reached the recorded price', () => {
-    expect(findBaselines(market, [0, 0], context([100]))).toEqual([]);
-  });
-});
-
 describe('getCompanyReturn', () => {
   const company = { shortName: 'PRR', name: 'Pennsylvania', parValue: 90, totalShares: 10 };
   const state = (over = {}) => ({
     ors: { PRR: { or1: 100, or2: 200, or3: 300 } },
     shareValues: { PRR: 126 },
     sharePositions: { PRR: [1, 9] },
+    startValues: { PRR: 90 },
+    startPositions: { PRR: PAR_90 },
     playerAssets: { Kim: { cash: 0, shares: { PRR: 60 } } },
     ...over
   });
@@ -124,78 +109,74 @@ describe('getCompanyReturn', () => {
     const result = getCompanyReturn(company, args());
 
     expect(result.orIncomePerShare).toBe(60);
-    expect(result.baseline.price).toBe(90);
+    expect(result.start.price).toBe(90);
     expect(result.stockReturnPerShare).toBe(36);
     expect(result.totalReturnPerShare).toBe(96);
-    expect(result.baseline.certainty).toBe('exact');
   });
 
-  it('counts the sold out move as part of the price gain', () => {
+  // The rounds no longer have a say in where the price started; only the recorded value does.
+  it('takes the recorded start even where the rounds could never have produced it', () => {
     const result = getCompanyReturn(company, args({
-      dashboardState: {
-        sharePositions: { PRR: [1, 9] },
-        shareValues: { PRR: 126 },
-        playerAssets: { Kim: { cash: 0, shares: { PRR: 100 } } }
-      }
+      dashboardState: { startValues: { PRR: 76 }, startPositions: { PRR: [1, 4] } }
     }));
 
-    // 82 up to 90, then three squares right to 126.
+    expect(result.start.price).toBe(76);
+    expect(result.stockReturnPerShare).toBe(50);
+  });
+
+  it('walks the recorded rounds from the recorded square to describe the moves', () => {
+    expect(getCompanyReturn(company, args()).steps.map((step) => step.move))
+      .toEqual(['right', 'right', 'right']);
+  });
+
+  it('takes the sold out move before the rounds', () => {
+    const result = getCompanyReturn(company, args({
+      dashboardState: { playerAssets: { Kim: { cash: 0, shares: { PRR: 100 } } } }
+    }));
+
     expect(result.soldOut).toBe(true);
-    expect(result.baseline.price).toBe(82);
-    expect(result.stockReturnPerShare).toBe(44);
     expect(result.steps[0]).toMatchObject({ reason: 'soldOut', move: 'up' });
   });
 
-  it('cannot pin the baseline down when the top of the market swallows the sold out move', () => {
+  it('has no price half at all when no start was recorded', () => {
     const result = getCompanyReturn(company, args({
-      dashboardState: {
-        sharePositions: { PRR: [0, 9] },
-        shareValues: { PRR: 142 },
-        playerAssets: { Kim: { cash: 0, shares: { PRR: 100 } } }
-      }
+      dashboardState: { startValues: {}, startPositions: {} }
     }));
 
-    // From 90 the up move lands on 100; from 100 it has nowhere to go, so both reach 142.
-    expect(result.baseline.certainty).toBe('approximate');
-    expect(result.baseline.range).toEqual([90, 100]);
-    expect(result.stockReturnPerShare).toBe(42);
-  });
-
-  it('says so when the rounds cannot explain the recorded price', () => {
-    const result = getCompanyReturn(company, args({
-      dashboardState: { sharePositions: { PRR: [0, 0] }, shareValues: { PRR: 60 } }
-    }));
-
-    expect(result.baseline.certainty).toBe('unexplained');
+    expect(result.start.price).toBeNull();
     expect(result.stockReturnPerShare).toBeNull();
     expect(result.totalReturnPerShare).toBeNull();
+    expect(result.returnOnStart).toBeNull();
     expect(result.orIncomePerShare).toBe(60);
   });
 
-  it('takes the most cautious baseline when several squares would do', () => {
+  it('finds the square from the price when only the price was recorded', () => {
     const result = getCompanyReturn(company, args({
-      dashboardState: {
-        ors: { PRR: { or1: 100 } },
-        sharePositions: { PRR: [0, 18] },
-        shareValues: { PRR: 350 }
-      }
+      dashboardState: { startPositions: {} }
     }));
 
-    expect(result.baseline.certainty).toBe('approximate');
-    // 300 and 325 both move right to 350, and 350 has nowhere further to go.
-    expect(result.baseline.range).toEqual([300, 350]);
-    expect(result.baseline.price).toBe(350);
-    expect(result.stockReturnPerShare).toBe(0);
+    expect(result.start.position).toEqual(PAR_90);
+    expect(result.steps.map((step) => step.move)).toEqual(['right', 'right', 'right']);
+  });
+
+  it('measures the return against the recorded start', () => {
+    expect(getCompanyReturn(company, args()).returnOnStart).toBeCloseTo(96 / 90);
   });
 
   it('works from the flat price list when a title has no grid', () => {
     const flatTitle = { sharePrices: [80, 90, 100, 112], priceMovement: rules };
     const result = getCompanyReturn(company, args({
       staticConfig: flatTitle,
-      dashboardState: { ors: { PRR: { or1: 100 } }, shareValues: { PRR: 100 }, sharePositions: {} }
+      dashboardState: {
+        ors: { PRR: { or1: 100 } },
+        shareValues: { PRR: 100 },
+        sharePositions: {},
+        startValues: { PRR: 90 },
+        startPositions: {}
+      }
     }));
 
-    expect(result.baseline.price).toBe(90);
+    expect(result.start.price).toBe(90);
     expect(result.stockReturnPerShare).toBe(10);
   });
 });
@@ -209,6 +190,8 @@ describe('getPlayerReturns', () => {
     ors: { PRR: { or1: 100, or2: 200, or3: 300 }, NYC: { or1: 100 } },
     shareValues: { PRR: 126, NYC: 100 },
     sharePositions: { PRR: [1, 9], NYC: [1, 7] },
+    startValues: { PRR: 90, NYC: 90 },
+    startPositions: { PRR: PAR_90, NYC: PAR_90 },
     // 90% of PRR is held, so it is not sold out and earns no upward move.
     playerAssets: { Kim: { cash: 500, shares: { PRR: 60, NYC: 20 } }, Sam: { cash: 200, shares: { PRR: 30 } } }
   };
@@ -251,7 +234,9 @@ describe('describeCompany', () => {
     const story = describeCompany(build({
       ors: { PRR: { or1: 100, or2: 200, or3: 300 } },
       shareValues: { PRR: 126 },
-      sharePositions: { PRR: [1, 9] }
+      sharePositions: { PRR: [1, 9] },
+      startValues: { PRR: 90 },
+      startPositions: { PRR: PAR_90 }
     }));
 
     expect(story).toContain('paid in all three operating rounds');
@@ -264,7 +249,9 @@ describe('describeCompany', () => {
     const story = describeCompany(build({
       ors: { PRR: { or1: 100, or2: 0, or3: '' } },
       shareValues: { PRR: 90 },
-      sharePositions: { PRR: [1, 6] }
+      sharePositions: { PRR: PAR_90 },
+      startValues: { PRR: 90 },
+      startPositions: { PRR: PAR_90 }
     }));
 
     // Only two rounds were played, so the blank third is left out of the count entirely.
@@ -277,6 +264,8 @@ describe('describeCompany', () => {
       ors: { PRR: { or1: 100 } },
       shareValues: { PRR: 100 },
       sharePositions: { PRR: [1, 7] },
+      startValues: { PRR: 90 },
+      startPositions: { PRR: PAR_90 },
       playerAssets: { Kim: { shares: { PRR: 100 } } }
     }));
 
@@ -284,21 +273,23 @@ describe('describeCompany', () => {
     expect(story).toContain('up one');
   });
 
-  it('says plainly when the price cannot be explained', () => {
+  it('says plainly when no starting price was recorded', () => {
     const story = describeCompany(build({
       ors: { PRR: { or1: 100 } },
       shareValues: { PRR: 60 },
       sharePositions: { PRR: [0, 0] }
     }));
 
-    expect(story).toContain('cannot be reached');
+    expect(story).toContain('no starting price');
   });
 
   it('says when a price fell rather than rose', () => {
     const story = describeCompany(build({
       ors: { PRR: { or1: 0, or2: 0 } },
       shareValues: { PRR: 76 },
-      sharePositions: { PRR: [1, 4] }
+      sharePositions: { PRR: [1, 4] },
+      startValues: { PRR: 90 },
+      startPositions: { PRR: PAR_90 }
     }));
 
     expect(story).toContain('lost $14');
@@ -316,6 +307,8 @@ describe('describePlayer', () => {
         ors: { PRR: { or1: 100, or2: 200, or3: 300 } },
         shareValues: { PRR: 126 },
         sharePositions: { PRR: [1, 9] },
+        startValues: { PRR: 90 },
+        startPositions: { PRR: PAR_90 },
         playerAssets: { Kim: { cash: 500, shares: { PRR: 60 } } }
       },
       staticConfig: game1830,
@@ -382,11 +375,13 @@ describe('rules a title does not spell out', () => {
   const company = { shortName: 'PRR', name: 'Pennsylvania', parValue: 90, totalShares: 10 };
   const flatPrices = [80, 90, 100, 110, 120];
 
-  const run = (staticConfig, ors, priceNow, shares = 50) => getCompanyReturn(company, {
+  const run = (staticConfig, ors, startPrice, shares = 50) => getCompanyReturn(company, {
     dashboardState: {
       ors: { PRR: ors },
-      shareValues: { PRR: priceNow },
+      shareValues: { PRR: startPrice },
       sharePositions: {},
+      startValues: { PRR: startPrice },
+      startPositions: {},
       playerAssets: { Kim: { cash: 0, shares: { PRR: shares } } }
     },
     staticConfig,
@@ -397,25 +392,23 @@ describe('rules a title does not spell out', () => {
   // The reference moves right one on any payout unless a title says otherwise.
   it('moves right one square on a payout when the title names no rule', () => {
     const result = run({ sharePrices: flatPrices, priceMovement: { dividendWithheld: { move: 'left', squares: 1 } } },
-      { or1: 500 }, 100);
+      { or1: 500 }, 90);
 
-    expect(result.baseline.price).toBe(90);
-    expect(result.stockReturnPerShare).toBe(10);
+    expect(result.steps.map((step) => step.move)).toEqual(['right']);
   });
 
   it('moves left one square on a withheld round when the title names no rule', () => {
     const result = run({ sharePrices: flatPrices, priceMovement: { dividendPaid: { move: 'right', squares: 1 } } },
-      { or1: 0 }, 90);
+      { or1: 0 }, 100);
 
-    expect(result.baseline.price).toBe(100);
-    expect(result.stockReturnPerShare).toBe(-10);
+    expect(result.steps.map((step) => step.move)).toEqual(['left']);
   });
 
   it('works at all for a title carrying no price rules whatsoever', () => {
-    const result = run({ sharePrices: flatPrices }, { or1: 500 }, 100);
+    const result = run({ sharePrices: flatPrices }, { or1: 500 }, 90);
 
-    expect(result.baseline.certainty).toBe('exact');
-    expect(result.baseline.price).toBe(90);
+    expect(result.start.price).toBe(90);
+    expect(result.steps.map((step) => step.move)).toEqual(['right']);
   });
 
   // A rule that is written down as moving nothing is a rule, not an absence.
@@ -425,27 +418,25 @@ describe('rules a title does not spell out', () => {
       dividendPaid: { move: 'right', squares: 1 },
       dividendWithheld: { move: 'left', squares: 1 }
     };
-    const result = run({ sharePrices: flatPrices, priceMovement: rules }, { or1: 500 }, 100, 100);
+    const result = run({ sharePrices: flatPrices, priceMovement: rules }, { or1: 500 }, 90, 100);
 
     expect(result.soldOut).toBe(true);
-    expect(result.baseline.price).toBe(90);
     expect(result.steps.every((step) => step.reason !== 'soldOut')).toBe(true);
   });
 
   it('still takes the sold out move up when the title leaves the rule out', () => {
     const result = run({ sharePrices: flatPrices, priceMovement: { dividendPaid: { move: 'right', squares: 1 } } },
-      { or1: 500 }, 110, 100);
+      { or1: 500 }, 90, 100);
 
     expect(result.soldOut).toBe(true);
     expect(result.steps[0]).toMatchObject({ reason: 'soldOut', move: 'up' });
-    expect(result.baseline.price).toBe(90);
   });
 
   it('leaves a small payout alone where the title counts multiples of the price', () => {
     const rules = { dividendPaid: { move: 'right', squares: 'perMultipleOfPrice', maxSquares: 2 } };
     const result = run({ sharePrices: flatPrices, priceMovement: rules }, { or1: 10 }, 100);
 
-    expect(result.baseline.price).toBe(100);
+    expect(result.steps).toEqual([]);
     expect(result.stockReturnPerShare).toBe(0);
   });
 });

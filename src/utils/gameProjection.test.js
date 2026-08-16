@@ -13,6 +13,8 @@ const dashboardState = {
   ors: { PRR: { or1: 100, or2: 200 }, NYC: { or1: 100, or2: 0 } },
   shareValues: { PRR: 126, NYC: 90 },
   sharePositions: { PRR: [1, 9], NYC: [1, 6] },
+  startValues: { PRR: 100, NYC: 90 },
+  startPositions: { PRR: [1, 7], NYC: [1, 6] },
   playerAssets: {
     Kim: { cash: 500, shares: { PRR: 60, NYC: 40 } },
     Sam: { cash: 300, shares: { PRR: 30 } }
@@ -132,6 +134,8 @@ describe('projectNetWorth', () => {
   it('takes the sold out move again at every projected share round', () => {
     const soldOut = {
       ...dashboardState,
+      // Started a row lower, so the repeated upward move has somewhere to go.
+      startPositions: { ...dashboardState.startPositions, PRR: [2, 8] },
       playerAssets: { Kim: { cash: 500, shares: { PRR: 100 } }, Sam: { cash: 300, shares: {} } }
     };
     const rows = project({ dashboardState: soldOut });
@@ -149,12 +153,13 @@ describe('projectNetWorth', () => {
     expect(nycAtEnd).toBeLessThan(rows[2].prices.NYC);
   });
 
-  it('holds a company still when its price could not be explained', () => {
+  it('holds a company still when no starting price was recorded', () => {
     const puzzling = {
       ...dashboardState,
       ors: { PRR: { or1: 100 } },
       shareValues: { PRR: 10, NYC: 90 },
-      sharePositions: { PRR: [7, 0], NYC: [1, 6] }
+      startValues: { NYC: 90 },
+      startPositions: { NYC: [1, 6] }
     };
     const rows = project({ dashboardState: puzzling });
 

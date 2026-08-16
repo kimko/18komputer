@@ -131,6 +131,7 @@ export default function Dashboard() {
             maxOr={maxOr}
             dashboardState={dashboardState}
             updateMaxOr={updateMaxOr}
+            updateDashboardFields={updateDashboardFields}
             setActivePopup={setActivePopup}
             onCompanyClick={showCompanyName}
           />

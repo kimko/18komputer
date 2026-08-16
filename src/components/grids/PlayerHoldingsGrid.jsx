@@ -158,7 +158,7 @@ export default function PlayerHoldingsGrid({
       <Flex justify="center" align="center" mb="4" wrap="wrap" gap="8">
         <Flex gap="4" align="center">
           <Heading as="h3" size="lg" color="teal.400">Player Holdings</Heading>
-          <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => setShowDetails(!showDetails)}>
+          <Button data-testid="player-details-toggle" size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => setShowDetails(!showDetails)}>
             {showDetails ? "Hide Details" : "Details"}
           </Button>
         </Flex>

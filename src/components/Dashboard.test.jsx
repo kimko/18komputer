@@ -98,11 +98,12 @@ describe('Dashboard', () => {
     renderWithChakra(<Dashboard />);
     await screen.findByText('Player Holdings');
     
-    const detailsButton = screen.getByText('Details');
+    const detailsButton = screen.getByTestId('player-details-toggle');
     fireEvent.click(detailsButton);
-    
-    expect(screen.getByText('Hide Details')).toBeInTheDocument();
-    
+
+    expect(detailsButton).toHaveTextContent('Hide Details');
+
+
     // Alice details: share value 200, op income 120
     expect(screen.getAllByText('$200').length).toBeGreaterThan(1);
     expect(screen.getAllByText('$120').length).toBeGreaterThan(1);

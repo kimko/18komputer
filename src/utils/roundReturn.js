@@ -1,4 +1,4 @@
-import { parseCell, cellAt, move, findStartCell } from './stockMarket.js';
+import { cellAt, move, findStartCell } from './stockMarket.js';
 import { getShareValue, getCompanyShareCount, getBankShares, getPlayerShareValue } from './dashboardMath.js';
 
 export const marketFor = (staticConfig) => {
@@ -74,33 +74,9 @@ export function stepPrice(market, position, rules, name, revenue) {
   return step ? step.to : position;
 }
 
-const samePosition = (a, b) => a?.[0] === b?.[0] && a?.[1] === b?.[1];
-
-// The starting square is not recorded, so try every square and keep the ones that land on the price.
-export function findBaselines(market, endPosition, context) {
-  const found = [];
-  market.grid.forEach((row, rowIndex) => {
-    row.forEach((code, colIndex) => {
-      if (!parseCell(code)) return;
-      const start = [rowIndex, colIndex];
-      if (samePosition(walk(market, start, context).position, endPosition)) found.push(start);
-    });
-  });
-  return found;
-}
-
-function summariseBaseline(market, candidates) {
-  if (!candidates.length) return { certainty: 'unexplained', price: null, position: null, range: null };
-
-  const prices = [...new Set(candidates.map((position) => cellAt(market.grid, position).price))].sort((a, b) => a - b);
-  if (prices.length === 1) {
-    return { certainty: 'exact', price: prices[0], position: candidates[0], range: null };
-  }
-
-  // The highest baseline claims the smallest gain, so an uncertain figure errs on the cautious side.
-  const price = prices[prices.length - 1];
-  const position = candidates.find((candidate) => cellAt(market.grid, candidate).price === price);
-  return { certainty: 'approximate', price, position, range: [prices[0], price] };
+export function readStartPrice(dashboardState, shortName) {
+  const recorded = dashboardState?.startValues?.[shortName];
+  return recorded === undefined || recorded === '' ? null : Number(recorded);
 }
 
 export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr, players }) {
@@ -117,7 +93,11 @@ export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr,
   const bankShares = getBankShares(dashboardState, players, shortName);
   const soldOut = bankShares === 0;
 
-  const empty = {
+  const startPrice = readStartPrice(dashboardState, shortName);
+  const startPosition = dashboardState?.startPositions?.[shortName]
+    || (market && startPrice !== null ? findStartCell(market, company.parValue, startPrice) : null);
+
+  const base = {
     shortName,
     name: company.name,
     color: company.color,
@@ -128,29 +108,21 @@ export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr,
     orIncomePerShare,
     stockReturnPerShare: null,
     totalReturnPerShare: null,
-    returnOnBaseline: null,
+    returnOnStart: null,
     steps: [],
-    baseline: { certainty: 'unexplained', price: null, position: null, range: null }
+    start: { price: startPrice, position: startPosition }
   };
 
-  if (!market) return empty;
+  if (startPrice === null) return base;
 
-  const endPosition = dashboardState?.sharePositions?.[shortName]
-    || findStartCell(market, company.parValue, priceNow);
-  if (!endPosition || !cellAt(market.grid, endPosition)) return empty;
-
-  const context = { rounds, soldOut, rules };
-  const baseline = summariseBaseline(market, findBaselines(market, endPosition, context));
-  if (baseline.certainty === 'unexplained') return { ...empty, baseline };
-
-  const stockReturnPerShare = priceNow - baseline.price;
+  const placed = market && startPosition && cellAt(market.grid, startPosition);
+  const stockReturnPerShare = priceNow - startPrice;
   return {
-    ...empty,
-    baseline,
-    steps: walk(market, baseline.position, context).steps,
+    ...base,
+    steps: placed ? walk(market, startPosition, { rounds, soldOut, rules }).steps : [],
     stockReturnPerShare,
     totalReturnPerShare: orIncomePerShare + stockReturnPerShare,
-    returnOnBaseline: baseline.price ? (orIncomePerShare + stockReturnPerShare) / baseline.price : null
+    returnOnStart: startPrice ? (orIncomePerShare + stockReturnPerShare) / startPrice : null
   };
 }
 
@@ -188,22 +160,19 @@ function describeMoves({ steps }) {
 }
 
 export function describeCompany(company) {
-  const { shortName, soldOut, orIncomePerShare, stockReturnPerShare, baseline } = company;
+  const { shortName, soldOut, orIncomePerShare, stockReturnPerShare, start } = company;
   const opening = `${shortName} ${describeRounds(company)}${soldOut ? ' and was sold out' : ''}`;
 
-  if (baseline.certainty === 'unexplained') {
-    return `${opening}. A share collected ${money(orIncomePerShare)} in dividends, but the recorded price `
-      + 'cannot be reached from those rounds, so the price gain is unknown.';
+  if (start.price === null) {
+    return `${opening}. A share collected ${money(orIncomePerShare)} in dividends, but no starting price `
+      + 'was recorded, so the price gain is unknown.';
   }
 
   const priceMove = stockReturnPerShare > 0
     ? `gained ${money(stockReturnPerShare)} in price`
     : (stockReturnPerShare < 0 ? `lost ${money(stockReturnPerShare)} in price` : 'ended where it started');
-  const hedge = baseline.certainty === 'approximate'
-    ? ` Its price before those rounds was somewhere between ${money(baseline.range[0])} and ${money(baseline.range[1])}, so that gain is approximate.`
-    : '';
 
-  return `${opening}, ${describeMoves(company)}. A share collected ${money(orIncomePerShare)} in dividends and ${priceMove}.${hedge}`;
+  return `${opening}, ${describeMoves(company)}. A share collected ${money(orIncomePerShare)} in dividends and ${priceMove}.`;
 }
 
 export function describePlayer(player) {
@@ -216,7 +185,7 @@ export function describePlayer(player) {
 
   return `${name}'s shares collected ${money(incomeReturn)} in dividends and ${priceMove}`
     + `, ${money(totalReturn)} in all${share >= 40 ? `, mostly from ${best.shortName}` : ''}.`
-    + (partial ? ' One holding has a price we could not explain, so the price half is incomplete.' : '');
+    + (partial ? ' One holding has no starting price recorded, so the price half is incomplete.' : '');
 }
 
 export function getPlayerReturns({ dashboardState, staticConfig, maxOr, players, activeCompanies }) {
@@ -252,7 +221,7 @@ export function getPlayerReturns({ dashboardState, staticConfig, maxOr, players,
       cash,
       shareValue,
       netWorth: cash + shareValue + incomeReturn,
-      // A holding whose price we could not explain leaves the stock half of this incomplete.
+      // A holding with no starting price recorded leaves the stock half of this incomplete.
       partial: holdings.some((holding) => holding.stock === null)
     };
   });

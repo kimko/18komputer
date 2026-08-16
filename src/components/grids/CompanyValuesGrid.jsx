@@ -1,17 +1,54 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text } from '@chakra-ui/react';
 import { getShareValue, getCompanyOrTotal, formatCurrency } from '../../utils/dashboardMath.js';
 import CompanyBadge from '../ui/CompanyBadge.jsx';
+import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 
-export default function CompanyValuesGrid({ 
-  activeCompanies, 
-  maxOr, 
-  dashboardState, 
+const BULK_ACTIONS = {
+  ors: {
+    button: 'Set all ORs to zero',
+    heading: 'Set every OR to zero?',
+    body: 'Every operating round already recorded is replaced with zero.',
+    confirm: 'Set all to zero'
+  },
+  prices: {
+    button: 'Set all share prices to zero',
+    heading: 'Clear every share price?',
+    body: 'Share prices and SP start are cleared for every company, back to par value.',
+    confirm: 'Clear all prices'
+  }
+};
+
+export default function CompanyValuesGrid({
+  activeCompanies,
+  maxOr,
+  dashboardState,
   updateMaxOr,
+  updateDashboardFields,
   setActivePopup,
   onCompanyClick
 }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [pendingBulk, setPendingBulk] = useState(null);
+
   if (activeCompanies.length === 0) return null;
+
+  const zeroAllOrs = () => {
+    const zeroed = Object.fromEntries(Array.from({ length: maxOr }, (_, i) => [`or${i + 1}`, 0]));
+    updateDashboardFields({
+      ors: () => Object.fromEntries(activeCompanies.map(c => [c.shortName, { ...zeroed }]))
+    });
+  };
+
+  const clearAllPrices = () => updateDashboardFields({
+    shareValues: {}, sharePositions: {}, startValues: {}, startPositions: {}
+  });
+
+  const applyBulk = () => {
+    if (pendingBulk === 'ors') zeroAllOrs();
+    else clearAllPrices();
+    setPendingBulk(null);
+  };
 
   return (
     <Box mb="8">
@@ -20,13 +57,27 @@ export default function CompanyValuesGrid({
         <Flex gap="1">
           <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => updateMaxOr(maxOr - 1)} disabled={maxOr <= 1}>- OR</Button>
           <Button size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => updateMaxOr(maxOr + 1)}>+ OR</Button>
+          <Button data-testid="company-details-toggle" size="xs" variant="outline" color="white" borderColor="gray.600" onClick={() => setShowDetails(!showDetails)}>
+            {showDetails ? 'Hide Details' : 'Details'}
+          </Button>
         </Flex>
       </Flex>
-      
+
+      {showDetails && (
+        <Flex justify="center" gap="2" mb="4" wrap="wrap">
+          {Object.entries(BULK_ACTIONS).map(([key, action]) => (
+            <Button key={key} size="xs" variant="outline" colorPalette="red" onClick={() => setPendingBulk(key)}>
+              {action.button}
+            </Button>
+          ))}
+        </Flex>
+      )}
+
       <Box overflowX="auto" mb="8">
-        <Grid templateColumns={`80px 100px 80px repeat(${maxOr}, 80px)`} gap="2" alignItems="center" w="max-content" mx="auto">
+        <Grid templateColumns={`80px 100px ${showDetails ? '100px ' : ''}80px repeat(${maxOr}, 80px)`} gap="2" alignItems="center" w="max-content" mx="auto">
           <GridItem></GridItem>
           <GridItem textAlign="center"><Text fontWeight="bold" color="white">Share Price</Text></GridItem>
+          {showDetails && <GridItem textAlign="center"><Text fontWeight="bold" color="white">SP start</Text></GridItem>}
           <GridItem textAlign="center"><Text fontWeight="bold" color="cyan.300">OR Total</Text></GridItem>
           {Array.from({ length: maxOr }).map((_, i) => (
             <GridItem key={i} textAlign="center"><Text fontWeight="bold" color="white">OR {i + 1}</Text></GridItem>
@@ -44,6 +95,13 @@ export default function CompanyValuesGrid({
                   {formatCurrency(getShareValue(dashboardState, activeCompanies, c.shortName))}
                 </Button>
               </GridItem>
+              {showDetails && (
+                <GridItem>
+                  <Button data-testid="sp-start-btn" w="100%" bg="gray.800" _hover={{ bg: 'gray.700' }} color="white" onClick={() => setActivePopup({ type: 'startValue', companyId: c.shortName })}>
+                    {formatCurrency(dashboardState.startValues?.[c.shortName])}
+                  </Button>
+                </GridItem>
+              )}
               <GridItem>
                 <Box w="100%" bg="gray.900" color="cyan.300" textAlign="center" py="2" borderRadius="md" fontWeight="bold">
                   {companyOrTotal > 0 ? formatCurrency(companyOrTotal) : ''}
@@ -63,6 +121,26 @@ export default function CompanyValuesGrid({
           )})}
         </Grid>
       </Box>
+
+      {pendingBulk && (
+        <ModalBackdrop
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulk-action-title"
+          onClose={() => setPendingBulk(null)}
+          textAlign="center"
+        >
+          <Heading id="bulk-action-title" size="md" mb="2" color="red.400">
+            {BULK_ACTIONS[pendingBulk].heading}
+          </Heading>
+          <Text color="gray.300" mb="2" fontSize="sm">{BULK_ACTIONS[pendingBulk].body}</Text>
+          <Text color="gray.500" mb="6" fontSize="xs">This action cannot be undone.</Text>
+          <Flex gap="4">
+            <Button flex="1" variant="outline" color="white" onClick={() => setPendingBulk(null)}>Cancel</Button>
+            <Button flex="1" colorPalette="red" onClick={applyBulk}>{BULK_ACTIONS[pendingBulk].confirm}</Button>
+          </Flex>
+        </ModalBackdrop>
+      )}
     </Box>
   );
 }

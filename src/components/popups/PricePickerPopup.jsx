@@ -163,13 +163,13 @@ function OneDimensionalPicker({ value, options, onChange, onClose }) {
   );
 }
 
-export default function PricePickerPopup({ company, value, position, parValue, options, market, onChange, onClose }) {
+export default function PricePickerPopup({ company, value, position, parValue, options, market, onChange, onClose, title = 'Set final price for' }) {
   const isTwoDimensional = market?.type === '2d' && market.grid?.length > 1;
 
   return (
     <ModalBackdrop onClose={onClose} maxW={isTwoDimensional ? 'lg' : 'sm'}>
       <Flex align="center" gap="2" mb="4">
-        <Text fontWeight="bold" color="white">Set final price for</Text>
+        <Text fontWeight="bold" color="white">{title}</Text>
         <CompanyBadge company={company} px="2" py="1" fontSize="sm" />
       </Flex>
 
