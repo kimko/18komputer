@@ -5,6 +5,8 @@ export default function TrainCard({
   index,
   totalTrains,
   allBonuses,
+  pendingIndex = null,
+  onCancelPending,
   onClear,
   onCopy,
   onToggleExclude,
@@ -17,6 +19,64 @@ export default function TrainCard({
   const stopsSum = train.stops.reduce((s, v) => s + v, 0);
   const bonusSum = (train.bonusStops || []).reduce((s, b) => s + b.val, 0);
   const trainTotal = stopsSum + bonusSum;
+
+  const chips = train.stops.map((stop, idx) => ({
+    key: `reg-${idx}`,
+    node: (
+      <Button
+        size="sm"
+        fontSize="lg"
+        variant="ghost"
+        color="orange.300"
+        aria-label={`Remove stop ${idx + 1}: ${stop}`}
+        onClick={() => onRemoveStop(train.id, idx)}
+        _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+      >
+        {stop}
+      </Button>
+    )
+  }));
+
+  if (pendingIndex !== null) {
+    chips.splice(pendingIndex, 0, {
+      key: 'pending-slot',
+      node: (
+        <Button
+          size="sm"
+          fontSize="lg"
+          variant="outline"
+          color="orange.300"
+          borderStyle="dashed"
+          borderColor="orange.300"
+          minW="12"
+          aria-label="Cancel replacing this stop"
+          onClick={onCancelPending}
+          _hover={{ bg: 'whiteAlpha.200' }}
+        >
+          {' '}
+        </Button>
+      )
+    });
+  }
+
+  (train.bonusStops || []).forEach((stop, idx) => {
+    chips.push({
+      key: `bonus-${idx}`,
+      node: (
+        <Button
+          size="sm"
+          fontSize="lg"
+          variant="ghost"
+          color="cyan.400"
+          aria-label={`Remove bonus stop ${stop.val}`}
+          onClick={() => onRemoveBonusStop(train.id, idx)}
+          _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
+        >
+          {stop.val}({stop.label})
+        </Button>
+      )
+    });
+  });
 
   return (
     <Box 
@@ -73,37 +133,11 @@ export default function TrainCard({
           </Text>
         </Heading>
         <Flex wrap="wrap" gap="1" align="center" minH="40px">
-          {train.stops.length === 0 && (!train.bonusStops || train.bonusStops.length === 0) && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
-          {train.stops.map((stop, idx) => (
-            <Flex key={`reg-${idx}`} align="center">
-              <Button
-                size="sm"
-                fontSize="lg"
-                variant="ghost"
-                color="orange.300"
-                aria-label={`Remove stop ${stop}`}
-                onClick={() => onRemoveStop(train.id, idx)}
-                _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
-              >
-                {stop}
-              </Button>
-              {(idx < train.stops.length - 1 || (train.bonusStops && train.bonusStops.length > 0)) && <Text color="gray.600" mx="1" fontSize="lg">+</Text>}
-            </Flex>
-          ))}
-          {train.bonusStops && train.bonusStops.map((stop, idx) => (
-            <Flex key={`bonus-${idx}`} align="center">
-              <Button
-                size="sm"
-                fontSize="lg"
-                variant="ghost"
-                color="cyan.400"
-                aria-label={`Remove bonus stop ${stop.val}`}
-                onClick={() => onRemoveBonusStop(train.id, idx)}
-                _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
-              >
-                {stop.val}({stop.label})
-              </Button>
-              {idx < train.bonusStops.length - 1 && <Text color="gray.600" mx="1" fontSize="lg">+</Text>}
+          {chips.length === 0 && <Text color="gray.500" fontSize="sm">No stops added.</Text>}
+          {chips.map((chip, idx) => (
+            <Flex key={chip.key} align="center">
+              {chip.node}
+              {idx < chips.length - 1 && <Text color="gray.600" mx="1" fontSize="lg">+</Text>}
             </Flex>
           ))}
         </Flex>

@@ -25,6 +25,10 @@ vi.mock('../data/games/1817.json', () => ({
   default: { id: '1817', name: '1817', corporateStructures: [0, 1, 2], maxPlayerHolding: 60, allowsHalfPay: true }
 }));
 
+vi.mock('../data/games/1824.json', () => ({
+  default: { id: '1824', name: '1824', corporateStructures: [], revenueBonuses: [{ label: 'Port', adds: [10] }] }
+}));
+
 const renderWithChakra = (ui) => {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -407,6 +411,155 @@ describe('RevenueCalculator Component', () => {
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.queryByText('10%')).not.toBeInTheDocument();
     expect(screen.getByText('$20')).toBeInTheDocument();
+  });
+
+  describe('replacing a stop in place', () => {
+    const GAP_LABEL = 'Cancel replacing this stop';
+
+    const route = () => screen.getAllByRole('button', { name: /^Remove stop \d/ }).map(b => b.textContent);
+    const tapValue = (val) => fireEvent.click(screen.getByRole('button', { name: val }));
+    const tapStop = (position, val) => fireEvent.click(screen.getByRole('button', { name: `Remove stop ${position}: ${val}` }));
+
+    const openCalculator = async () => {
+      renderWithChakra(<RevenueCalculator />);
+      await screen.findByText(/Grand Total/i);
+      fireEvent.click(screen.getByRole('button', { name: /PRR/i }));
+    };
+
+    const bonusGame = () => ({
+      id: 'inst_123',
+      gameId: '1824',
+      players: ['Alice', 'Bob'],
+      state: {
+        activeCompanies: [
+          { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 }
+        ],
+        companyORs: []
+      }
+    });
+
+    it('puts the next stop tapped where the deleted one was', async () => {
+      await openCalculator();
+
+      ['10', '20', '30', '20'].forEach(tapValue);
+      expect(route()).toEqual(['10', '20', '30', '20']);
+
+      tapStop(3, 30);
+      expect(route()).toEqual(['10', '20', '20']);
+
+      tapValue('40');
+      expect(route()).toEqual(['10', '20', '40', '20']);
+      expect(screen.getByText(/Grand Total: \$90/)).toBeInTheDocument();
+    });
+
+    it('goes back to adding at the end once the freed place is used', async () => {
+      await openCalculator();
+
+      ['10', '20', '30', '20'].forEach(tapValue);
+      tapStop(3, 30);
+      tapValue('40');
+      tapValue('50');
+
+      expect(route()).toEqual(['10', '20', '40', '20', '50']);
+    });
+
+    it('marks the freed place, and gives it up when the mark is tapped', async () => {
+      await openCalculator();
+
+      ['10', '20', '30'].forEach(tapValue);
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+
+      tapStop(2, 20);
+      expect(screen.getByLabelText(GAP_LABEL)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText(GAP_LABEL));
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+
+      tapValue('40');
+      expect(route()).toEqual(['10', '30', '40']);
+    });
+
+    it('gives up the freed place when the next thing tapped is not a stop', async () => {
+      await openCalculator();
+
+      ['10', '20', '30'].forEach(tapValue);
+      tapStop(2, 20);
+      expect(screen.getByLabelText(GAP_LABEL)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /^Copy$/i }));
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+    });
+
+    it('moves the mark when a second stop is deleted first', async () => {
+      await openCalculator();
+
+      ['10', '20', '30', '20'].forEach(tapValue);
+      tapStop(3, 30);
+      tapStop(1, 10);
+      expect(route()).toEqual(['20', '20']);
+
+      tapValue('50');
+      expect(route()).toEqual(['50', '20', '20']);
+    });
+
+    it('still adds at the end when the deleted stop was the last one', async () => {
+      await openCalculator();
+
+      ['10', '20'].forEach(tapValue);
+      tapStop(2, 20);
+      tapValue('30');
+
+      expect(route()).toEqual(['10', '30']);
+    });
+
+    it('does not carry a freed place over to another company', async () => {
+      mockApi.getGame.mockResolvedValue({
+        id: 'inst_123',
+        gameId: '1830',
+        players: ['Alice', 'Bob'],
+        state: {
+          activeCompanies: [
+            { shortName: 'PRR', name: 'Pennsylvania Railroad', color: '#ff0000', parValue: 67 },
+            { shortName: 'NYC', name: 'New York Central', color: '#000000', parValue: 67 }
+          ],
+          companyORs: []
+        }
+      });
+      await openCalculator();
+
+      ['10', '20', '30'].forEach(tapValue);
+      tapStop(2, 20);
+      expect(screen.getByLabelText(GAP_LABEL)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /NYC/i }));
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+    });
+
+    it('leaves bonus stops alone, and they give up a freed place', async () => {
+      mockApi.getGame.mockResolvedValue(bonusGame());
+      await openCalculator();
+
+      tapValue('10');
+      tapValue('20');
+      fireEvent.click(screen.getByRole('button', { name: '10(P)' }));
+      expect(screen.getByLabelText('Remove bonus stop 10')).toBeInTheDocument();
+
+      // A deleted bonus stop holds nothing open, so the next bonus goes to the end
+      fireEvent.click(screen.getByLabelText('Remove bonus stop 10'));
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+
+      // A bonus tapped after deleting a stop is added at the end, and gives the place up
+      tapStop(1, 10);
+      expect(screen.getByLabelText(GAP_LABEL)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: '10(P)' }));
+
+      expect(screen.queryByLabelText(GAP_LABEL)).not.toBeInTheDocument();
+      expect(route()).toEqual(['20']);
+      expect(screen.getByLabelText('Remove bonus stop 10')).toBeInTheDocument();
+
+      tapValue('30');
+      expect(route()).toEqual(['20', '30']);
+    });
   });
 
   it('offers no structure buttons when the game only has one', async () => {

@@ -12,11 +12,18 @@ import { getCompanyHoldings } from '../utils/dashboardMath.js';
 import { allowsHalfPay } from '../utils/payoutMath.js';
 import { toReceiptTrain } from '../services/printer/receiptLayout.js';
 
+function withStopAdded(stops, val, slotIndex) {
+  if (slotIndex === null || slotIndex > stops.length) return [...stops, val];
+  return [...stops.slice(0, slotIndex), val, ...stops.slice(slotIndex)];
+}
+
 export default function RevenueCalculator() {
   const [match, params] = useRoute('/game/:id/calculator');
   const { loading, gameInstance, updateGameStateDebounced } = useGameData(params?.id);
-  
+
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  // Screen only: it is not part of the route, so it stays out of the saved game and the receipt.
+  const [pendingSlot, setPendingSlot] = useState(null);
 
   // Auto-select first active company on load
   useEffect(() => {
@@ -52,6 +59,51 @@ export default function RevenueCalculator() {
       [selectedCompanyId]: { ...currentCompanyState, ...updates }
     };
     updateGameStateDebounced({ calculatorState: nextCompanyStates });
+  };
+
+  const mapTrain = (id, fn) => updateCompanyState({ trains: trains.map(t => t.id === id ? fn(t) : t) });
+
+  const handleClear = (id) => {
+    setPendingSlot(null);
+    mapTrain(id, t => ({ ...t, stops: [], bonusStops: [] }));
+  };
+
+  const handleCopy = (tCopy) => {
+    setPendingSlot(null);
+    updateCompanyState({
+      trains: [...trains, { id: Date.now() + Math.random(), stops: [...tCopy.stops], bonusStops: [...(tCopy.bonusStops || [])] }]
+    });
+  };
+
+  const handleToggleExclude = (id) => {
+    setPendingSlot(null);
+    mapTrain(id, t => ({ ...t, isExcluded: !t.isExcluded }));
+  };
+
+  const handleRemoveTrain = (id) => {
+    setPendingSlot(null);
+    updateCompanyState({ trains: trains.filter(t => t.id !== id) });
+  };
+
+  const handleRemoveStop = (id, idxToRemove) => {
+    setPendingSlot({ trainId: id, index: idxToRemove });
+    mapTrain(id, t => ({ ...t, stops: t.stops.filter((_, idx) => idx !== idxToRemove) }));
+  };
+
+  const handleRemoveBonusStop = (id, idxToRemove) => {
+    setPendingSlot(null);
+    mapTrain(id, t => ({ ...t, bonusStops: t.bonusStops.filter((_, idx) => idx !== idxToRemove) }));
+  };
+
+  const handleAddStop = (id, val) => {
+    const slotIndex = pendingSlot?.trainId === id ? pendingSlot.index : null;
+    setPendingSlot(null);
+    mapTrain(id, t => ({ ...t, stops: withStopAdded(t.stops, val, slotIndex) }));
+  };
+
+  const handleAddBonusStop = (id, val, label) => {
+    setPendingSlot(null);
+    mapTrain(id, t => ({ ...t, bonusStops: [...(t.bonusStops || []), { val, label }] }));
   };
 
   const setTotalShares = (val) => {
@@ -118,7 +170,7 @@ export default function RevenueCalculator() {
                     outlineColor="white"
                     outlineOffset="2px"
                     _hover={{ outline: '2px solid', outlineColor: 'whiteAlpha.500', outlineOffset: '2px' }}
-                    onClick={() => setSelectedCompanyId(c.shortName)}
+                    onClick={() => { setPendingSlot(null); setSelectedCompanyId(c.shortName); }}
                   >
                     {c.shortName}
                   </Button>
@@ -136,14 +188,16 @@ export default function RevenueCalculator() {
               index={i}
               totalTrains={trains.length}
               allBonuses={allBonuses}
-              onClear={(id) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, stops: [], bonusStops: [] } : t) })}
-              onCopy={(tCopy) => updateCompanyState({ trains: [...trains, { id: Date.now() + Math.random(), stops: [...tCopy.stops], bonusStops: [...tCopy.bonusStops] }] })}
-              onToggleExclude={(id) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, isExcluded: !t.isExcluded } : t) })}
-              onRemove={(id) => updateCompanyState({ trains: trains.filter(t => t.id !== id) })}
-              onRemoveStop={(id, idxToRemove) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, stops: t.stops.filter((_, idx) => idx !== idxToRemove) } : t) })}
-              onRemoveBonusStop={(id, idxToRemove) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, bonusStops: t.bonusStops.filter((_, idx) => idx !== idxToRemove) } : t) })}
-              onAddStop={(id, val) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, stops: [...t.stops, val] } : t) })}
-              onAddBonusStop={(id, val, label) => updateCompanyState({ trains: trains.map(t => t.id === id ? { ...t, bonusStops: [...(t.bonusStops || []), { val, label }] } : t) })}
+              pendingIndex={pendingSlot?.trainId === train.id ? pendingSlot.index : null}
+              onCancelPending={() => setPendingSlot(null)}
+              onClear={handleClear}
+              onCopy={handleCopy}
+              onToggleExclude={handleToggleExclude}
+              onRemove={handleRemoveTrain}
+              onRemoveStop={handleRemoveStop}
+              onRemoveBonusStop={handleRemoveBonusStop}
+              onAddStop={handleAddStop}
+              onAddBonusStop={handleAddBonusStop}
             />
           ))}
         </VStack>
