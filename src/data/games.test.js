@@ -23,6 +23,14 @@ function validate(file, data) {
   // Absent means the title has no half pay rule, so the flag only ever turns it on.
   if ('allowsHalfPay' in data && data.allowsHalfPay !== true) fail('allowsHalfPay must be true or absent');
 
+  // The most of one company a single player may hold. Absent means the usual 60%.
+  if ('maxPlayerHolding' in data) {
+    const held = data.maxPlayerHolding;
+    if (typeof held !== 'number' || held % 10 !== 0 || held < 10 || held > 100) {
+      fail(`maxPlayerHolding "${held}" must be a multiple of 10 between 10 and 100`);
+    }
+  }
+
   if (!isNumberArray(data.revenueStops)) fail('revenueStops must be an array of numbers');
   if (data.parValues && !isNumberArray(data.parValues)) fail('parValues must be an array of numbers');
   if (data.sharePrices && !isNumberArray(data.sharePrices)) fail('sharePrices must be an array of numbers');
@@ -206,6 +214,39 @@ describe('Game Data Schema Validation', () => {
       expect(validate('x.json', { ...game, allowsHalfPay: 'yes' }))
         .toContain('x.json: allowsHalfPay must be true or absent');
       expect(validate('x.json', game)).toEqual([]);
+    });
+
+    it('catches a holding limit that is not a whole number of tenths', () => {
+      const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+      const limit = (maxPlayerHolding) => validate('x.json', { ...game, maxPlayerHolding });
+
+      expect(limit(65)).toContain('x.json: maxPlayerHolding "65" must be a multiple of 10 between 10 and 100');
+      expect(limit(110)).toContain('x.json: maxPlayerHolding "110" must be a multiple of 10 between 10 and 100');
+      expect(limit(0)).toContain('x.json: maxPlayerHolding "0" must be a multiple of 10 between 10 and 100');
+      expect(limit('60')).toContain('x.json: maxPlayerHolding "60" must be a multiple of 10 between 10 and 100');
+
+      expect(limit(60)).toEqual([]);
+      expect(limit(100)).toEqual([]);
+      expect(validate('x.json', game)).toEqual([]);
+    });
+  });
+
+  describe('which titles let one player hold a whole company', () => {
+    const read = (id) => JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
+    const wholeCompanyTitles = ['1824', '1824_2p', '1824_3p', '1871', '1880', '1894'];
+
+    it('lets one player take the lot in 1824, 1871, 1880 and 1894', () => {
+      wholeCompanyTitles.forEach((id) => expect(read(id).maxPlayerHolding).toBe(100));
+    });
+
+    // scripts/build-games.js rewrites a file from the .txt alone, so a regeneration would quietly
+    // drop this hand-added field. Naming every title here is what makes that show up as a failure.
+    it('stops every other title at 60', () => {
+      const rest = files
+        .map((f) => f.replace(/\.json$/, ''))
+        .filter((id) => !wholeCompanyTitles.includes(id));
+
+      expect(rest.filter((id) => read(id).maxPlayerHolding !== 60)).toEqual([]);
     });
   });
 

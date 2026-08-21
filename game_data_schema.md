@@ -21,6 +21,7 @@ interface GameData {
   revenueBonuses: RevenueBonus[];
   hasPullmans?: boolean;  // Injected for 1822 family games
   allowsHalfPay?: boolean; // true when "payout:" is not PayoutOption.Full; absent means the title has no half pay
+  maxPlayerHolding?: number; // most of one company a single player may hold; absent means the usual 60
   stockMarket?: StockMarket; // absent means the title has no grid, so sharePrices is the whole market
   priceMovement?: PriceMovement; // absent means we have no reference for the title
   // Other properties like assets, corporateStructures can be added as needed.
@@ -120,4 +121,5 @@ To ensure we understand how the parsed JSON data drives the frontend application
 | `trains` | **C) Results** | Used to track company train rosters and their associated costs (if train purchasing is eventually tracked). |
 | `allowsHalfPay` | **B) Revenue Calculator** | Shows the Full Pay / Half Pay buttons. Absent means the title has no half pay rule, so the buttons are hidden. Withholding is a separate operation and has no button either way, since it pays nothing per share. |
 | `maxOr` | **C) Results** | Determines the number of Operating Round columns (e.g., OR1, OR2, OR3) displayed in the Company ORs Table. |
-| `ownership` | **A) Raise Funds** & **C) Results** | Used to validate or distribute share percentages when assigning ownership in the Player Assets table. |
+| `ownership` | *(nothing yet)* | Declared here from the outset but never implemented: `scripts/parse-games.js` does not emit it, no game JSON carries it, and no code reads it. The job it describes is done by `maxPlayerHolding` and `corporateStructures`. |
+| `maxPlayerHolding` | **C) Results** | The most of one company a single player may hold, read by `src/utils/corporateStructures.js` and turned into the percentages the Share Count popup offers. 60 on almost every title; 100 on 1824, 1871, 1880 and 1894, which let one player take a company outright. Hand-added rather than parsed, so `scripts/build-games.js` would drop it on a regeneration; `src/data/games.test.js` names every title to catch that. A structure is never capped below one share, so 1817's 2-share company stays at 100 despite the title's 60. |

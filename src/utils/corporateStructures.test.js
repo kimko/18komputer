@@ -8,6 +8,8 @@ import {
 } from './corporateStructures.js';
 
 const oneEightSeventeen = { corporateStructures: [0, 1, 2], maxPlayerHolding: 60 };
+// 1824 names its structure rather than leaving the list empty, and lets one player hold the lot.
+const eighteenTwentyFour = { corporateStructures: [0], maxPlayerHolding: 100 };
 
 describe('getStructures', () => {
   it('maps 1817 ids to a 10, 5 and 2 share structure', () => {
@@ -32,6 +34,21 @@ describe('getStructures', () => {
 
   it('drops ids it does not recognise', () => {
     expect(getStructures({ corporateStructures: [0, 7] }).map(s => s.totalShares)).toEqual([10]);
+  });
+
+  it('uses the game own maximum holding for a named structure too', () => {
+    expect(getStructures(eighteenTwentyFour)[0].maxPlayerHolding).toBe(100);
+  });
+
+  it('carries a whole-company title through every structure it names', () => {
+    const config = { corporateStructures: [0, 1, 2], maxPlayerHolding: 100 };
+    expect(getStructures(config).map(s => s.maxPlayerHolding)).toEqual([100, 100, 100]);
+  });
+
+  it('never caps a structure below a single share', () => {
+    // One share of a 2-share company is the whole company, so 1817's 60% cannot apply to it.
+    expect(getStructures(oneEightSeventeen)[2].maxPlayerHolding).toBe(100);
+    expect(getStructures({ corporateStructures: [1], maxPlayerHolding: 10 })[0].maxPlayerHolding).toBe(20);
   });
 });
 
@@ -91,6 +108,11 @@ describe('canUseStructure', () => {
     expect(canUseStructure(fiveShare, [60, 40])).toBe(true);
     expect(canUseStructure(twoShare, [60, 40])).toBe(false);
   });
+
+  it('allows one player the whole company where the title does', () => {
+    expect(canUseStructure(getStructures(eighteenTwentyFour)[0], [100])).toBe(true);
+    expect(canUseStructure(tenShare, [100])).toBe(false);
+  });
 });
 
 describe('getHoldingOptions', () => {
@@ -119,5 +141,17 @@ describe('getHoldingOptions', () => {
 
   it('offers only zero when the bank has nothing left', () => {
     expect(getHoldingOptions(tenShare, 0)).toEqual([0]);
+  });
+
+  describe('on a title that lets one player hold the whole company', () => {
+    const [tenShareOf1824] = getStructures(eighteenTwentyFour);
+
+    it('offers tens all the way to 100 percent', () => {
+      expect(getHoldingOptions(tenShareOf1824, 100)).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+    });
+
+    it('still stops at what the bank has left', () => {
+      expect(getHoldingOptions(tenShareOf1824, 40)).toEqual([0, 10, 20, 30, 40]);
+    });
   });
 });

@@ -117,7 +117,7 @@
     340,
     350
   ],
-  "maxPlayerHolding": 60,
+  "maxPlayerHolding": 100,
   "stockMarket": {
     "type": "2d",
     "grid": [
