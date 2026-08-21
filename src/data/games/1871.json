@@ -89,6 +89,11 @@
       "name": "Hunter River Branch",
       "shortName": "HRB",
       "color": "#008f4f"
+    },
+    {
+      "name": "the Pier",
+      "shortName": "P",
+      "color": "#00b5ad"
     }
   ],
   "trains": [
