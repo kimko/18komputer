@@ -1,3 +1,5 @@
+import { trainsRevenue } from './trainMath.js';
+
 export const formatCurrency = (val) => {
   if (val === undefined || val === null || isNaN(Number(val))) return '';
   return `$${Number(val).toLocaleString()}`;
@@ -79,12 +81,5 @@ export const getBankShares = (dashboardState, players, companyId) => {
 export const getCalculatorGrandTotal = (gameInstance, companyId) => {
   const calcState = gameInstance?.state?.calculatorState?.[companyId];
   if (!calcState || !calcState.trains) return 0;
-  
-  return calcState.trains
-    .filter(t => !t.isExcluded)
-    .reduce((sum, t) => {
-      const stopsSum = t.stops.reduce((s, v) => s + v, 0);
-      const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
-      return sum + stopsSum + bonusSum;
-    }, 0);
+  return trainsRevenue(calcState.trains);
 };

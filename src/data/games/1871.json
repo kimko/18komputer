@@ -297,5 +297,14 @@
       "move": null,
       "squares": 0
     }
-  }
+  },
+  "revenueBonuses": [
+    {
+      "label": "+",
+      "adds": [
+        10,
+        20
+      ]
+    }
+  ]
 }

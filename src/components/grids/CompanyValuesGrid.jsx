@@ -1,20 +1,45 @@
 import { Fragment, useState } from 'react';
 import { Box, Flex, Heading, Button, Grid, GridItem, Text } from '@chakra-ui/react';
 import { getShareValue, getCompanyOrTotal, formatCurrency } from '../../utils/dashboardMath.js';
+import { solveStartPrices, toStartFields } from '../../utils/startPrice.js';
+import { marketFor } from '../../utils/roundReturn.js';
 import CompanyBadge from '../ui/CompanyBadge.jsx';
 import ModalBackdrop from '../ui/ModalBackdrop.jsx';
 
 const BULK_ACTIONS = {
+  populate: {
+    button: 'Populate all ORs',
+    palette: 'teal',
+    heading: 'Fill every OR from the calculator?',
+    body: ({ runCount, companyCount, maxOr }) =>
+      `The last run calculated for ${runCount} of ${companyCount} companies is written into all `
+      + `${maxOr} operating rounds, replacing anything already recorded. A company nobody has run `
+      + 'is left as it is.',
+    confirm: 'Populate'
+  },
+  startPrices: {
+    button: 'Set SP start',
+    palette: 'teal',
+    heading: 'Work out every SP start?',
+    body: ({ placed, companyCount, approximate }) =>
+      `Replaying the recorded rounds backwards places ${placed} of ${companyCount} companies`
+      + `${approximate ? `, ${approximate} of them on more than one square` : ''}. `
+      + 'A company whose price no square explains is left as it is, and anything already set is '
+      + 'overwritten.',
+    confirm: 'Work them out'
+  },
   ors: {
     button: 'Set all ORs to zero',
+    palette: 'red',
     heading: 'Set every OR to zero?',
-    body: 'Every operating round already recorded is replaced with zero.',
+    body: () => 'Every operating round already recorded is replaced with zero.',
     confirm: 'Set all to zero'
   },
   prices: {
     button: 'Set all share prices to zero',
+    palette: 'red',
     heading: 'Clear every share price?',
-    body: 'Share prices and SP start are cleared for every company, back to par value.',
+    body: () => 'Share prices and SP start are cleared for every company, back to par value.',
     confirm: 'Clear all prices'
   }
 };
@@ -23,6 +48,9 @@ export default function CompanyValuesGrid({
   activeCompanies,
   maxOr,
   dashboardState,
+  staticConfig,
+  players = [],
+  calculatorTotals = {},
   updateMaxOr,
   updateDashboardFields,
   setActivePopup,
@@ -33,6 +61,15 @@ export default function CompanyValuesGrid({
 
   if (activeCompanies.length === 0) return null;
 
+  // A run of nothing is what an untouched calculator looks like, so it counts as no run at all.
+  const companiesWithRuns = activeCompanies.filter(c => Number(calculatorTotals[c.shortName]) > 0);
+
+  // With no market to walk there is nothing to work backwards along, so the button is not offered.
+  const hasMarket = Boolean(marketFor(staticConfig));
+  const solved = hasMarket
+    ? solveStartPrices({ dashboardState, staticConfig, maxOr, players, activeCompanies })
+    : [];
+
   const zeroAllOrs = () => {
     const zeroed = Object.fromEntries(Array.from({ length: maxOr }, (_, i) => [`or${i + 1}`, 0]));
     updateDashboardFields({
@@ -40,15 +77,42 @@ export default function CompanyValuesGrid({
     });
   };
 
+  const populateAllOrs = () => updateDashboardFields({
+    ors: (current = {}) => companiesWithRuns.reduce((next, c) => {
+      const total = Number(calculatorTotals[c.shortName]);
+      const filled = Object.fromEntries(Array.from({ length: maxOr }, (_, i) => [`or${i + 1}`, total]));
+      return { ...next, [c.shortName]: filled };
+    }, { ...current })
+  });
+
+  const setAllStartPrices = () => updateDashboardFields(toStartFields(solved, dashboardState));
+
   const clearAllPrices = () => updateDashboardFields({
     shareValues: {}, sharePositions: {}, startValues: {}, startPositions: {}
   });
 
+  const BULK_APPLY = {
+    populate: populateAllOrs,
+    startPrices: setAllStartPrices,
+    ors: zeroAllOrs,
+    prices: clearAllPrices
+  };
+
   const applyBulk = () => {
-    if (pendingBulk === 'ors') zeroAllOrs();
-    else clearAllPrices();
+    BULK_APPLY[pendingBulk]?.();
     setPendingBulk(null);
   };
+
+  const bulkContext = {
+    runCount: companiesWithRuns.length,
+    companyCount: activeCompanies.length,
+    placed: solved.filter(s => s.found).length,
+    approximate: solved.filter(s => s.approximate).length,
+    maxOr
+  };
+
+  const bulkActions = Object.entries(BULK_ACTIONS)
+    .filter(([key]) => key !== 'startPrices' || hasMarket);
 
   return (
     <Box mb="8">
@@ -65,8 +129,15 @@ export default function CompanyValuesGrid({
 
       {showDetails && (
         <Flex justify="center" gap="2" mb="4" wrap="wrap">
-          {Object.entries(BULK_ACTIONS).map(([key, action]) => (
-            <Button key={key} size="xs" variant="outline" colorPalette="red" onClick={() => setPendingBulk(key)}>
+          {bulkActions.map(([key, action]) => (
+            <Button
+              key={key}
+              size="xs"
+              variant="outline"
+              colorPalette={action.palette}
+              onClick={() => setPendingBulk(key)}
+              disabled={key === 'populate' && companiesWithRuns.length === 0}
+            >
               {action.button}
             </Button>
           ))}
@@ -130,14 +201,16 @@ export default function CompanyValuesGrid({
           onClose={() => setPendingBulk(null)}
           textAlign="center"
         >
-          <Heading id="bulk-action-title" size="md" mb="2" color="red.400">
+          <Heading id="bulk-action-title" size="md" mb="2" color={`${BULK_ACTIONS[pendingBulk].palette}.400`}>
             {BULK_ACTIONS[pendingBulk].heading}
           </Heading>
-          <Text color="gray.300" mb="2" fontSize="sm">{BULK_ACTIONS[pendingBulk].body}</Text>
+          <Text color="gray.300" mb="2" fontSize="sm">{BULK_ACTIONS[pendingBulk].body(bulkContext)}</Text>
           <Text color="gray.500" mb="6" fontSize="xs">This action cannot be undone.</Text>
           <Flex gap="4">
             <Button flex="1" variant="outline" color="white" onClick={() => setPendingBulk(null)}>Cancel</Button>
-            <Button flex="1" colorPalette="red" onClick={applyBulk}>{BULK_ACTIONS[pendingBulk].confirm}</Button>
+            <Button flex="1" colorPalette={BULK_ACTIONS[pendingBulk].palette} onClick={applyBulk}>
+              {BULK_ACTIONS[pendingBulk].confirm}
+            </Button>
           </Flex>
         </ModalBackdrop>
       )}

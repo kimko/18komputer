@@ -1,4 +1,9 @@
 import { Box, Button, Center, Flex, Heading, Text, VStack, SimpleGrid } from '@chakra-ui/react';
+import { bonusKey, bonusValue, bonusesLeft, trainStopsTotal, trainBonusTotal } from '../../utils/trainMath.js';
+
+// A bonus with no adds list is worth something the train works out for itself, so it gets one
+// button rather than one per amount.
+const buttonsFor = (bonus) => (bonus.adds?.length ? bonus.adds : [null]);
 
 export default function TrainCard({
   train,
@@ -16,9 +21,7 @@ export default function TrainCard({
   onAddStop,
   onAddBonusStop
 }) {
-  const stopsSum = train.stops.reduce((s, v) => s + v, 0);
-  const bonusSum = (train.bonusStops || []).reduce((s, b) => s + b.val, 0);
-  const trainTotal = stopsSum + bonusSum;
+  const trainTotal = trainStopsTotal(train) + trainBonusTotal(train);
 
   const chips = train.stops.map((stop, idx) => ({
     key: `reg-${idx}`,
@@ -60,6 +63,7 @@ export default function TrainCard({
   }
 
   (train.bonusStops || []).forEach((stop, idx) => {
+    const val = bonusValue(stop, train.stops);
     chips.push({
       key: `bonus-${idx}`,
       node: (
@@ -68,11 +72,11 @@ export default function TrainCard({
           fontSize="lg"
           variant="ghost"
           color="cyan.400"
-          aria-label={`Remove bonus stop ${stop.val}`}
+          aria-label={`Remove bonus stop ${val}`}
           onClick={() => onRemoveBonusStop(train.id, idx)}
           _hover={{ bg: 'whiteAlpha.200', textDecoration: 'line-through' }}
         >
-          {stop.val}({stop.label})
+          {val}({stop.label})
         </Button>
       )
     });
@@ -144,18 +148,18 @@ export default function TrainCard({
       </VStack>
 
       <SimpleGrid columns={5} gap="2" mt="4">
-        {allBonuses.map(bonus => 
-          bonus.adds.map((val) => (
-            <Button 
-              key={`b-${bonus.label}-${val}`} 
-              size="lg" 
-              variant="outline" 
+        {allBonuses.map(bonus =>
+          buttonsFor(bonus).map((val) => (
+            <Button
+              key={`b-${bonus.label}-${val}`}
+              size="lg"
+              variant="outline"
               color="cyan.300"
               colorPalette="cyan"
-              onClick={() => onAddBonusStop(train.id, val, bonus.label[0])}
-              disabled={train.isExcluded}
+              onClick={() => onAddBonusStop(train.id, bonus, val)}
+              disabled={train.isExcluded || bonusesLeft(bonus, train) < 1}
             >
-              {val}({bonus.label[0]})
+              {val === null ? bonus.label : `${val}(${bonusKey(bonus)})`}
             </Button>
           ))
         )}

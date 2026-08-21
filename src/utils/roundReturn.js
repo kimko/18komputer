@@ -1,5 +1,11 @@
 import { cellAt, move, findStartCell } from './stockMarket.js';
-import { getShareValue, getCompanyShareCount, getBankShares, getPlayerShareValue } from './dashboardMath.js';
+import {
+  getShareValue,
+  getCompanyShareCount,
+  getBankShares,
+  getPlayerShareValue,
+  getCompanyHoldings
+} from './dashboardMath.js';
 
 export const marketFor = (staticConfig) => {
   if (staticConfig?.stockMarket) return staticConfig.stockMarket;
@@ -37,19 +43,39 @@ function squaresFor(rule, revenue, price) {
   return multiples < 1 ? 0 : Math.min(multiples, rule.maxSquares || multiples);
 }
 
-function applyRule(market, position, rule, revenue, reason) {
+// A few titles pay a sold out company more than the usual one square, depending on where it stands
+// or on who holds it. 1894 adds one square when a player holds most of the company and another
+// when it is still in the grey zone, so a single sold out round can carry it three squares up.
+// The conditions are read against the square the company is leaving, not the one it arrives on.
+function extraSquaresFor(rule, market, position, context) {
+  return (rule.extraSquares || []).reduce((total, extra) => {
+    const squares = Number(extra.squares) || 0;
+    if (extra.when === 'inZone') {
+      return total + (cellAt(market.grid, position)?.zone === extra.zone ? squares : 0);
+    }
+    if (extra.when === 'playerHoldsAtLeast') {
+      const most = Math.max(0, ...(context?.holdings || []));
+      return total + (most >= Number(extra.percent) ? squares : 0);
+    }
+    return total;
+  }, 0);
+}
+
+function applyRule(market, position, rule, revenue, reason, context) {
   if (!rule?.move) return null;
-  const squares = squaresFor(rule, revenue, cellAt(market.grid, position)?.price);
-  if (squares < 1) return null;
+  const base = squaresFor(rule, revenue, cellAt(market.grid, position)?.price);
+  if (base < 1) return null;
+  const squares = base + extraSquaresFor(rule, market, position, context);
 
   let next = position;
   for (let step = 0; step < squares; step += 1) next = move(market, next, rule.move);
   return { reason, move: rule.move, squares, revenue, from: position, to: next };
 }
 
-export function walk(market, start, { rounds, soldOut, rules }) {
+export function walk(market, start, { rounds, soldOut, rules, holdings }) {
   let position = start;
   const steps = [];
+  const context = { holdings };
 
   const record = (step) => {
     if (!step) return;
@@ -57,20 +83,20 @@ export function walk(market, start, { rounds, soldOut, rules }) {
     position = step.to;
   };
 
-  if (soldOut) record(applyRule(market, position, ruleFor(rules, 'soldOut'), 0, 'soldOut'));
+  if (soldOut) record(applyRule(market, position, ruleFor(rules, 'soldOut'), 0, 'soldOut', context));
 
   rounds.forEach((revenue, index) => {
     if (revenue === null) return;
     const rule = ruleFor(rules, revenue > 0 ? 'dividendPaid' : 'dividendWithheld');
-    record(applyRule(market, position, rule, revenue, `or${index + 1}`));
+    record(applyRule(market, position, rule, revenue, `or${index + 1}`, context));
   });
 
   return { position, steps };
 }
 
 // One round at a time, for callers stepping a game forward rather than walking a whole window.
-export function stepPrice(market, position, rules, name, revenue) {
-  const step = applyRule(market, position, ruleFor(rules, name), revenue, name);
+export function stepPrice(market, position, rules, name, revenue, context) {
+  const step = applyRule(market, position, ruleFor(rules, name), revenue, name, context);
   return step ? step.to : position;
 }
 
@@ -92,6 +118,7 @@ export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr,
   const priceNow = getShareValue(dashboardState, [company], shortName);
   const bankShares = getBankShares(dashboardState, players, shortName);
   const soldOut = bankShares === 0;
+  const holdings = getCompanyHoldings(dashboardState?.playerAssets, players, shortName);
 
   const startPrice = readStartPrice(dashboardState, shortName);
   const startPosition = dashboardState?.startPositions?.[shortName]
@@ -119,7 +146,7 @@ export function getCompanyReturn(company, { dashboardState, staticConfig, maxOr,
   const stockReturnPerShare = priceNow - startPrice;
   return {
     ...base,
-    steps: placed ? walk(market, startPosition, { rounds, soldOut, rules }).steps : [],
+    steps: placed ? walk(market, startPosition, { rounds, soldOut, rules, holdings }).steps : [],
     stockReturnPerShare,
     totalReturnPerShare: orIncomePerShare + stockReturnPerShare,
     returnOnStart: startPrice ? (orIncomePerShare + stockReturnPerShare) / startPrice : null

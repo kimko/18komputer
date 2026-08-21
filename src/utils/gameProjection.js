@@ -1,5 +1,5 @@
 import { cellAt } from './stockMarket.js';
-import { getCompanyShareCount, getBankShares, getShareValue } from './dashboardMath.js';
+import { getCompanyShareCount, getBankShares, getShareValue, getCompanyHoldings } from './dashboardMath.js';
 import { marketFor, readRounds, getCompanyReturn, stepPrice } from './roundReturn.js';
 
 const MAX_TICKS = 12;
@@ -49,6 +49,8 @@ function readCompanies({ dashboardState, staticConfig, maxOr, players, activeCom
       shortName,
       shares: Number(company.totalShares) || 10,
       soldOut: getBankShares(dashboardState, players, shortName) === 0,
+      // Titles that pay a bigger sold out jump to a mostly held company need to know who holds it.
+      holdings: getCompanyHoldings(dashboardState?.playerAssets, players, shortName),
       rounds,
       // Every projected round repeats whatever the last recorded one did.
       repeatRevenue: lastRecorded(rounds),
@@ -92,7 +94,7 @@ export function projectNetWorth({ dashboardState, staticConfig, maxOr, players, 
 
   const movePrice = (company, name, revenue) => {
     if (!company.position) return;
-    company.position = stepPrice(market, company.position, rules, name, revenue);
+    company.position = stepPrice(market, company.position, rules, name, revenue, { holdings: company.holdings });
   };
 
   return timeline.map((tick) => {

@@ -48,8 +48,16 @@ interface Rule {
   move: 'up' | 'down' | 'left' | 'right' | null;  // null means this trigger moves nothing
   squares: number | Count;
   maxSquares?: number;   // ceiling on a Count, never on a fixed number
+  extraSquares?: Extra[];// stacked on top of squares when the square or the holdings say so
   custom?: string;       // what the reference does that we have not captured, and where it lives
 }
+
+// 1894 is so far the only title with any: a sold out company climbs one square as usual, one more
+// if a player holds 80% or more, and one more again if it is standing in the grey zone, so it can
+// take three in a single share round. Conditions are read against the square being left.
+type Extra =
+  | { when: 'inZone'; zone: 'y' | 'o' | 'b'; squares: number }
+  | { when: 'playerHoldsAtLeast'; percent: number; squares: number };
 
 // Counts that depend on the sale or the payout rather than being a fixed number.
 type Count =
@@ -70,9 +78,12 @@ interface Train {
   cost: number;
 }
 
+// A bonus pays out but never fills a train, so it is never counted towards the stop count.
 interface RevenueBonus {
-  label: string;          // e.g., "Bridge", "Coal"
-  adds: number[];         // e.g., [10]
+  label: string;          // e.g., "Bridge", "Coal", "+", "2x"
+  adds?: number[];        // the amounts it can be worth, e.g. [10]
+  doubles?: 'highestStop';// worth the train's best stop instead of a fixed amount; excludes adds
+  maxPerTrain?: number;   // absent means one train may claim it as often as it likes
 }
 ```
 
@@ -112,7 +123,7 @@ To ensure we understand how the parsed JSON data drives the frontend application
 | :--- | :--- | :--- |
 | `id`, `name`, `bggId` | **0) Main Menu** | Used to populate the "New Game" selection dropdown/modal. |
 | `revenueStops` | **B) Revenue Calculator** | Generates the dynamic vertical list of rows (e.g., 20, 30, 40) for calculating train run revenue. |
-| `revenueBonuses` | **B) Revenue Calculator** | Generates the special bonus rows (e.g., "Bridge", "Coal") below the standard revenue stops. |
+| `revenueBonuses` | **B) Revenue Calculator** | Generates the special bonus buttons (e.g., "Bridge", "Coal") below the standard revenue stops, one per amount in `adds` or a single button for a `doubles` bonus. A bonus never counts towards the train's stop count. `maxPerTrain` greys the button out once that train has had its fill, and `doubles` is revalued whenever the stops change. Valued in one place, `src/utils/trainMath.js`, so the calculator, the grand total, the dashboard and the receipt cannot disagree. |
 | `companies` (`name`, `shortName`, `color`) | **A) Raise Funds** & **C) Results** | Populates the list of companies available to activate in Raise Funds. Provides the UI styling (color) and headers for the Company ORs and Player Assets tables. |
 | `sharePrices` | **A) Raise Funds** & **C) Results** | Used to set the initial/current market value of an active company's shares. Used to calculate Player Net Worth in the Results dashboard. |
 | `priceMovement` | **C) Results** | What makes a company's price move and which way, written by `scripts/import-price-movement.js`. Nothing reads it yet; it is there so a later change can offer "paid a dividend" or "sold out" instead of bare arrows. A `custom` note on a rule means the reference implementation does something we have not captured, so the rest of that rule is the headline behaviour rather than the whole story. |

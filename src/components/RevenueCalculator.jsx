@@ -10,6 +10,7 @@ import { getContrastColor } from '../utils/colorUtils.js';
 import { getStructures, canUseStructure, DEFAULT_TOTAL_SHARES } from '../utils/corporateStructures.js';
 import { getCompanyHoldings } from '../utils/dashboardMath.js';
 import { allowsHalfPay } from '../utils/payoutMath.js';
+import { toBonusEntry, trainsRevenue } from '../utils/trainMath.js';
 import { toReceiptTrain } from '../services/printer/receiptLayout.js';
 
 function withStopAdded(stops, val, slotIndex) {
@@ -101,9 +102,9 @@ export default function RevenueCalculator() {
     mapTrain(id, t => ({ ...t, stops: withStopAdded(t.stops, val, slotIndex) }));
   };
 
-  const handleAddBonusStop = (id, val, label) => {
+  const handleAddBonusStop = (id, bonus, val) => {
     setPendingSlot(null);
-    mapTrain(id, t => ({ ...t, bonusStops: [...(t.bonusStops || []), { val, label }] }));
+    mapTrain(id, t => ({ ...t, bonusStops: [...(t.bonusStops || []), toBonusEntry(bonus, val)] }));
   };
 
   const setTotalShares = (val) => {
@@ -121,13 +122,7 @@ export default function RevenueCalculator() {
     allBonuses = [...allBonuses, ...gameInstance.staticConfig.revenueBonuses];
   }
   
-  const grandTotal = trains
-    .filter(t => !t.isExcluded)
-    .reduce((sum, t) => {
-      const stopsSum = t.stops.reduce((s, v) => s + v, 0);
-      const bonusSum = (t.bonusStops || []).reduce((s, b) => s + b.val, 0);
-      return sum + stopsSum + bonusSum;
-    }, 0);
+  const grandTotal = trainsRevenue(trains);
 
   const receiptTrains = trains.filter(t => !t.isExcluded).map(toReceiptTrain);
 

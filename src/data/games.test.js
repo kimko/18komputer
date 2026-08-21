@@ -88,6 +88,26 @@ function validate(file, data) {
         fail(`priceMovement.${trigger} maxSquares must be more than one`);
       }
       if ('custom' in rule && typeof rule.custom !== 'string') fail(`priceMovement.${trigger} custom is not a string`);
+
+      // Extras stack on top of the base move when the square or the holdings say so. They are the
+      // only way a title gets more than its usual jump, and 1894 is so far the only one that does.
+      if ('extraSquares' in rule) {
+        if (!Array.isArray(rule.extraSquares)) {
+          fail(`priceMovement.${trigger} extraSquares is not an array`);
+        } else {
+          rule.extraSquares.forEach((extra, i) => {
+            const where = `priceMovement.${trigger} extra ${i}`;
+            if (!(extra.squares > 0)) fail(`${where} adds "${extra.squares}", which is not a count`);
+            if (extra.when === 'inZone') {
+              if (!['y', 'o', 'b'].includes(extra.zone)) fail(`${where} names zone "${extra.zone}", which no cell can carry`);
+            } else if (extra.when === 'playerHoldsAtLeast') {
+              if (!(extra.percent > 0 && extra.percent <= 100)) fail(`${where} wants "${extra.percent}" percent held`);
+            } else {
+              fail(`${where} tests "${extra.when}", which is not a condition`);
+            }
+          });
+        }
+      }
     });
   }
 
@@ -112,7 +132,20 @@ function validate(file, data) {
 
   (data.revenueBonuses || []).forEach((b, i) => {
     if (typeof b.label !== 'string') fail(`revenue bonus ${i} has no label`);
-    if (!isNumberArray(b.adds)) fail(`revenue bonus ${i} has no numeric adds`);
+
+    // A bonus is worth either a fixed amount off its adds list or something the train works out,
+    // and exactly one of the two: neither leaves nothing to pay, both leaves it ambiguous.
+    if ('doubles' in b) {
+      if (b.doubles !== 'highestStop') fail(`revenue bonus ${i} doubles "${b.doubles}", which is not a rule`);
+      if ('adds' in b) fail(`revenue bonus ${i} both doubles and adds a fixed amount`);
+    } else if (!isNumberArray(b.adds)) {
+      fail(`revenue bonus ${i} has no numeric adds`);
+    }
+
+    // Absent means the title puts no limit on how often one train can claim it.
+    if ('maxPerTrain' in b && (!Number.isInteger(b.maxPerTrain) || b.maxPerTrain < 1)) {
+      fail(`revenue bonus ${i} maxPerTrain "${b.maxPerTrain}" must be a whole number of at least 1`);
+    }
   });
 
   return problems;
@@ -228,6 +261,126 @@ describe('Game Data Schema Validation', () => {
       expect(limit(60)).toEqual([]);
       expect(limit(100)).toEqual([]);
       expect(validate('x.json', game)).toEqual([]);
+    });
+  });
+
+  // The picker reads the index while everything after it reads the game file, so a title renamed
+  // in one and not the other is picked by a name it never shows again.
+  describe('the index and the game files agree', () => {
+    const index = JSON.parse(fs.readFileSync(path.join(__dirname, 'gamesIndex.json'), 'utf8'));
+    const byId = Object.fromEntries(index.map((entry) => [entry.id, entry]));
+    const ids = files.map((f) => f.replace(/\.json$/, ''));
+
+    it('lists every game file exactly once, and nothing else', () => {
+      expect([...index].map((e) => e.id).sort()).toEqual([...ids].sort());
+    });
+
+    it('gives each one the same name and bggId as its file', () => {
+      const mismatched = ids.filter((id) => {
+        const game = JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
+        return byId[id].name !== game.name || byId[id].bggId !== game.bggId;
+      });
+      expect(mismatched).toEqual([]);
+    });
+  });
+
+  describe('the extra sold out jumps', () => {
+    const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+    const extras = (extraSquares) => validate('x.json', {
+      ...game,
+      priceMovement: { soldOut: { move: 'up', squares: 1, extraSquares } }
+    });
+
+    it('takes a zone extra and a holdings extra, stacked', () => {
+      expect(extras([
+        { when: 'playerHoldsAtLeast', percent: 80, squares: 1 },
+        { when: 'inZone', zone: 'o', squares: 1 }
+      ])).toEqual([]);
+    });
+
+    it('refuses a condition it cannot test', () => {
+      expect(extras([{ when: 'itFeelsRight', squares: 1 }]))
+        .toContain('x.json: priceMovement.soldOut extra 0 tests "itFeelsRight", which is not a condition');
+    });
+
+    it('refuses a zone no cell could be marked with', () => {
+      expect(extras([{ when: 'inZone', zone: 'q', squares: 1 }]))
+        .toContain('x.json: priceMovement.soldOut extra 0 names zone "q", which no cell can carry');
+    });
+
+    it('refuses a holding that is not a percentage', () => {
+      expect(extras([{ when: 'playerHoldsAtLeast', percent: 180, squares: 1 }]))
+        .toContain('x.json: priceMovement.soldOut extra 0 wants "180" percent held');
+    });
+
+    it('refuses an extra that adds nothing', () => {
+      expect(extras([{ when: 'inZone', zone: 'o', squares: 0 }]))
+        .toContain('x.json: priceMovement.soldOut extra 0 adds "0", which is not a count');
+    });
+
+    it('gives 1894 both extras, and gives no other title any', () => {
+      const read = (id) => JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
+      expect(read('1894').priceMovement.soldOut.extraSquares).toEqual([
+        { when: 'playerHoldsAtLeast', percent: 80, squares: 1 },
+        { when: 'inZone', zone: 'o', squares: 1 }
+      ]);
+
+      const others = files
+        .map((f) => f.replace(/\.json$/, ''))
+        .filter((id) => id !== '1894')
+        .filter((id) => Object.values(read(id).priceMovement || {}).some((rule) => 'extraSquares' in rule));
+      expect(others).toEqual([]);
+    });
+  });
+
+  describe('the revenue bonus rules', () => {
+    const game = { id: 'x', name: 'x', revenueStops: [10], companies: [{ name: 'A', shortName: 'A' }] };
+    const bonus = (b) => validate('x.json', { ...game, revenueBonuses: [b] });
+
+    it('takes a plain bonus that adds fixed amounts', () => {
+      expect(bonus({ label: '+', adds: [10, 20] })).toEqual([]);
+    });
+
+    it('takes a bonus that doubles the best stop instead of adding an amount', () => {
+      expect(bonus({ label: '2x', doubles: 'highestStop' })).toEqual([]);
+    });
+
+    it('refuses a doubling rule it does not know', () => {
+      expect(bonus({ label: '2x', doubles: 'everything' }))
+        .toContain('x.json: revenue bonus 0 doubles "everything", which is not a rule');
+    });
+
+    it('refuses a bonus that is worth two different things at once', () => {
+      expect(bonus({ label: '2x', doubles: 'highestStop', adds: [20] }))
+        .toContain('x.json: revenue bonus 0 both doubles and adds a fixed amount');
+    });
+
+    it('still refuses a bonus that is worth nothing at all', () => {
+      expect(bonus({ label: '+' })).toContain('x.json: revenue bonus 0 has no numeric adds');
+    });
+
+    it('takes a per-train cap and refuses a nonsensical one', () => {
+      expect(bonus({ label: '+', adds: [20], maxPerTrain: 1 })).toEqual([]);
+      expect(bonus({ label: '+', adds: [20], maxPerTrain: 0 }))
+        .toContain('x.json: revenue bonus 0 maxPerTrain "0" must be a whole number of at least 1');
+      expect(bonus({ label: '+', adds: [20], maxPerTrain: 1.5 }))
+        .toContain('x.json: revenue bonus 0 maxPerTrain "1.5" must be a whole number of at least 1');
+    });
+  });
+
+  describe('the bonuses 1871 and 1894 pay', () => {
+    const read = (id) => JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
+
+    it('gives 1871 a plus bonus worth 10 or 20', () => {
+      expect(read('1871').revenueBonuses).toEqual([{ label: '+', adds: [10, 20] }]);
+    });
+
+    it('gives 1894 a plus, an offboard and a doubler, each once per train', () => {
+      expect(read('1894').revenueBonuses).toEqual([
+        { label: '+', adds: [20], maxPerTrain: 1 },
+        { label: 'offboard', adds: [100], maxPerTrain: 1 },
+        { label: '2x', doubles: 'highestStop', maxPerTrain: 1 }
+      ]);
     });
   });
 

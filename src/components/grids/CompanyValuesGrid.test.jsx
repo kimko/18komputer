@@ -125,5 +125,142 @@ describe('CompanyValuesGrid', () => {
         shareValues: {}, sharePositions: {}, startValues: {}, startPositions: {}
       });
     });
+
+    describe('populating the ORs from the calculator', () => {
+      const twoCompanies = [
+        { shortName: 'PRR', color: '#ff0000' },
+        { shortName: 'NYC', color: '#0000ff' }
+      ];
+
+      it('writes each company last calculated run into every operating round', () => {
+        const updateDashboardFields = vi.fn();
+        renderComponent({
+          updateDashboardFields,
+          activeCompanies: twoCompanies,
+          calculatorTotals: { PRR: 130, NYC: 80 }
+        });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Populate all ORs'));
+        fireEvent.click(screen.getByText('Populate'));
+
+        const [fields] = updateDashboardFields.mock.calls[0];
+        expect(fields.ors()).toEqual({
+          PRR: { or1: 130, or2: 130 },
+          NYC: { or1: 80, or2: 80 }
+        });
+      });
+
+      // A company nobody has run is not a company that earned nothing, so its rounds are left
+      // alone rather than being overwritten with a zero that would read as a withheld dividend.
+      it('leaves a company with no calculated run exactly as it was', () => {
+        const updateDashboardFields = vi.fn();
+        renderComponent({
+          updateDashboardFields,
+          activeCompanies: twoCompanies,
+          calculatorTotals: { PRR: 130, NYC: 0 }
+        });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Populate all ORs'));
+        fireEvent.click(screen.getByText('Populate'));
+
+        const [fields] = updateDashboardFields.mock.calls[0];
+        expect(fields.ors({ PRR: { or1: 5 }, NYC: { or1: 55 } })).toEqual({
+          NYC: { or1: 55 },
+          PRR: { or1: 130, or2: 130 }
+        });
+      });
+
+      it('says how many companies it is about to fill', () => {
+        renderComponent({ activeCompanies: twoCompanies, calculatorTotals: { PRR: 130, NYC: 0 } });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Populate all ORs'));
+        expect(screen.getByText(/1 of 2 companies/)).toBeTruthy();
+      });
+
+      it('asks first, and writes nothing on cancel', () => {
+        const updateDashboardFields = vi.fn();
+        renderComponent({ updateDashboardFields, calculatorTotals: { PRR: 130 } });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Populate all ORs'));
+        fireEvent.click(screen.getByText('Cancel'));
+        expect(updateDashboardFields).not.toHaveBeenCalled();
+      });
+
+      it('offers nothing to populate when no company has been run', () => {
+        renderComponent({ calculatorTotals: {} });
+        openDetails();
+
+        expect(screen.getByText('Populate all ORs').closest('button').disabled).toBe(true);
+      });
+    });
+
+    describe('working out every SP start', () => {
+      // Two rows, so a sold out company can climb and a paying round can run off the end.
+      const staticConfig = {
+        stockMarket: { type: '2d', grid: [['60', '70', '80', '90'], ['30', '40', '50p', '60']] }
+      };
+
+      const renderSolvable = (props = {}) => renderComponent({
+        staticConfig,
+        players: ['Ada'],
+        dashboardState: {
+          ors: { PRR: { or1: 100 } },
+          shareValues: { PRR: 70 },
+          playerAssets: { Ada: { shares: { PRR: 50 } } }
+        },
+        ...props
+      });
+
+      it('writes the start price and square it worked out', () => {
+        const updateDashboardFields = vi.fn();
+        renderSolvable({ updateDashboardFields });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Set SP start'));
+        fireEvent.click(screen.getByText('Work them out'));
+
+        expect(updateDashboardFields).toHaveBeenCalledWith({
+          startValues: { PRR: 60 },
+          startPositions: { PRR: [0, 0] }
+        });
+      });
+
+      it('asks first, and writes nothing on cancel', () => {
+        const updateDashboardFields = vi.fn();
+        renderSolvable({ updateDashboardFields });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Set SP start'));
+        fireEvent.click(screen.getByText('Cancel'));
+        expect(updateDashboardFields).not.toHaveBeenCalled();
+      });
+
+      it('says how many it could place and how many are only approximate', () => {
+        renderSolvable();
+        openDetails();
+
+        fireEvent.click(screen.getByText('Set SP start'));
+        expect(screen.getByText(/1 of 1 companies/)).toBeTruthy();
+      });
+
+      it('is offered but explains itself when no company can be placed', () => {
+        renderSolvable({ dashboardState: { ors: {}, shareValues: { PRR: 999 }, playerAssets: {} } });
+        openDetails();
+
+        fireEvent.click(screen.getByText('Set SP start'));
+        expect(screen.getByText(/0 of 1 companies/)).toBeTruthy();
+      });
+
+      it('is not offered at all on a title with no market', () => {
+        renderComponent({ staticConfig: {} });
+        openDetails();
+
+        expect(screen.queryByText('Set SP start')).toBeNull();
+      });
+    });
   });
 });

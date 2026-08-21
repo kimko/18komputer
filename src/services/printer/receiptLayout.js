@@ -1,3 +1,5 @@
+import { bonusValue, trainRevenue } from '../../utils/trainMath.js';
+
 export const COLS = 32;
 
 // NFD does not decompose these, so they need spelling out before the ASCII filter.
@@ -49,11 +51,14 @@ export function trainLabel(train, index) {
 export function toReceiptTrain(train = {}) {
   const stops = train.stops || [];
   const bonuses = train.bonusStops || [];
-  const route = [...stops.map(String), ...bonuses.map((b) => `${b.val}(${b.label})`)].join('+');
+  const route = [
+    ...stops.map(String),
+    ...bonuses.map((b) => `${bonusValue(b, stops)}(${b.label})`)
+  ].join('+');
 
   return {
     route: route || '0',
-    revenue: stops.reduce((sum, v) => sum + v, 0) + bonuses.reduce((sum, b) => sum + b.val, 0),
+    revenue: trainRevenue(train),
     stopCount: stops.length,
     hasBonus: bonuses.length > 0
   };

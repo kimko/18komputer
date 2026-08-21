@@ -6,6 +6,7 @@ import { buildRemoteLink } from '../services/printer/shareLink.js';
 import { saveGameToSheet } from '../services/remote/gamesSheet.js';
 import { reportProblem } from '../services/monitoring/monitoring.js';
 import { toastSheetOutcome } from './ui/toast.js';
+import { getCalculatorGrandTotal } from '../utils/dashboardMath.js';
 
 import DashboardPopups from './DashboardPopups.jsx';
 import CompanyValuesGrid from './grids/CompanyValuesGrid.jsx';
@@ -92,6 +93,11 @@ export default function Dashboard() {
 
   const updateDashboardField = (field, updater) => updateDashboardFields({ [field]: updater });
 
+  // What the revenue calculator last worked out for each company, so the ORs can be filled from it.
+  const calculatorTotals = Object.fromEntries(activeCompanies.map(c => (
+    [c.shortName, getCalculatorGrandTotal(gameInstance, c.shortName)]
+  )));
+
   return (
     <Box p="2" pb="24" maxW="100%" overflowX="hidden">
       <Flex justify="flex-end" align="center" mb="4" gap="3" wrap="wrap">
@@ -130,6 +136,9 @@ export default function Dashboard() {
             activeCompanies={activeCompanies}
             maxOr={maxOr}
             dashboardState={dashboardState}
+            staticConfig={gameInstance.staticConfig}
+            players={players}
+            calculatorTotals={calculatorTotals}
             updateMaxOr={updateMaxOr}
             updateDashboardFields={updateDashboardFields}
             setActivePopup={setActivePopup}

@@ -1,5 +1,5 @@
 {
-  "name": "1894",
+  "name": "1894 France and Belgium",
   "bggId": 0,
   "maxOr": 3,
   "revenueStops": [
@@ -163,7 +163,19 @@
     "soldOut": {
       "move": "up",
       "squares": 1,
-      "custom": "additional +1 up if president+treasury hold at least 80% or the price is in the gray area (g_1894/game.rb:price_movement_chart)"
+      "extraSquares": [
+        {
+          "when": "playerHoldsAtLeast",
+          "percent": 80,
+          "squares": 1
+        },
+        {
+          "when": "inZone",
+          "zone": "o",
+          "squares": 1
+        }
+      ],
+      "custom": "the two extras stack, so a sold out company held at 80% and standing in the grey zone climbs three squares (g_1894/game.rb:price_movement_chart)"
     },
     "dividendPaid": {
       "move": "right",
@@ -189,5 +201,26 @@
       "move": null,
       "squares": 0
     }
-  }
+  },
+  "revenueBonuses": [
+    {
+      "label": "+",
+      "adds": [
+        20
+      ],
+      "maxPerTrain": 1
+    },
+    {
+      "label": "offboard",
+      "adds": [
+        100
+      ],
+      "maxPerTrain": 1
+    },
+    {
+      "label": "2x",
+      "doubles": "highestStop",
+      "maxPerTrain": 1
+    }
+  ]
 }
