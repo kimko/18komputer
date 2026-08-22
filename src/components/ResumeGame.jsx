@@ -4,8 +4,31 @@ import { useLocation } from 'wouter';
 import { getGame, getGamesList, deleteGame, deleteAllGames, importGame } from '../api/mockApi.js';
 import { readShareToken } from '../services/printer/shareLink.js';
 import { loadGameFromSheet } from '../services/remote/gamesSheet.js';
+import { useWaitStage } from '../hooks/useWaitStage.js';
+import { reportProblem } from '../services/monitoring/monitoring.js';
 import ModalBackdrop from './ui/ModalBackdrop.jsx';
 import RemoteImportDialog from './RemoteImportDialog.jsx';
+
+// The fetch is expected to land inside a few seconds; past that, say so and keep counting so a
+// slow connection does not read as a frozen app. The wait ends either way at TIMEOUT_MS in
+// gamesSheet.js, which fails with 'The sheet took too long to answer.'
+const REMOTE_WAIT_STAGES = [
+  { after: 0, message: 'Fetching the shared game...' },
+  { after: 3, message: 'This is taking longer than usual...', showElapsed: true },
+  { after: 15, message: 'Still trying — the connection looks slow...', showElapsed: true }
+];
+
+// Writing the game to this device can fail on its own account — a full localStorage is the usual
+// reason — and that has nothing to do with the sheet, which reports its own failures. Without this
+// the only trace is a console line and a raw browser message on screen.
+async function importShared(game) {
+  try {
+    await importGame(game);
+  } catch (err) {
+    reportProblem(err, { stage: 'importing the shared game', id: game.id });
+    throw err;
+  }
+}
 
 export default function ResumeGame() {
   const [, navigate] = useLocation();
@@ -20,6 +43,7 @@ export default function ResumeGame() {
   const [importToken, setImportToken] = useState('');
   const [fetchingRemote, setFetchingRemote] = useState(false);
   const [remoteConflict, setRemoteConflict] = useState(null);
+  const waitStage = useWaitStage(fetchingRemote, REMOTE_WAIT_STAGES);
 
   async function loadGames() {
     try {
@@ -65,7 +89,7 @@ export default function ResumeGame() {
             setRemoteConflict({ local, remote: game, remoteUpdatedAt: updatedAt });
             return;
           }
-          await importGame(game);
+          await importShared(game);
           navigate(`/game/${game.id}/dashboard`);
         } catch (err) {
           console.error('Failed to fetch the shared game', err);
@@ -80,7 +104,12 @@ export default function ResumeGame() {
   const useSharedCopy = async () => {
     const incoming = remoteConflict.remote;
     setRemoteConflict(null);
-    await importGame(incoming);
+    try {
+      await importShared(incoming);
+    } catch (err) {
+      setImportError(err.message);
+      return;
+    }
     navigate(`/game/${incoming.id}/dashboard`);
   };
 
@@ -200,7 +229,14 @@ export default function ResumeGame() {
   if (loading || fetchingRemote) return (
     <Center h="100vh" bg="gray.900" flexDirection="column" gap="4">
       <Spinner color="orange.400" size="xl" />
-      {fetchingRemote && <Text color="gray.400">Fetching the shared game...</Text>}
+      {fetchingRemote && (
+        <>
+          <Text color="gray.400">{waitStage.message}</Text>
+          {waitStage.showElapsed && (
+            <Text color="gray.500" fontSize="sm">Still waiting — {waitStage.elapsed}s</Text>
+          )}
+        </>
+      )}
     </Center>
   );
 

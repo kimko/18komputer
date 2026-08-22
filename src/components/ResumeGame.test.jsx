@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { act, render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import ResumeGame from './ResumeGame.jsx';
@@ -20,6 +20,9 @@ vi.mock('../api/mockApi.js', () => ({
 
 vi.mock('../services/remote/gamesSheet.js', () => ({ loadGameFromSheet: vi.fn() }));
 import { loadGameFromSheet } from '../services/remote/gamesSheet.js';
+
+vi.mock('../services/monitoring/monitoring.js', () => ({ reportProblem: vi.fn() }));
+import { reportProblem } from '../services/monitoring/monitoring.js';
 
 const renderWithChakra = (ui) => {
   return render(
@@ -151,6 +154,72 @@ describe('ResumeGame', () => {
 
       await waitFor(() => expect(mockApi.importGame).toHaveBeenCalledWith(shared));
       expect(mockNavigate).toHaveBeenCalledWith('/game/game_123_456/dashboard');
+    });
+
+    // Fake timers do not mix with the waitFor/findBy* the rest of this file leans on, so this
+    // case drives the clock by hand instead.
+    it('escalates what the spinner says while the sheet keeps them waiting', async () => {
+      vi.useFakeTimers();
+      loadGameFromSheet.mockReturnValue(new Promise(() => {}));
+
+      renderWithChakra(<ResumeGame />);
+      await act(async () => {});
+
+      expect(screen.getByText('Fetching the shared game...')).toBeInTheDocument();
+      expect(screen.queryByText(/Still waiting/)).not.toBeInTheDocument();
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+      expect(screen.getByText('This is taking longer than usual...')).toBeInTheDocument();
+      expect(screen.getByText(/Still waiting/)).toHaveTextContent('Still waiting — 3s');
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+      expect(screen.getByText(/Still waiting/)).toHaveTextContent('Still waiting — 5s');
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(10000); });
+      expect(screen.getByText('Still trying — the connection looks slow...')).toBeInTheDocument();
+
+      vi.useRealTimers();
+    });
+
+    it('says so and reports it when this device cannot store the game', async () => {
+      loadGameFromSheet.mockResolvedValue({ game: shared, updatedAt: '2026-08-11T19:02:00.000Z' });
+      mockApi.getGame.mockRejectedValue(new Error('Game not found'));
+      mockApi.importGame.mockRejectedValue(new Error('The quota has been exceeded.'));
+
+      renderWithChakra(<ResumeGame />);
+
+      expect(await screen.findByText('The quota has been exceeded.')).toBeInTheDocument();
+      expect(reportProblem).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ stage: 'importing the shared game', id: 'game_123_456' })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('says so and reports it when replacing the local copy cannot be stored', async () => {
+      loadGameFromSheet.mockResolvedValue({ game: shared, updatedAt: '2026-08-11T19:02:00.000Z' });
+      mockApi.getGame.mockResolvedValue(mine);
+      mockApi.importGame.mockRejectedValue(new Error('The quota has been exceeded.'));
+
+      renderWithChakra(<ResumeGame />);
+      fireEvent.click(await screen.findByRole('button', { name: 'Use the shared one' }));
+
+      expect(await screen.findByText('The quota has been exceeded.')).toBeInTheDocument();
+      expect(reportProblem).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ stage: 'importing the shared game', id: 'game_123_456' })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    // gamesSheet.js reports its own failures, so this catch must not report them again.
+    it('leaves the sheet to report its own failures', async () => {
+      loadGameFromSheet.mockRejectedValue(new Error('That game is not in the sheet.'));
+
+      renderWithChakra(<ResumeGame />);
+
+      expect(await screen.findByText('That game is not in the sheet.')).toBeInTheDocument();
+      expect(reportProblem).not.toHaveBeenCalled();
     });
 
     it('says why nothing happened when the sheet cannot be read', async () => {
