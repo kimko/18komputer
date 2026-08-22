@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LZString from 'lz-string';
 import { buildShareToken, buildShareLink, buildRemoteLink, readShareToken } from './shareLink.js';
+import { reportProblem } from '../monitoring/monitoring.js';
+
+vi.mock('../monitoring/monitoring.js', () => ({
+  reportProblem: vi.fn()
+}));
+
+beforeEach(() => {
+  reportProblem.mockReset();
+});
 
 const gameInstance = {
   id: 'inst_1',
@@ -192,5 +201,32 @@ describe('buildRemoteLink', () => {
   it('uses the site root when the app is served from it', () => {
     expect(buildRemoteLink('http://localhost:5173', '/game/game_1_2/dashboard', 'game_1_2'))
       .toBe('http://localhost:5173/resume#remote=game_1_2');
+  });
+});
+
+describe('the ruleset a shared game needs to be readable', () => {
+  const unknown = { ...gameInstance, gameId: 'not-a-real-game' };
+
+  it('still opens the game when the ruleset cannot be loaded', async () => {
+    const game = await roundTrip(unknown);
+
+    expect(game.gameId).toBe('not-a-real-game');
+    expect(game.state.activeCompanies[0].shortName).toBe('A&A');
+  });
+
+  // Without this the game imports looking merely shabby, with no trace of why.
+  it('says so rather than quietly dropping the company names and colours', async () => {
+    await roundTrip(unknown);
+
+    expect(reportProblem).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ level: 'warning', stage: 'company details', id: 'not-a-real-game' })
+    );
+  });
+
+  it('stays quiet when the ruleset loads as it should', async () => {
+    await roundTrip();
+
+    expect(reportProblem).not.toHaveBeenCalled();
   });
 });

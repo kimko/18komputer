@@ -4,7 +4,7 @@ import { matchesSaved, rememberSaved, hasSavedGame } from './savedGames.js';
 import { reportProblem } from '../monitoring/monitoring.js';
 
 const MAX_DATA_LENGTH = 45000;
-const TIMEOUT_MS = 15000;
+export const TIMEOUT_MS = 30000;
 
 const MESSAGES = {
   too_large: 'This game is too big to save to the sheet.',
@@ -15,9 +15,32 @@ const MESSAGES = {
 
 const NOT_SET_UP = 'The Google Sheet is not set up yet. See google-apps-script/README.md.';
 
+// How much of the budget a call started at `startedAt` has left.
+const remaining = (startedAt) => TIMEOUT_MS - (Date.now() - startedAt);
+
+// The AbortController below only covers the request reaching its headers. Reading the body and
+// unpacking the token happen after that, out of its reach, so a stall there would spin forever.
+// They share the one budget rather than each getting a fresh one, so the whole load still gives
+// up at TIMEOUT_MS instead of at some multiple of it.
+function withDeadline(work, budgetMs, stage, { silent = false } = {}) {
+  let timer;
+  const deadline = new Promise((_resolve, reject) => {
+    timer = setTimeout(() => {
+      const problem = new Error('The sheet took too long to answer.');
+      problem.stalled = true;
+      // Headers came back, so for a save the row may well have landed.
+      problem.unanswered = true;
+      if (!silent) reportProblem(problem, { stage, cause: 'stalled' });
+      reject(problem);
+    }, Math.max(budgetMs, 0));
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}
+
 // The request is attempted rather than refused up front, so a test can stand in for the sheet.
 // A placeholder endpoint only shows up as a failure to connect, which is what NOT_SET_UP explains.
 async function call(url, options = {}, { silent = false } = {}) {
+  const startedAt = Date.now();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -45,8 +68,13 @@ async function call(url, options = {}, { silent = false } = {}) {
   }
 
   // An unreadable body is the script returning its HTML error page, which usually means the
-  // deployment was never republished after an edit.
-  const body = await response.json().catch(() => null);
+  // deployment was never republished after an edit. A body that never arrives is a different
+  // fault, so it keeps its own error rather than being read as an error page.
+  const body = await withDeadline(response.json(), remaining(startedAt), 'reading the answer', { silent })
+    .catch((err) => {
+      if (err.stalled) throw err;
+      return null;
+    });
   if (!body?.ok) {
     const problem = new Error(MESSAGES[body?.error] || 'The sheet refused the request.');
     // Asking for a game that is not in the sheet is a normal thing to do, not a fault.
@@ -128,8 +156,14 @@ export async function saveGameToSheet(gameInstance, dashboardState) {
 }
 
 export async function loadGameFromSheet(gameId) {
+  // Unpacking pulls in the ruleset chunk, so it can wait on the network as well as the answer did.
+  const startedAt = Date.now();
   const body = await call(`${SHEET_ENDPOINT}?id=${encodeURIComponent(gameId)}`);
-  const game = await readShareToken(body.data);
+  const game = await withDeadline(
+    readShareToken(body.data),
+    remaining(startedAt),
+    'unpacking the shared game'
+  );
   if (!game) {
     const problem = new Error('The game in the sheet could not be read.');
     reportProblem(problem, { stage: 'loading shared game', id: gameId, code: 'invalid_data' });

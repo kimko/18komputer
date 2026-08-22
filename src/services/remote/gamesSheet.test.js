@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { saveGameToSheet, loadGameFromSheet } from './gamesSheet.js';
+import { saveGameToSheet, loadGameFromSheet, TIMEOUT_MS } from './gamesSheet.js';
 import { reportProblem } from '../monitoring/monitoring.js';
 
 const ENDPOINT = 'https://script.google.com/macros/s/TEST/exec';
@@ -12,6 +12,10 @@ vi.mock('./sheetConfig.js', () => ({
 vi.mock('../monitoring/monitoring.js', () => ({
   reportProblem: vi.fn()
 }));
+
+// Kept real; spread only so a single test can stand in for readShareToken.
+vi.mock('../printer/shareLink.js', async (importOriginal) => ({ ...(await importOriginal()) }));
+import * as shareLink from '../printer/shareLink.js';
 
 const gameInstance = {
   id: 'game_1786043602870_246',
@@ -185,8 +189,8 @@ describe('saveGameToSheet', () => {
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
     const rejects = expect(pending).rejects.toThrow(/took too long/);
-    await vi.advanceTimersByTimeAsync(15000);
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
 
     await rejects;
     expect(global.fetch).toHaveBeenCalledTimes(2);
@@ -209,7 +213,7 @@ describe('saveGameToSheet', () => {
     });
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
 
     await expect(pending).resolves.toMatchObject({ outcome: 'created', updatedAt: 'then' });
   });
@@ -228,7 +232,7 @@ describe('saveGameToSheet', () => {
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
     const rejects = expect(pending).rejects.toThrow(/took too long/);
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
 
     await rejects;
   });
@@ -243,7 +247,7 @@ describe('saveGameToSheet', () => {
     });
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
 
     await expect(pending).resolves.toMatchObject({
       outcome: 'created',
@@ -259,7 +263,7 @@ describe('saveGameToSheet', () => {
 
     const pending = saveGameToSheet(gameInstance, dashboardState);
     const rejects = expect(pending).rejects.toThrow(/took too long/);
-    await vi.advanceTimersByTimeAsync(15000);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
 
     await rejects;
   });
@@ -306,6 +310,57 @@ describe('loadGameFromSheet', () => {
 
     expect(result.outcome).toBe('unchanged');
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('gives up when the answer arrives but its body never does', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => new Promise(() => {})
+    });
+
+    const pending = loadGameFromSheet('game_1_2');
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+
+    await rejects;
+    expect(reportProblem).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ stage: 'reading the answer', cause: 'stalled' })
+    );
+  });
+
+  it('gives up when unpacking the game stalls on the ruleset it needs', async () => {
+    vi.useFakeTimers();
+    global.fetch = answers({ ok: true, data: 'a-token', updated: 'then' });
+    vi.spyOn(shareLink, 'readShareToken').mockReturnValue(new Promise(() => {}));
+
+    const pending = loadGameFromSheet('game_1_2');
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+
+    await rejects;
+    expect(reportProblem).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ stage: 'unpacking the shared game', cause: 'stalled' })
+    );
+    vi.mocked(shareLink.readShareToken).mockRestore();
+  });
+
+  // Otherwise a load that stalls in two places would keep them waiting for twice the timeout.
+  it('spends one timeout on the whole load, not one per stage', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockImplementation(() => new Promise((resolve) => {
+      setTimeout(() => resolve({ ok: true, status: 200, json: () => new Promise(() => {}) }), 20000);
+    }));
+
+    const pending = loadGameFromSheet('game_1_2');
+    const rejects = expect(pending).rejects.toThrow(/took too long/);
+
+    // 20s reaching the answer leaves 10s for the body, so the whole thing is over at 30s.
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+    await rejects;
   });
 
   it('fails for a game the sheet does not have', async () => {

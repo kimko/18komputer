@@ -1,6 +1,7 @@
 import LZString from 'lz-string';
 import { generateGameName } from '../../api/mockApi.js';
 import { DEFAULT_TOTAL_SHARES } from '../../utils/corporateStructures.js';
+import { reportProblem } from '../monitoring/monitoring.js';
 
 // Bumped only when the wire shape changes; a token without it is the original format.
 const FORMAT = 1;
@@ -86,12 +87,16 @@ export function buildShareToken(gameInstance, dashboardState, { includeCalculato
   return LZString.compressToEncodedURIComponent(JSON.stringify(compact));
 }
 
+// Losing this leaves the game readable but stripped of company names and colours, which is worth
+// knowing about: on a flaky connection this chunk is exactly what fails to arrive, and the import
+// otherwise succeeds looking merely shabby.
 async function loadCompanyDetails(gameId) {
   try {
     const definition = await import(`../../data/games/${gameId}.json`);
     const companies = (definition.default || definition).companies || [];
     return Object.fromEntries(companies.map((c) => [c.shortName, c]));
-  } catch {
+  } catch (err) {
+    reportProblem(err, { level: 'warning', stage: 'company details', id: gameId });
     return {};
   }
 }
