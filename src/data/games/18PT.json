@@ -76,6 +76,11 @@
       "name": "Purple Railway",
       "shortName": "PUR",
       "color": "#7b1fa2"
+    },
+    {
+      "name": "Red Railway",
+      "shortName": "RED",
+      "color": "#DC143C"
     }
   ],
   "id": "18PT",
