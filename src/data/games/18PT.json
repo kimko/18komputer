@@ -1,0 +1,124 @@
+{
+  "name": "18PT Pocket Train",
+  "maxOr": 2,
+  "revenueStops": [
+    10,
+    20,
+    30,
+    40
+  ],
+  "revenueBonuses": [
+    {
+      "label": "+10",
+      "adds": [
+        10
+      ]
+    },
+    {
+      "label": "2x",
+      "doubles": "highestStop",
+      "maxPerTrain": 1
+    }
+  ],
+  "parValues": [
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    130,
+    140,
+    150,
+    160,
+    170,
+    180
+  ],
+  "corporateStructures": [
+    0,
+    1
+  ],
+  "maxPlayerHolding": 100,
+  "companies": [
+    {
+      "name": "Pink Railway",
+      "shortName": "PNK",
+      "color": "#ff69b4"
+    },
+    {
+      "name": "Black Railway",
+      "shortName": "BLK",
+      "color": "#222222"
+    },
+    {
+      "name": "Blue Railway",
+      "shortName": "BLU",
+      "color": "#1a6bbf"
+    },
+    {
+      "name": "Grey Railway",
+      "shortName": "GRY",
+      "color": "#888888"
+    },
+    {
+      "name": "Yellow Railway",
+      "shortName": "YEL",
+      "color": "#e6c800"
+    },
+    {
+      "name": "White Railway",
+      "shortName": "WHT",
+      "color": "#dddddd"
+    },
+    {
+      "name": "Green Railway",
+      "shortName": "GRN",
+      "color": "#2e7d32"
+    },
+    {
+      "name": "Purple Railway",
+      "shortName": "PUR",
+      "color": "#7b1fa2"
+    }
+  ],
+  "id": "18PT",
+  "sharePrices": [
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    130,
+    140,
+    150,
+    160,
+    170,
+    180
+  ],
+  "stockMarket": {
+    "type": "1d",
+    "grid": [
+      [
+        "50p",
+        "60p",
+        "70p",
+        "80p",
+        "90p",
+        "100p",
+        "110p",
+        "120p",
+        "130p",
+        "140p",
+        "150p",
+        "160p",
+        "170p",
+        "180p"
+      ]
+    ]
+  }
+}
