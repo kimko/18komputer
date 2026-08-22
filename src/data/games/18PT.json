@@ -13,11 +13,6 @@
       "adds": [
         10
       ]
-    },
-    {
-      "label": "2x",
-      "doubles": "highestStop",
-      "maxPerTrain": 1
     }
   ],
   "parValues": [
