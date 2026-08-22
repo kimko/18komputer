@@ -386,7 +386,7 @@ describe('Game Data Schema Validation', () => {
 
   describe('which titles let one player hold a whole company', () => {
     const read = (id) => JSON.parse(fs.readFileSync(path.join(gamesDir, `${id}.json`), 'utf8'));
-    const wholeCompanyTitles = ['1824', '1824_2p', '1824_3p', '1871', '1880', '1894'];
+    const wholeCompanyTitles = ['1824', '1824_2p', '1824_3p', '1871', '1880', '1894', '18PT'];
 
     it('lets one player take the lot in 1824, 1871, 1880 and 1894', () => {
       wholeCompanyTitles.forEach((id) => expect(read(id).maxPlayerHolding).toBe(100));
